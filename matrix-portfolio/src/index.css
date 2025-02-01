@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: #33ff33;
+  font-family: monospace;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+    text-shadow: none;
+  }
+  10% {
+    opacity: 0.3;
+    transform: translateX(10px);
+    text-shadow: -2px 0 #ff0000, 2px 2px #0000ff;
+  }
+  20% {
+    transform: translateX(-5px);
+    text-shadow: 2px -2px #ff0000, -2px 2px #0000ff;
+  }
+  30% { transform: translateX(5px); }
+  40% {
+    transform: translateX(0);
+    text-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    text-shadow: 0 0 10px #33ff33;
+  }
+}
+
+@keyframes typeIn {
+  from {
+    opacity: 1;
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  to {
+    opacity: 1;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% {
+    transform: translate(var(--moveX), var(--moveY)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.glitch-in {
+  animation: glitchIn 1.5s ease-out forwards;
+}
+
+.type-in {
+  animation: typeIn 2s steps(40, end) forwards;
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+.float {
+  animation: float 20s linear infinite;
+}
