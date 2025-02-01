@@ -11,7 +11,7 @@ const Home = () => {
             animationDelay: '0.5s',
             textShadow: '0 0 10px #33ff33'
           }}>
-        WELCOME TO THE SYSTEM
+        WELCOME TO THE CryptoWebb
       </h1>
       
       <nav className="mb-8 flex gap-4 opacity-0 fade-in"
