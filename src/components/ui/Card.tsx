@@ -1,14 +1,15 @@
-
 // src/components/ui/Card.tsx
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import { CSSProperties } from 'react';
 
 interface CardProps {
   children: React.ReactNode;
   className?: string;
+  style?: CSSProperties;  // Add this line to accept style prop
 }
 
-export const Card = ({ children, className }: CardProps) => {
+export const Card = ({ children, className, style }: CardProps) => {
   return (
     <motion.div
       className={clsx(
@@ -18,6 +19,7 @@ export const Card = ({ children, className }: CardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      style={style}  // Add this line to pass the style prop
     >
       {children}
     </motion.div>

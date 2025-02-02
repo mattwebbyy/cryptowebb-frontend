@@ -25,3 +25,15 @@
     @apply px-6 py-2 border border-matrix-green relative overflow-hidden transition-all duration-300;
   }
 }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s forwards;
+}
