@@ -5,22 +5,7 @@ const Home = () => {
   return (
     <>
       {/* Add this div for the auth buttons */}
-      <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 fade-in"
-           style={{ animationDelay: '0.3s' }}>
-        <Link 
-          to="/login"
-          className="text-sm px-4 py-1.5 border border-matrix-green bg-black/50 hover:bg-matrix-green/20 transition-all duration-300 flex items-center gap-2"
-        >
-          <span className="w-2 h-2 bg-matrix-green rounded-full animate-pulse"></span>
-          INITIALIZE
-        </Link>
-        <Link 
-          to="/signup"
-          className="text-sm px-4 py-1.5 border border-matrix-green/50 hover:border-matrix-green bg-black/30 hover:bg-matrix-green/10 transition-all duration-300"
-        >
-          REQUEST ACCESS
-        </Link>
-      </div>
+
 
       <FloatingIcons />
       

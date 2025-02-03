@@ -3,7 +3,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 
 const DashboardLayout = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-matrix-green">
+    <div className="min-h-screen  text-matrix-green">
       <header className="p-4 border-b border-matrix-green">
         <h1 className="text-3xl font-bold">Dashboard</h1>
       </header>

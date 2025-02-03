@@ -15,7 +15,7 @@ type Profile = {
 
 const fetchProfile = async (): Promise<Profile> => {
   const token = localStorage.getItem('token');
-  const response = await fetch('http://localhost:8080/api/user/profile', {
+  const response = await fetch('http://localhost:8080/api/v1/users/me', {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

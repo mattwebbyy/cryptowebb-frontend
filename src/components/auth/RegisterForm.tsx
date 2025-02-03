@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export const RegisterForm = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      const response = await fetch('http://localhost:8080/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -30,8 +32,21 @@ export const RegisterForm = () => {
         throw new Error(data.error || 'Registration failed');
       }
 
-      // Redirect to login upon successful registration
-      navigate('/login');
+      // Display a success toast notification
+      toast.success('Registered successfully!', {
+        position: "top-right",
+        autoClose: 3000, // 3 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // Redirect to login after a slight delay to let the toast show
+      setTimeout(() => {
+        navigate('/login');
+      }, 500);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     }

@@ -2,33 +2,43 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth'; // Add this import
 
 export const LoginForm = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Add this line to get the login function from context
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
+    
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
+      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+      
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Login failed');
 
-      localStorage.setItem('token', data.token);
+      // Use the context login function instead of directly setting localStorage
+      await login(data.token);
       navigate('/dashboard');
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = () => {
-    // Replace this with your Google auth logic.
+    // Implement proper Google auth integration
     console.log('Google sign in clicked');
     navigate('/dashboard');
   };
@@ -37,7 +47,7 @@ export const LoginForm = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-lg w-full p-8 border border-matrix-green bg-black/30 shadow-lg "
+      className="max-w-lg w-full p-8 border border-matrix-green bg-black/30 shadow-lg"
     >
       <h2 className="text-3xl mb-8 text-center text-matrix-green font-bold px-16">
         System Login
@@ -52,6 +62,7 @@ export const LoginForm = () => {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
+            required
           />
         </div>
         <div>
@@ -63,6 +74,7 @@ export const LoginForm = () => {
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
+            required
           />
         </div>
         {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -71,8 +83,9 @@ export const LoginForm = () => {
           whileTap={{ scale: 0.98 }}
           type="submit"
           className="w-full p-3 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90 transition-colors"
+          disabled={isSubmitting}
         >
-          Access System
+          {isSubmitting ? 'Authenticating...' : 'Access System'}
         </motion.button>
       </form>
       <div className="my-6 text-center text-matrix-green font-semibold">or</div>
