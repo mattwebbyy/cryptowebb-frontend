@@ -1,35 +1,120 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa';
-import { useAuth } from '../../hooks/useAuth'; // Add this import
+import { useAuth } from '../../hooks/useAuth';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Add this line to get the login function from context
+  const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingOAuth, setIsProcessingOAuth] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    // --- Option 1: Check if token data is in the URL (from backend redirect) ---
+    const token = searchParams.get('token');
+    if (token) {
+      // Build the auth response object from the URL query parameters
+      const authData = {
+        token,
+        refreshToken: searchParams.get('refreshToken') || '',
+        type: searchParams.get('type') || 'Bearer',
+        user: {
+          id: searchParams.get('id') || '',
+          email: searchParams.get('email') || '',
+          firstName: searchParams.get('firstName') || '',
+          lastName: searchParams.get('lastName') || '',
+          role: searchParams.get('role') || '',
+          avatarUrl: searchParams.get('avatarUrl') || '',
+        },
+      };
+
+      setIsProcessingOAuth(true);
+      login(authData)
+        .then(() => {
+          navigate('/dashboard', { replace: true });
+        })
+        .catch((err) => {
+          console.error('OAuth login error:', err);
+          setError('Failed to complete Google authentication');
+          navigate('/login', { replace: true });
+        })
+        .finally(() => {
+          setIsProcessingOAuth(false);
+        });
+      return; // No need to process further if token was found
+    }
+
+    // --- Fallback: Check for a "code" parameter (if still in use) ---
+    const code = searchParams.get('code');
+    if (code) {
+      setIsProcessingOAuth(true);
+      const handleGoogleCallback = async () => {
+        try {
+          console.log('Handling Google callback with code:', code);
+          const response = await fetch(`http://localhost:8080/api/v1/auth/google/callback?code=${code}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Authentication failed');
+          }
+
+          const data = await response.json();
+          console.log('Google auth response:', data);
+          await login(data);
+          navigate('/dashboard', { replace: true });
+        } catch (err) {
+          console.error('Google auth error:', err);
+          setError('Failed to complete Google authentication');
+          navigate('/login', { replace: true });
+        } finally {
+          setIsProcessingOAuth(false);
+        }
+      };
+
+      handleGoogleCallback();
+    }
+  }, [location, login, navigate]);
+
+  if (isProcessingOAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-matrix-green text-center">
+          <div className="mb-4">Processing Google Authentication...</div>
+          {/* You could add a loading spinner here if desired */}
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch('http://localhost:8080/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      
+
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Login failed');
 
-      // Use the context login function instead of directly setting localStorage
-      await login(data.token);
+      await login(data); // Save tokens and user data to localStorage
       navigate('/dashboard');
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -37,10 +122,18 @@ export const LoginForm = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // Implement proper Google auth integration
-    console.log('Google sign in clicked');
-    navigate('/dashboard');
+  const handleGoogleSignIn = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/auth/google/login');
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Failed to initiate Google login');
+
+      // Redirect the user to the Google OAuth page.
+      window.location.href = data.url;
+    } catch (err) {
+      setError('Failed to initiate Google login');
+    }
   };
 
   return (
@@ -59,9 +152,7 @@ export const LoginForm = () => {
             placeholder="Email"
             className="w-full p-3 bg-black border border-matrix-green text-matrix-green rounded focus:outline-none focus:ring-2 focus:ring-matrix-green"
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
         </div>
@@ -71,9 +162,7 @@ export const LoginForm = () => {
             placeholder="Password"
             className="w-full p-3 bg-black border border-matrix-green text-matrix-green rounded focus:outline-none focus:ring-2 focus:ring-matrix-green"
             value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
           />
         </div>

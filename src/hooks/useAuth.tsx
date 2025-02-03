@@ -7,6 +7,7 @@ import {
   useCallback 
 } from 'react';
 import * as React from 'react';
+import { AuthResponse } from '../types/types';
 
 interface User {
   id: string;
@@ -24,7 +25,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (token: string) => Promise<void>;
+  login: (authData: AuthResponse) => Promise<void>;
   logout: () => void;
 }
 
@@ -39,60 +40,89 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenType');
+    setIsAuthenticated(false);
+    setUser(null);
+    setIsLoading(false);
+  }, []);
+
   const fetchUserInfo = useCallback(async (token: string) => {
-    setIsLoading(true);
     try {
       const response = await fetch('http://localhost:8080/api/v1/users/me', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
       });
-      
-      if (response.ok) {
-        const responseData = await response.json();
-        const userData = responseData.user;
-        setUser(userData);
-        setIsAuthenticated(true);
-      } else {
-        console.error('Failed to fetch user info:', await response.json());
-        logout();
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
       }
+
+      const data = await response.json();
+      setUser(data.user);
+      setIsAuthenticated(true);
+      console.log('User info fetched successfully:', data.user);
     } catch (error) {
       console.error('Error fetching user info:', error);
       logout();
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logout]);
 
-  const login = useCallback(async (token: string) => {
-    localStorage.setItem('token', token);
-    await fetchUserInfo(token);
-  }, [fetchUserInfo]);
+  const login = useCallback(async (authData: AuthResponse) => {
+    try {
+      console.log('Logging in with auth data:', authData);
+      
+      // Store tokens
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('refreshToken', authData.refreshToken);
+      localStorage.setItem('tokenType', authData.type);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-    setUser(null);
-  }, []);
+      // Set user data
+      setUser(authData.user);
+      setIsAuthenticated(true);
+      
+      console.log('Login successful:', {
+        user: authData.user,
+        isAuthenticated: true,
+        tokensStored: true
+      });
+    } catch (error) {
+      console.error('Error during login:', error);
+      logout();
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [logout]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
+      console.log('Found existing token, fetching user info...');
       fetchUserInfo(token);
     } else {
+      console.log('No token found, setting loading to false');
       setIsLoading(false);
     }
   }, [fetchUserInfo]);
 
+  const value = {
+    isAuthenticated,
+    user,
+    isLoading,
+    login,
+    logout
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      user, 
-      isLoading, 
-      login, 
-      logout 
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

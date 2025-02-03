@@ -16,6 +16,7 @@ const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
 const DashboardHome = lazy(() => import('./pages/dashboard/Dashboard'));
 const Profile = lazy(() => import('./pages/dashboard/Profile'));
 const Settings = lazy(() => import('./pages/dashboard/Settings'));
+import OAuthCallback from './components/auth/OAuthCallback';
 
 export function Routes() {
   return (
@@ -26,8 +27,10 @@ export function Routes() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+                {/* Add OAuth callback route */}
         <Route path="/register" element={<Signup />} />
-        
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
+
         {/* Dashboard nested routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
