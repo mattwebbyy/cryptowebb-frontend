@@ -37,3 +37,16 @@
 .fade-in {
   animation: fadeIn 0.5s forwards;
 }
+
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  overflow-y: auto;
+}
