@@ -2,6 +2,7 @@
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { MatrixLoader } from '@/components/ui/MatrixLoader';
+import { PricingPage } from './pages/PricingPage';
 
 // Lazy load marketing and auth pages
 const Home = lazy(() => import('./pages/Home'));
@@ -30,6 +31,7 @@ export function Routes() {
                 {/* Add OAuth callback route */}
         <Route path="/register" element={<Signup />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
         {/* Dashboard nested routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
