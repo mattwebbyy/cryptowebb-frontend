@@ -15,7 +15,7 @@ export const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-matrix-green text-xl font-bold">
-            MATRIX
+            Cryptowebb
           </Link>
 
           <div className="flex gap-6">
