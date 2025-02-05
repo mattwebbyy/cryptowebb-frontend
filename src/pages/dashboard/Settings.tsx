@@ -3,21 +3,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type APIKey = {
   id: string;
-  name: string;
+  Name: string;
   prefix: string;
   created_at: string;  // Updated to match backend
-  expires_at: string;  // Updated to match backend
+  ExpiresAt: string;  // Updated to match backend
   last_used_at?: string;
 };
 
 type APIKeyResponse = APIKey & {
   key: string; // Only present when first created
 };
-
 const formatDate = (dateString: string) => {
   if (!dateString) return 'N/A';
   try {
-    // Convert UTC string to Date object
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -26,6 +24,7 @@ const formatDate = (dateString: string) => {
       hour: '2-digit',
       minute: '2-digit',
       timeZoneName: 'short',
+      timeZone: 'UTC' // Add this to show UTC time
     }).format(date);
   } catch (e) {
     console.error('Date parsing error:', e, dateString);
@@ -194,84 +193,82 @@ const Settings = () => {
             </button>
           </form>
 
-          {generatedKey && (
-            <div className="mt-6 p-4 bg-black/50 rounded-lg border border-matrix-green animate-fadeIn">
-              <p className="text-matrix-green font-medium mb-2">
-                Your new API key has been generated. Copy it now, it won't be shown again:
-              </p>
-              <div className="relative mt-2">
-                <code className="block p-4 bg-black/70 rounded-lg text-matrix-green 
-                              font-mono text-sm break-all border border-matrix-green/30">
-                  {generatedKey.key}
-                </code>
-                <button
-                  onClick={() => handleCopyKey(generatedKey.key)}
-                  className="absolute top-2 right-2 px-3 py-1.5 text-xs 
-                           bg-matrix-green/20 hover:bg-matrix-green/30 
-                           border border-matrix-green rounded-md
-                           transition duration-200 ease-in-out"
-                >
-                  {copySuccess ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-            </div>
-          )}
+{generatedKey && (
+  <div className="mt-6 p-4 bg-black/50 rounded-lg border border-matrix-green animate-fadeIn">
+    <p className="text-matrix-green font-medium mb-2">
+      Your new API key has been generated. Copy it now, it won't be shown again:
+    </p>
+    <div className="relative mt-2">
+      <pre className="p-4 bg-black/70 rounded-lg text-matrix-green 
+                    font-mono text-sm overflow-x-auto border border-matrix-green/30
+                    whitespace-nowrap scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50">
+        {generatedKey.key}
+      </pre>
+      <button
+        onClick={() => handleCopyKey(generatedKey.key)}
+        className="absolute top-4 right-4 px-3 py-1.5 text-xs 
+                 bg-matrix-green/20 hover:bg-matrix-green/30 
+                 border border-matrix-green rounded-md
+                 transition duration-200 ease-in-out"
+      >
+        {copySuccess ? 'Copied!' : 'Copy'}
+      </button>
+    </div>
+  </div>
+)}
         </div>
 
         {/* Existing API Keys */}
         <div className="bg-black/30 p-6 rounded-lg border border-matrix-green/50 shadow-lg">
-          <h3 className="text-2xl font-semibold mb-6 text-matrix-green">Active API Keys</h3>
-          
-          {isLoading ? (
-            <div className="text-matrix-green text-center py-4">Loading API keys...</div>
-          ) : !keys?.length ? (
-            <div className="text-matrix-green/70 text-center py-4">No active API keys found</div>
-          ) : (
-            <div className="space-y-4">
-              {keys.map((key) => (
-                <div key={key.id} 
-                     className="p-4 bg-black/50 rounded-lg border border-matrix-green/30 
-                              hover:border-matrix-green/50 transition-colors duration-200">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <h4 className="text-lg font-medium text-matrix-green">{key.name}</h4>
-                      <div className="space-y-1 text-sm text-matrix-green/70">
-                        <p className="flex items-center gap-2">
-                          <span className="font-medium">Created:</span>
-                          <span>{formatDate(key.created_at)}</span>
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <span className="font-medium">Expires:</span>
-                          <span>{formatDate(key.expires_at)}</span>
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <span className="font-medium">Prefix:</span>
-                          <span className="font-mono">{key.prefix}</span>
-                        </p>
-                        {key.last_used_at && (
-                          <p className="flex items-center gap-2">
-                            <span className="font-medium">Last Used:</span>
-                            <span>{formatDate(key.last_used_at)}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => revokeMutation.mutate(key.id)}
-                      disabled={revokeMutation.isPending}
-                      className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 
-                               border border-red-500/50 hover:border-red-500 
-                               rounded-md text-red-400 text-sm transition
-                               duration-200 ease-in-out disabled:opacity-50"
-                    >
-                      {revokeMutation.isPending ? 'Revoking...' : 'Revoke Key'}
-                    </button>
-                  </div>
-                </div>
-              ))}
+  <h3 className="text-2xl font-semibold mb-6 text-matrix-green">Active API Keys</h3>
+  {isLoading ? (
+    <div className="text-matrix-green text-center py-4">Loading API keys...</div>
+  ) : !keys?.length ? (
+    <div className="text-matrix-green/70 text-center py-4">No active API keys found</div>
+  ) : (
+    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2
+                  scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50">
+      {keys.map((key) => (
+        <div key={key.id} 
+             className="p-4 bg-black/50 rounded-lg border border-matrix-green/30 
+                      hover:border-matrix-green/50 transition-colors duration-200">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1 flex-1 min-w-0">
+              <h4 className="text-lg font-medium text-matrix-green truncate">{key.Name}</h4>
+              <div className="space-y-1 text-sm text-matrix-green/70">
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">Created:</span>
+                  <span>{formatDate(key.created_at)}</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">Expires:</span>
+                  <span>{formatDate(key.ExpiresAt)}</span>
+                </p>
+                {key.last_used_at && (
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">Last Used:</span>
+                    <span>{formatDate(key.last_used_at)}</span>
+                  </p>
+                )}
+              </div>
             </div>
-          )}
+            <button
+              onClick={() => revokeMutation.mutate(key.id)}
+              disabled={revokeMutation.isPending}
+              className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 
+                       border border-red-500/50 hover:border-red-500 
+                       rounded-md text-red-400 text-sm transition
+                       duration-200 ease-in-out disabled:opacity-50
+                       flex-shrink-0 ml-4"
+            >
+              {revokeMutation.isPending ? 'Revoking...' : 'Revoke'}
+            </button>
+          </div>
         </div>
+      ))}
+    </div>
+  )}
+</div>
       </div>
     </div>
   );
