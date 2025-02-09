@@ -14,12 +14,14 @@ export const Header = () => {
     <header className="fixed top-0 w-full z-50 backdrop-blur-sm">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
+          {/* Logo */}
           <Link to="/" className="text-matrix-green text-xl font-bold">
             Cryptowebb
           </Link>
 
+          {/* Navigation Links */}
           <div className="flex gap-6">
-            {['about', 'projects', 'contact'].map((path) => (
+            {['about', 'projects', 'contact', 'pricing'].map((path) => (
               <motion.div
                 key={path}
                 whileHover={{ scale: 1.05 }}
@@ -35,8 +37,21 @@ export const Header = () => {
                 </Link>
               </motion.div>
             ))}
+            {isAuthenticated && (
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to="/dashboard"
+                  className={`matrix-button ${
+                    location.pathname.startsWith('/dashboard') ? 'bg-matrix-green/20' : ''
+                  }`}
+                >
+                  Dashboard
+                </Link>
+              </motion.div>
+            )}
           </div>
 
+          {/* Authentication Links */}
           <div className="flex gap-4">
             {isAuthenticated ? (
               <>
