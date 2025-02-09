@@ -389,7 +389,6 @@ const PricingPage: React.FC = () => {
 
   return (
     <div className="relative w-full min-h-screen text-matrix-green">
-      <div className="absolute inset-0 overflow-y-auto">
         <div className="max-w-7xl mx-auto p-8">
           {/* Header Section */}
           <div className="text-center mb-12">
@@ -769,7 +768,7 @@ const PricingPage: React.FC = () => {
           </Modal>
 
           <Modal isOpen={showHistory} onClose={() => setShowHistory(false)} title="Subscription History">
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-4 max-h-96 ">
               {subscriptionHistory.length === 0 ? (
                 <p className="text-gray-400">No subscription history available.</p>
               ) : (
@@ -791,7 +790,6 @@ const PricingPage: React.FC = () => {
           </Modal>
         </div>
       </div>
-    </div>
   );
 };
 

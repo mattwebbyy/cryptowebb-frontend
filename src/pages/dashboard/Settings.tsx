@@ -226,7 +226,7 @@ const Settings = () => {
   ) : !keys?.length ? (
     <div className="text-matrix-green/70 text-center py-4">No active API keys found</div>
   ) : (
-    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2
+    <div className="space-y-4 overflow-y-auto pr-2
                   scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50">
       {keys.map((key) => (
         <div key={key.id} 

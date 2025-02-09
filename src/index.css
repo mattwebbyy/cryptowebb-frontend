@@ -8,7 +8,7 @@ body {
   background-color: #000;
   color: #33ff33;
   font-family: monospace;
-  overflow: hidden;
+  overflow-y: auto; /* or simply remove this line */
   min-height: 100vh;
 }
 

@@ -45,8 +45,8 @@ const DashboardLayout = () => {
             </ul>
           </nav>
         </aside>
-        <main className="flex-1 p-4">
-          <Outlet />
+        <main className="flex-1 p-4 overflow-y-auto">
+        <Outlet />
         </main>
       </div>
     </div>
