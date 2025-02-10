@@ -84,7 +84,7 @@ const Contact = () => {
         transition={{ duration: 0.5 }}
         className="max-w-2xl mx-auto"
       >
-        <Card className="p-8 bg-black/90 border border-matrix-green">
+        <Card className="p-8 px-24 bg-black/90 border border-matrix-green">
           <h1 className="text-4xl mb-8 text-center text-matrix-green font-mono">CONTACT</h1>
           
           {status === 'error' && (
