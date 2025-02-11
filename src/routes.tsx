@@ -2,15 +2,19 @@
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { MatrixLoader } from '@/components/ui/MatrixLoader';
-import  PricingPage  from './pages/PricingPage';
+import PricingPage from './pages/PricingPage';
 
 // Lazy load marketing and auth pages
 const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const Projects = lazy(() => import('./pages/Projects'));
 const Contact = lazy(() => import('./pages/Contact'));
-const Login = lazy(() => import('./pages/auth/Login'));   // Contains your LoginForm with BackButton
-const Signup = lazy(() => import('./pages/auth/Signup')); // Contains your Signup with BackButton
+const Login = lazy(() => import('./pages/auth/Login'));
+const Signup = lazy(() => import('./pages/auth/Signup'));
+
+// Lazy load blog pages
+const BlogList = lazy(() => import('./pages/blog/BlogList'));
+const BlogPost = lazy(() => import('./pages/blog/BlogPost'));
 
 // Lazy load dashboard pages (nested routes)
 const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
@@ -23,21 +27,33 @@ export function Routes() {
   return (
     <Suspense fallback={<MatrixLoader />}>
       <RouterRoutes>
+        {/* Marketing pages */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/pricing" element={<PricingPage />} />
+
+        {/* Blog routes */}
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+
+        {/* Auth routes */}
         <Route path="/login" element={<Login />} />
-                {/* Add OAuth callback route */}
         <Route path="/register" element={<Signup />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
-        <Route path="/pricing" element={<PricingPage />} />
 
         {/* Dashboard nested routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
+          
+          {/* Blog management routes */}
+          <Route path="blog">
+            <Route path="new" element={<BlogList />} /> {/* You'll want to create a BlogEditor component for this */}
+            <Route path="edit/:id" element={<BlogList />} /> {/* You'll want to create a BlogEditor component for this */}
+          </Route>
         </Route>
       </RouterRoutes>
     </Suspense>
