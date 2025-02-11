@@ -15,6 +15,7 @@ const Signup = lazy(() => import('./pages/auth/Signup'));
 // Lazy load blog pages
 const BlogList = lazy(() => import('./pages/blog/BlogList'));
 const BlogPost = lazy(() => import('./pages/blog/BlogPost'));
+const BlogEditor = lazy(() => import('./pages/blog/BlogEditor')); // Add this line
 
 // Lazy load dashboard pages (nested routes)
 const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
@@ -51,8 +52,8 @@ export function Routes() {
           
           {/* Blog management routes */}
           <Route path="blog">
-            <Route path="new" element={<BlogList />} /> {/* You'll want to create a BlogEditor component for this */}
-            <Route path="edit/:id" element={<BlogList />} /> {/* You'll want to create a BlogEditor component for this */}
+            <Route path="new" element={<BlogEditor />} />
+            <Route path="edit/:id" element={<BlogEditor />} />
           </Route>
         </Route>
       </RouterRoutes>

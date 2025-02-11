@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth';
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
 
 interface BlogPost {
   id: string;
@@ -26,10 +29,10 @@ interface BlogResponse {
 export default function BlogList() {
   const { user } = useAuth();
   
-  const { data, isLoading } = useQuery<BlogResponse>({
+  const { data, isLoading, error } = useQuery<BlogResponse>({
     queryKey: ['blogs'],
     queryFn: async () => {
-      const response = await axios.get<BlogResponse>(`${import.meta.env.VITE_API_URL}/api/v1/blog`);
+      const response = await axios.get<BlogResponse>(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog`);
       return response.data;
     }
   });
@@ -37,69 +40,86 @@ export default function BlogList() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-matrix-green"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Blog Posts</h1>
-        {user?.role === 'admin' && (
-          <Link
-            to="/dashboard/blog/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Create New Post
-          </Link>
-        )}
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {data?.posts.map((post: BlogPost) => (
-          <article key={post.id} className="flex flex-col overflow-hidden rounded-lg shadow-lg">
-            {post.image_url && (
-              <div className="flex-shrink-0">
-                <img
-                  className="h-48 w-full object-cover"
-                  src={post.image_url}
-                  alt={post.title}
-                />
-              </div>
+    <div className="min-h-screen pt-20 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="max-w-7xl mx-auto bg-black/90 border border-matrix-green p-6">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-mono text-matrix-green">Blog Posts</h1>
+            {user?.role === 'admin' && (
+              <Link to="/dashboard/blog/new">
+                <Button className="bg-matrix-green hover:bg-matrix-green/80 text-black font-mono">
+                  Create New Post
+                </Button>
+              </Link>
             )}
-            <div className="flex flex-1 flex-col justify-between bg-white p-6">
-              <div className="flex-1">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {post.tags.map((tag: string) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <Link to={`/blog/${post.slug}`} className="block mt-2">
-                  <p className="text-xl font-semibold text-gray-900">{post.title}</p>
-                  <p className="mt-3 text-base text-gray-500">
-                    {post.content.slice(0, 150)}...
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {data?.posts.map((post) => (
+              <motion.article
+                key={post.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="bg-black/50 border border-matrix-green rounded-lg overflow-hidden hover:border-matrix-green/80 transition-colors"
+              >
+                {post.image_url && (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={post.image_url}
+                      alt={post.title}
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+                <div className="p-6">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 text-xs font-mono bg-matrix-green/20 text-matrix-green rounded"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <Link to={`/blog/${post.slug}`}>
+                    <h2 className="text-xl font-mono text-matrix-green mb-2 hover:text-matrix-green/80">
+                      {post.title}
+                    </h2>
+                  </Link>
+                  <p className="text-gray-400 mb-4 line-clamp-3">
+                    {post.content}
                   </p>
-                </Link>
-              </div>
-              <div className="mt-6">
-                <div className="text-sm text-gray-500">
-                  {new Date(post.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  <div className="text-sm text-matrix-green/60 font-mono">
+                    {new Date(post.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </div>
+                  <Link 
+                    to={`/blog/${post.slug}`}
+                    className="inline-block mt-4 text-matrix-green hover:text-matrix-green/80 font-mono"
+                  >
+                    Read more →
+                  </Link>
                 </div>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+              </motion.article>
+            ))}
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 }
