@@ -91,3 +91,150 @@ body {
 .float {
   animation: float 20s linear infinite;
 }
+
+
+.w-md-editor {
+  background-color: transparent !important;
+}
+
+.w-md-editor-text-pre, .w-md-editor-text-input, .w-md-editor-text {
+  color: #00ff00 !important;
+  font-family: monospace !important;
+}
+
+.wmde-markdown-var {
+  color: #00ff00 !important;
+}
+
+.w-md-editor-toolbar {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-color: #00ff00 !important;
+}
+
+.w-md-editor-toolbar button {
+  color: #00ff00 !important;
+}
+
+.w-md-editor-toolbar button:hover {
+  color: rgba(0, 255, 0, 0.8) !important;
+}
+
+.wmde-markdown {
+  background-color: transparent !important;
+}
+
+.w-md-editor-preview {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: none !important;
+}
+
+.prose-matrix {
+  --tw-prose-body: theme('colors.gray.300');
+  --tw-prose-headings: theme('colors.matrix-green');
+  --tw-prose-links: theme('colors.matrix-green');
+  --tw-prose-bold: theme('colors.white');
+  --tw-prose-counters: theme('colors.matrix-green');
+  --tw-prose-bullets: theme('colors.matrix-green');
+  --tw-prose-hr: theme('colors.matrix-green' / 0.3);
+  --tw-prose-quotes: theme('colors.gray.400');
+  --tw-prose-quote-borders: theme('colors.matrix-green');
+  --tw-prose-captions: theme('colors.gray.400');
+  --tw-prose-code: theme('colors.matrix-green');
+  --tw-prose-pre-code: theme('colors.matrix-green');
+  --tw-prose-pre-bg: theme('colors.black' / 0.5);
+  --tw-prose-pre-border: theme('colors.matrix-green' / 0.3);
+}
+
+@layer base {
+  .prose {
+    max-width: none;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    color: #33ff33;
+    font-family: monospace;
+  }
+
+  .prose p {
+    color: #e5e7eb;
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .prose a {
+    color: #33ff33;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+
+  .prose a:hover {
+    color: rgba(51, 255, 51, 0.8);
+  }
+
+  .prose strong {
+    color: white;
+    font-weight: 600;
+  }
+
+  .prose ul {
+    color: #e5e7eb;
+    list-style-type: disc;
+    padding-left: 1.625em;
+  }
+
+  .prose ol {
+    color: #e5e7eb;
+    list-style-type: decimal;
+    padding-left: 1.625em;
+  }
+
+  .prose li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose blockquote {
+    font-style: italic;
+    color: #9ca3af;
+    border-left-width: 4px;
+    border-left-color: #33ff33;
+    padding-left: 1em;
+    margin: 1.5em 0;
+  }
+
+  .prose code {
+    color: #33ff33;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25em;
+    font-family: monospace;
+  }
+
+  .prose pre {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(51, 255, 51, 0.3);
+    border-radius: 0.5em;
+    padding: 1em;
+    overflow-x: auto;
+  }
+
+  .prose pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #33ff33;
+  }
+
+  .prose img {
+    border-radius: 0.5em;
+    border: 1px solid rgba(51, 255, 51, 0.3);
+  }
+
+  .prose hr {
+    border-color: rgba(51, 255, 51, 0.3);
+    margin: 2em 0;
+  }
+}

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
+import MDEditor from '@uiw/react-md-editor';
 
 interface BlogPost {
   title: string;
@@ -33,7 +34,6 @@ export default function BlogEditor() {
     is_published: false,
   });
 
-  // Convert tags array to string for input field
   const [tagInput, setTagInput] = useState('');
 
   // Fetch existing post data if editing
@@ -144,8 +144,12 @@ export default function BlogEditor() {
     setPost(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleContentChange = (value?: string) => {
+    setPost(prev => ({ ...prev, content: value || '' }));
+  };
+
   return (
-    <div className="min-h-screen pt-20 px-4">
+    <div className="min-h-screen pt-20 px-4" data-color-mode="dark">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -173,16 +177,20 @@ export default function BlogEditor() {
 
             <div>
               <label className="block text-matrix-green font-mono mb-2">
-                Content
+                Content (Markdown Supported)
               </label>
-              <textarea
-                name="content"
-                value={post.content}
-                onChange={handleChange}
-                rows={10}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
-                required
-              />
+              <div className="markdown-editor-wrapper">
+                <MDEditor
+                  value={post.content}
+                  onChange={handleContentChange}
+                  preview="edit"
+                  height={400}
+                  className="bg-black/50 border border-matrix-green"
+                  style={{
+                    backgroundColor: 'transparent',
+                  }}
+                />
+              </div>
             </div>
 
             <div>

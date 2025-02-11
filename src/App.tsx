@@ -5,9 +5,12 @@ import { Layout } from './components/layout/Layout';
 import { AuthProvider } from './hooks/useAuth';
 import { StripeProvider } from './components/providers/StripeProvider';
 import { Routes } from './routes';
+import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
   return (
+    <HelmetProvider>
+
     <AuthProvider>
       <StripeProvider>
         <div className="app-container">
@@ -28,6 +31,8 @@ function App() {
         </div>
       </StripeProvider>
     </AuthProvider>
+        </HelmetProvider>
+
   );
 }
 
