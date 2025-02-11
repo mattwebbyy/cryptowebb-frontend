@@ -4,9 +4,6 @@ import { FloatingIcons } from '@/components/matrix/FloatingIcons';
 const Home = () => {
   return (
     <>
-      {/* Add this div for the auth buttons */}
-
-
       <FloatingIcons />
       
       <h1 className="text-5xl mb-8 opacity-0 glitch-in hover-glow"
@@ -17,7 +14,6 @@ const Home = () => {
         WELCOME TO THE CryptoWebb
       </h1>
       
-      {/* Rest of your code remains the same */}
       <nav className="mb-8 flex gap-4 opacity-0 fade-in"
            style={{ animationDelay: '1s' }}>
         <Link to="/about" 
@@ -33,6 +29,16 @@ const Home = () => {
           CONTACT
         </Link>
       </nav>
+
+      {/* New free trial button */}
+      <div className="mb-8 flex justify-center opacity-0 fade-in"
+           style={{ animationDelay: '1.2s' }}>
+<Link 
+  to="/trial" 
+  className="matrix-link px-6 py-2 border border-[#33ff33] relative overflow-hidden transition-all duration-300">
+  Start Free Trial
+</Link>
+      </div>
 
       <div className="max-w-2xl mx-auto text-left p-4 border border-[#33ff33] bg-[#001400]/30 opacity-0 type-in relative overflow-hidden"
            style={{ animationDelay: '1.5s' }}>

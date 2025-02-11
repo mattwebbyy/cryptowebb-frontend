@@ -3,6 +3,7 @@ import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { MatrixLoader } from '@/components/ui/MatrixLoader';
 import PricingPage from './pages/PricingPage';
+import TrialPage from './pages/TrialPage';
 
 // Lazy load marketing and auth pages
 const Home = lazy(() => import('./pages/Home'));
@@ -34,6 +35,8 @@ export function Routes() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/trial" element={<TrialPage />} />
+
 
         {/* Blog routes */}
         <Route path="/blog" element={<BlogList />} />

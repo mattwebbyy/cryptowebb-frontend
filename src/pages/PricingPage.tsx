@@ -387,6 +387,98 @@ const PricingPage: React.FC = () => {
     }
   };
 
+  const handleFreeTrialSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    if (!stripe || !elements || !selectedPlan) {
+      setError('Please select a plan');
+      return;
+    }
+  
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError('Card element not found');
+      return;
+    }
+  
+    if (!email && !user) {
+      setError('Please enter your email');
+      return;
+    }
+  
+    setIsProcessing(true);
+    setError(null);
+  
+    try {
+      const { error: cardError, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+      });
+  
+      if (cardError) {
+        throw cardError;
+      }
+  
+      if (!paymentMethod) {
+        throw new Error('Payment method creation failed');
+      }
+  
+      const formData = {
+        priceId: STRIPE_CONFIG.prices[selectedPlan.tier][billingCycle],
+        paymentMethodId: paymentMethod.id,
+        email: user ? undefined : email,
+        billingCycle,
+        // DO NOT pass trialPeriodDays from client; free trial is forced on backend.
+      };
+  
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (user) {
+        headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+      }
+  
+      console.log('Sending free trial request with data:', formData);
+  
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/free-trial`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(formData),
+        credentials: 'include',
+      });
+  
+      const responseText = await response.text();
+      console.log('Raw server response (free trial):', responseText);
+  
+      if (!response.ok) {
+        let errorMessage = 'Failed to create free trial subscription';
+        if (responseText) {
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorMessage;
+          } catch (parseError) {
+            console.error('Failed to parse error response:', parseError);
+            errorMessage = responseText || 'Server error';
+          }
+        }
+        throw new Error(errorMessage);
+      }
+  
+      toast.success('Free trial subscription created successfully!');
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
+    } catch (err) {
+      console.error('Free trial subscription error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+
   return (
     <div className="relative w-full min-h-screen text-matrix-green">
         <div className="max-w-7xl mx-auto p-8">
