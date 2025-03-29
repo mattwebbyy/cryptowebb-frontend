@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { FaRocket, FaLock } from 'react-icons/fa';
+import { FaRocket, FaLock, FaArrowRight } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { STRIPE_CONFIG } from '../config/stripe';
 import { useAuth } from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 const TrialPage = () => {
   const { user } = useAuth();
@@ -12,7 +13,9 @@ const TrialPage = () => {
   const elements = useElements();
   const [email, setEmail] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
 
   // Default to Pro plan for trial
   const selectedPlan = {
@@ -22,7 +25,43 @@ const TrialPage = () => {
     features: STRIPE_CONFIG.plans.pro.features,
   };
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!user) {
+        setIsEligible(true); // Non-logged in users see the form
+        setIsChecking(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/free-trial`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({
+              priceId: STRIPE_CONFIG.prices.pro.monthly,
+            }),
+          }
+        );
+
+        const data = await response.json();
+        setIsEligible(!data.error?.includes('already had a free trial'));
+      } catch (error) {
+        console.error('Eligibility check error:', error);
+        setIsEligible(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkEligibility();
+  }, [user]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!stripe || !elements) {
@@ -85,12 +124,43 @@ const TrialPage = () => {
       }, 1500);
     } catch (err) {
       console.error('Trial error:', err);
-      setError(err.message);
-      toast.error(err.message);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center text-matrix-green">
+        <div className="text-center">
+          <div className="animate-pulse">
+            <p className="text-xl mb-4">Initializing trial system...</p>
+            <p className="text-sm text-matrix-green/70">Checking eligibility</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isEligible) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center text-matrix-green">
+        <div className="text-center max-w-2xl mx-auto bg-black/30 border-2 border-matrix-green rounded-xl p-8">
+          <h1 className="text-3xl font-bold mb-4">Trial Not Available</h1>
+          <p className="mb-6">You have already used your free trial. Check out our subscription plans for continued access.</p>
+          <Link 
+            to="/pricing" 
+            className="inline-flex items-center gap-2 px-6 py-2 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90"
+          >
+            View Plans <FaArrowRight />
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full text-matrix-green p-8">
