@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { store } from './store'
 import './index.css'
+import { applyHighchartsTheme } from './config/highchartsTheme'; // <<< Import the theme function
+applyHighchartsTheme();
 
 const queryClient = new QueryClient()
 
