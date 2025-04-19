@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LayoutDashboard } from 'lucide-react';
 
 export const Header = () => {
   const location = useLocation();
@@ -14,8 +14,14 @@ export const Header = () => {
     return <div className="fixed top-0 w-full z-50 backdrop-blur-sm h-20" />;
   }
 
+  // Add base nav links
   const navLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
-  if (isAuthenticated) navLinks.push('dashboard');
+  
+  // Add authenticated-only links
+  if (isAuthenticated) {
+    navLinks.push('dashboard');
+    navLinks.push('analytics'); // Add analytics link for authenticated users
+  }
 
   return (
     <header className="fixed top-0 w-full z-50 backdrop-blur-sm">
@@ -38,8 +44,9 @@ export const Header = () => {
                   to={`/${path}`}
                   className={`matrix-button capitalize ${
                     location.pathname === `/${path}` ? 'bg-matrix-green/20' : ''
-                  }`}
+                  } ${path === 'analytics' ? 'flex items-center gap-1' : ''}`}
                 >
+                  {path === 'analytics' && <LayoutDashboard size={16} />}
                   {path}
                 </Link>
               </motion.div>
@@ -107,9 +114,10 @@ export const Header = () => {
                     to={`/${path}`}
                     className={`block matrix-button capitalize ${
                       location.pathname === `/${path}` ? 'bg-matrix-green/20' : ''
-                    }`}
+                    } ${path === 'analytics' ? 'flex items-center gap-2' : ''}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    {path === 'analytics' && <LayoutDashboard size={16} />}
                     {path}
                   </Link>
                 ))}

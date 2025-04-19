@@ -4,7 +4,6 @@ import { lazy, Suspense } from 'react';
 import { MatrixLoader } from '@/components/ui/MatrixLoader';
 import PricingPage from './pages/PricingPage';
 import TrialPage from './pages/TrialPage';
-// import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; // Keep the import if you uncomment later
 
 // --- Marketing / Public Pages ---
 const Home = lazy(() => import('./pages/Home'));
@@ -21,18 +20,18 @@ import OAuthCallback from './components/auth/OAuthCallback';
 const BlogList = lazy(() => import('./pages/blog/BlogList'));
 const BlogPost = lazy(() => import('./pages/blog/BlogPost'));
 
-// --- Dashboard Pages ---
+// --- User Dashboard Pages ---
 const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
-// const DashboardHome = lazy(() => import('./pages/dashboard/Dashboard')); // Original dashboard home (can remove import if not used)
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const Profile = lazy(() => import('./pages/dashboard/Profile'));
 const Settings = lazy(() => import('./pages/dashboard/Settings'));
 const BlogEditor = lazy(() => import('./pages/blog/BlogEditor'));
-const AnalyticsDashboard = lazy(() => import('./pages/dashboard/AnalyticsDashboard'));
-const DatasourceManager = lazy(() => import('./pages/dashboard/DatasourceManager'));
-const DashboardManager = lazy(() => import('./pages/dashboard/DashboardManager'));
 
-// --- Other ---
-// const NotFound = lazy(() => import('./pages/NotFound'));
+// --- Analytics Pages (NEW) ---
+const AnalyticsLayout = lazy(() => import('./pages/analytics/AnalyticsLayout'));
+const AnalyticsDashboard = lazy(() => import('./pages/analytics/AnalyticsDashboard'));
+const DatasourceManager = lazy(() => import('./pages/analytics/DatasourceManager'));
+const DashboardManager = lazy(() => import('./pages/analytics/DashboardManager'));
 
 export function Routes() {
   return (
@@ -55,38 +54,23 @@ export function Routes() {
         <Route path="/register" element={<Signup />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
 
-        {/* --- Dashboard Routes (Temporarily UNPROTECTED) --- */}
-        {/* WARNING: Removed <ProtectedRoute> wrapper for development viewing */}
-        <Route
-          path="/dashboard"
-          element={
-             // <ProtectedRoute> // <<< Temporarily commented out / removed
-                <DashboardLayout />
-             // </ProtectedRoute> // <<< Temporarily commented out / removed
-          }
-        >
-          {/* Redirect base /dashboard to the main analytics view */}
-          <Route index element={<Navigate to="analytics" replace />} />
-
-          {/* DAaaS Features */}
-          <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="datasources" element={<DatasourceManager />} />
-          <Route path="manage" element={<DashboardManager />} />
-
-          {/* Other Dashboard Sections */}
+        {/* User Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
-
-          {/* Blog management routes (will also be unprotected now) */}
           <Route path="blog">
             <Route path="new" element={<BlogEditor />} />
             <Route path="edit/:id" element={<BlogEditor />} />
           </Route>
+        </Route>
 
-        </Route> {/* --- End Dashboard Routes --- */}
-
-        {/* Optional: Catch-all 404 Not Found Route */}
-        {/* <Route path="*" element={<NotFound />} /> */}
+        {/* Analytics Platform Routes (Completely Separate) */}
+        <Route path="/analytics" element={<AnalyticsLayout />}>
+          <Route index element={<AnalyticsDashboard />} />
+          <Route path="datasources" element={<DatasourceManager />} />
+          <Route path="manage" element={<DashboardManager />} />
+        </Route>
 
       </RouterRoutes>
     </Suspense>
