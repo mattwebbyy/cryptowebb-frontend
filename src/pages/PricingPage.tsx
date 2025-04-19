@@ -519,12 +519,12 @@ const PricingPage: React.FC = () => {
               return (
                 <motion.div
                   key={tier}
-                  whileHover={{ scale: isCurrentSub ? 1 : 1.02 }}
+                  whileHover={{ scale: isCurrentSub ? 1 : 1.01 }}
                   className={`relative rounded-xl border-2 ${
                     isCurrentSub ? 'cursor-default border-matrix-green/50' : 'cursor-pointer'
                   } ${plan.popular ? 'border-matrix-green' : 'border-gray-700'} ${
                     selectedTier === tier ? 'border-matrix-green bg-matrix-green/10' : ''
-                  } ${isCurrentSub ? 'border-matrix-green/50' : ''} bg-black p-6 shadow-xl`}
+                  } ${isCurrentSub ? 'border-matrix-green/50' : ''} bg-black p-6 shadow-xl flex flex-col`}
                   onClick={() => handleSelectPlan(tier as PlanTier)}
                 >
                   {isCurrentSub && (
@@ -544,7 +544,7 @@ const PricingPage: React.FC = () => {
                       )}
                     </>
                   )}
-
+<div className="flex-grow">
                   <div className="text-center mb-8">
                     <Icon className="w-12 h-12 mx-auto mb-4 text-matrix-green" />
                     <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
@@ -562,7 +562,8 @@ const PricingPage: React.FC = () => {
                       </li>
                     ))}
                   </ul>
-
+                  </div>
+                  <div className="mt-auto"> 
                   <button
                     className={`w-full py-3 rounded-lg font-semibold ${
                       isCurrentSub
@@ -583,6 +584,7 @@ const PricingPage: React.FC = () => {
                       ? 'Upgrade'
                       : 'Select Plan'}
                   </button>
+                  </div>
                 </motion.div>
               );
             })}
