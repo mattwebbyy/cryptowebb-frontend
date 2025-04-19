@@ -302,7 +302,7 @@ const AnalyticsDashboard = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-black text-matrix-green">
+        <div className="h-full flex flex-col bg-black/50 text-matrix-green">
             {/* Header */}
             <div className="flex justify-between items-center p-3 border-b border-matrix-green/30 flex-shrink-0">
                 <h2 className="text-lg font-mono text-matrix-green truncate pr-4" title={dashboard?.name}>

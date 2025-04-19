@@ -22,6 +22,7 @@ interface DiscountRates {
 }
 
 export const STRIPE_CONFIG = {
+    freeTrialDays:14,
     publicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY,
     prices: {
         basic: {
