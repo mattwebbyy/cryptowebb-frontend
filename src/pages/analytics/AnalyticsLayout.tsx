@@ -1,7 +1,7 @@
 // src/pages/analytics/AnalyticsLayout.tsx
 import { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { Home, Database, LayoutDashboard, ChevronLeft, Menu, X } from 'lucide-react';
+import { Home, Database, LayoutDashboard, ChevronLeft, Menu, X ,Eye} from 'lucide-react';
 
 const AnalyticsLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -63,6 +63,19 @@ const AnalyticsLayout = () => {
                     <span>Data Sources</span>
                   </NavLink>
                 </li>
+                <li>
+  <NavLink
+    to="/analytics/cipher-matrix"
+    className={({ isActive }) =>
+      `flex items-center p-2 rounded ${isActive 
+        ? 'bg-matrix-green/20 text-matrix-green font-medium' 
+        : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'}`
+    }
+  >
+    <Eye size={18} className="mr-2" /> {/* Import Eye from lucide-react */}
+    <span>Cipher Matrix</span>
+  </NavLink>
+</li>
                 <li>
                   <NavLink
                     to="/analytics/manage"

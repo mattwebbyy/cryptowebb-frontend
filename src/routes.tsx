@@ -32,6 +32,7 @@ const AnalyticsLayout = lazy(() => import('./pages/analytics/AnalyticsLayout'));
 const AnalyticsDashboard = lazy(() => import('./pages/analytics/AnalyticsDashboard'));
 const DatasourceManager = lazy(() => import('./pages/analytics/DatasourceManager'));
 const DashboardManager = lazy(() => import('./pages/analytics/DashboardManager'));
+const CipherMatrix = lazy(() => import('./pages/analytics/CipherMatrix'));
 
 export function Routes() {
   return (
@@ -70,6 +71,8 @@ export function Routes() {
           <Route index element={<AnalyticsDashboard />} />
           <Route path="datasources" element={<DatasourceManager />} />
           <Route path="manage" element={<DashboardManager />} />
+          <Route path="cipher-matrix" element={<CipherMatrix />} />
+
         </Route>
 
       </RouterRoutes>
