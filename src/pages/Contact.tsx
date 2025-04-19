@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from 'react'; // Import useEffect
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button'; // Assuming Button component handles disabled state styling
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Using Card parts for structure
-import { Label } from '@/components/ui/label'; // Assuming shadcn/ui structure
-import { Input } from '@/components/ui/input'; // Assuming shadcn/ui structure
-import { Textarea } from '@/components/ui/textarea'; // Assuming shadcn/ui structure
-import { AlertCircle, CheckCircle, Loader2, Send } from 'lucide-react'; // Import icons
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 interface ContactFormData {
   name: string;
@@ -16,9 +12,9 @@ interface ContactFormData {
 
 interface ApiResponse {
   success?: boolean;
-  message: string; // Ensure backend always sends a message
+  message: string;
   id?: string;
-  error?: string; // Backend might send error message here
+  error?: string;
 }
 
 const Contact = () => {
@@ -26,32 +22,20 @@ const Contact = () => {
     name: '',
     email: '',
     subject: '',
-    message: '',
+    message: ''
   });
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [responseMessage, setResponseMessage] = useState(''); // Combined state for success/error messages
-
-  // Clear success message after a delay
-  useEffect(() => {
-    if (status === 'success') {
-      const timer = setTimeout(() => {
-        setStatus('idle');
-        setResponseMessage('');
-      }, 5000); // Clear after 5 seconds
-      return () => clearTimeout(timer); // Cleanup timer on component unmount or status change
-    }
-  }, [status]);
-
+  const [errorMessage, setErrorMessage] = useState('');
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    setResponseMessage(''); // Clear previous messages
-
+    setErrorMessage('');
+    
     try {
       const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
-      console.log('Using API URL:', API_URL);
-
+      console.log('Using API URL:', API_URL); // Debug log
+      
       const response = await fetch(`${API_URL}/api/v1/contact`, {
         method: 'POST',
         headers: {
@@ -61,188 +45,146 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
 
-      // Try to parse JSON regardless of status code for more informative errors
+      // Remove credentials: 'include' since we don't need it for this public endpoint
+
+      const textResponse = await response.text();
+      console.log('Raw response:', textResponse);
+
       let data: ApiResponse;
-      const responseText = await response.text(); // Get text first for debugging
       try {
-        data = JSON.parse(responseText);
-        console.log('Parsed response:', data);
+        data = JSON.parse(textResponse);
       } catch (parseError) {
-        console.error('Failed to parse server response:', responseText);
-        // Use status text or a generic message if parsing fails
-        throw new Error(`Server returned an unexpected response (${response.status})`);
+        console.error('Failed to parse response:', textResponse);
+        throw new Error('Server returned an invalid response');
       }
 
-      if (!response.ok) {
-         // Prefer backend's error message if available
-         throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
-      }
-
-      // Assuming success if response is ok and has a success message or ID
-      if (data.success === false) { // Handle cases where success might be explicitly false
-          throw new Error(data.message || 'Submission failed.');
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit form');
       }
 
       setStatus('success');
-      setResponseMessage(data.message || 'Message sent successfully!');
-      setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
-
+      setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
       setStatus('error');
-      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setResponseMessage(message);
+      setErrorMessage(error instanceof Error ? error.message : 'Something went wrong');
       console.error('Contact form submission error:', error);
     }
-  };
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Optionally clear error when user starts typing again
-    if (status === 'error') {
-        setStatus('idle');
-        setResponseMessage('');
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
-    // Use padding on the outer div, not inside the card unless needed
-    <div className="min-h-screen flex items-center justify-center pt-20 px-4 pb-12 bg-gradient-to-b from-black via-gray-900 to-black"> {/* Added gradient */}
+    <div className="min-h-screen pt-20 px-4 pb-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        // Increased max-width, let mx-auto center it
-        className="w-full max-w-4xl" // Changed max-w-2xl to max-w-4xl
+        className="max-w-2xl mx-auto"
       >
-        {/* Using Card component parts for better structure (assuming shadcn/ui structure) */}
-        {/* Reduced internal padding, especially horizontal */}
-        <Card className="bg-black/80 border-2 border-matrix-green shadow-lg shadow-matrix-green/20 text-matrix-green font-mono backdrop-blur-sm">
-          <CardHeader className="text-center border-b border-matrix-green/30 pb-4">
-            <CardTitle className="text-3xl md:text-4xl font-bold tracking-wider">CONTACT US</CardTitle>
-             <p className="text-matrix-green/70 text-sm pt-2">Send us a transmission. We'll respond shortly.</p>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8"> {/* Adjusted padding */}
+        <Card className="p-8 px-24 bg-black/90 border border-matrix-green">
+          <h1 className="text-4xl mb-8 text-center text-matrix-green font-mono">CONTACT</h1>
+          
+          {status === 'error' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-6 p-4 border border-red-500 text-red-500 bg-black/50 font-mono"
+            >
+              {errorMessage}
+            </motion.div>
+          )}
 
-            {/* Status Messages */}
-            <AnimatePresence>
-              {status === 'error' && responseMessage && (
-                <motion.div
-                  key="error-message"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-6 p-4 border border-red-500/50 text-red-400 bg-red-900/20 rounded-md flex items-center gap-3"
-                  role="alert"
-                >
-                   <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                  <span>{responseMessage}</span>
-                </motion.div>
-              )}
-              {status === 'success' && responseMessage && (
-                <motion.div
-                  key="success-message"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                   className="mb-6 p-4 border border-matrix-green/50 text-matrix-green bg-green-900/20 rounded-md flex items-center gap-3"
-                  role="alert"
-                >
-                  <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                  <span>{responseMessage}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block mb-2 text-matrix-green font-mono">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                className="w-full bg-black/50 border border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-matrix-green text-matrix-green font-mono"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                maxLength={100}
+                placeholder="Your name"
+              />
+            </div>
 
-            {/* Hide form on success */}
-            {status !== 'success' && (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                 {/* Grid layout for Name and Email on medium screens and up */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div className="space-y-2">
-                       <Label htmlFor="name" className="text-sm font-medium">Name</Label>
-                       <Input
-                         type="text"
-                         id="name"
-                         name="name"
-                         className="bg-black/60 border-matrix-green/50 focus:border-matrix-green focus:ring-matrix-green" // Adjusted styles
-                         value={formData.name}
-                         onChange={handleChange}
-                         required
-                         maxLength={100}
-                         placeholder="Your name"
-                       />
-                     </div>
-                     <div className="space-y-2">
-                         <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                         <Input
-                             type="email"
-                             id="email"
-                             name="email"
-                             className="bg-black/60 border-matrix-green/50 focus:border-matrix-green focus:ring-matrix-green" // Adjusted styles
-                             value={formData.email}
-                             onChange={handleChange}
-                             required
-                             maxLength={100}
-                             placeholder="your.email@example.com"
-                         />
-                     </div>
-                 </div>
+            <div>
+              <label htmlFor="email" className="block mb-2 text-matrix-green font-mono">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="w-full bg-black/50 border border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-matrix-green text-matrix-green font-mono"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                maxLength={100}
+                placeholder="your.email@example.com"
+              />
+            </div>
 
+            <div>
+              <label htmlFor="subject" className="block mb-2 text-matrix-green font-mono">
+                Subject
+              </label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                className="w-full bg-black/50 border border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-matrix-green text-matrix-green font-mono"
+                value={formData.subject}
+                onChange={handleChange}
+                required
+                maxLength={200}
+                placeholder="Message subject"
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
-                  <Input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    className="bg-black/60 border-matrix-green/50 focus:border-matrix-green focus:ring-matrix-green" // Adjusted styles
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    maxLength={200}
-                    placeholder="Message subject"
-                  />
-                </div>
+            <div>
+              <label htmlFor="message" className="block mb-2 text-matrix-green font-mono">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={5}
+                className="w-full bg-black/50 border border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-matrix-green text-matrix-green font-mono resize-none"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                maxLength={5000}
+                placeholder="Your message here..."
+              />
+            </div>
 
-                <div className="space-y-2">
-                   <Label htmlFor="message" className="text-sm font-medium">Message</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    rows={6} // Increased rows
-                    className="bg-black/60 border-matrix-green/50 focus:border-matrix-green focus:ring-matrix-green resize-y" // Allow vertical resize
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    maxLength={5000} // Keep maxLength reasonable
-                    placeholder="Your message here..."
-                  />
-                   {/* Optional: Character counter */}
-                   <p className="text-xs text-right text-matrix-green/60">
-                       {formData.message.length} / 5000 characters
-                   </p>
-                </div>
+            <Button
+              type="submit"
+              disabled={status === 'submitting'}
+              className="w-full bg-matrix-green hover:bg-matrix-green/80 text-black font-mono transition-colors duration-200"
+            >
+              {status === 'submitting' ? 'SENDING...' : 'SEND MESSAGE'}
+            </Button>
 
-                <Button
-                  type="submit"
-                  disabled={status === 'submitting'}
-                  // Consistent button styling
-                   className="w-full bg-matrix-green hover:bg-matrix-green/80 text-black font-bold py-3 px-6 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait" // Added flex for icon
-                >
-                  {status === 'submitting' ? (
-                     <Loader2 className="h-5 w-5 animate-spin" /> // Loading spinner
-                  ) : (
-                     <Send className="h-5 w-5" /> // Send icon
-                  )}
-                  <span>
-                      {status === 'submitting' ? 'SENDING...' : 'SEND MESSAGE'}
-                  </span>
-                </Button>
-              </form>
-             )}
-          </CardContent>
+            {status === 'success' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-4 p-4 border border-matrix-green text-matrix-green bg-black/50 font-mono text-center"
+              >
+                <p>Message sent successfully!</p>
+                <p className="text-sm mt-2">We'll get back to you soon.</p>
+              </motion.div>
+            )}
+          </form>
         </Card>
       </motion.div>
     </div>
