@@ -1,4 +1,3 @@
-// src/components/ui/MatrixLoader.tsx
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -14,7 +13,9 @@ export const MatrixLoader = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
+    // Added pt-20 (adjust this value based on your navbar height)
+    // Kept high z-index
+    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[9999] pt-40"> {/* <-- Added pt-20 (adjust as needed) */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -25,7 +26,7 @@ export const MatrixLoader = () => {
           INITIALIZING SYSTEM
           <span className="inline-block w-16 text-left">{dots}</span>
         </h2>
-        
+
         <div className="w-64 h-2 bg-matrix-dark border border-matrix-green relative">
           <motion.div
             className="absolute top-0 left-0 h-full bg-matrix-green/50"

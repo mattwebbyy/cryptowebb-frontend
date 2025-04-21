@@ -122,56 +122,90 @@ const PricingPage: React.FC = () => {
   useEffect(() => {
     const fetchSubscriptionData = async () => {
       if (!user) {
-        console.log('No user, skipping fetch');
+        console.log('No user logged in, skipping subscription fetch.');
+        setCurrentSubscription(null); // Ensure it's null if no user
         return;
       }
 
+      const token = localStorage.getItem('token');
+      if (!token) {
+          console.warn('No auth token found, cannot fetch subscription.');
+          setCurrentSubscription(null);
+          return;
+      }
+
       try {
-        console.log('Starting subscription fetch...');
+        console.log('Fetching current subscription data...');
         const subResponse = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions`,
+          // *** CORRECTED ENDPOINT ***
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/current`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
-        console.log('Response received:', subResponse.status);
-        const responseText = await subResponse.text();
-        console.log('Raw response:', responseText);
+        console.log('Subscription fetch response status:', subResponse.status);
 
-        if (subResponse.ok) {
-          const data = JSON.parse(responseText);
-          console.log('Parsed data:', data);
-
-          const tier = determineTier(data.plan_id);
-          console.log('Determined tier from price ID:', data.plan_id, '→', tier);
-
-          if (tier) {
-            const subscriptionData = {
-              id: data.id,
-              tier,
-              status: data.status,
-              currentPeriodEnd: data.current_period_end,
-              currentPeriodStart: data.current_period_start,
-              cancelAtPeriodEnd: data.cancel_at_period_end,
-              priceId: data.plan_id,
-            };
-
-            console.log('Setting subscription data:', subscriptionData);
-            setCurrentSubscription(subscriptionData);
-          } else {
-            console.error('Could not determine tier from price ID:', data.plan_id);
-          }
+        // Handle cases where no active subscription is found (e.g., 404)
+        if (subResponse.status === 404) {
+            console.log('No active subscription found for user.');
+            setCurrentSubscription(null);
+            return; // Exit successfully, no active subscription
         }
+
+        // Handle other potential errors
+        if (!subResponse.ok) {
+             const errorText = await subResponse.text();
+             console.error('Subscription fetch failed:', subResponse.status, errorText);
+             // Optionally: toast.error(`Failed to fetch subscription: ${subResponse.status}`);
+             setCurrentSubscription(null); // Set to null on error
+             return; // Exit on error
+        }
+
+        // Parse the successful response
+        const data = await subResponse.json();
+        console.log('Successfully fetched subscription data:', data); // Log the received data
+
+        // *** Add Robust Tier Determination Here (if not done on backend) ***
+        // Replace or augment the existing determineTier logic as discussed previously.
+        // For now, using the existing determineTier as an example:
+        const tier = determineTier(data.plan_id); // data.plan_id is the Stripe Price ID
+        console.log('Determined Tier:', tier);
+
+        if (tier) {
+          // Convert Unix timestamps (assuming backend sends them) to ISO strings or Date objects
+          // GORM/Go often use time.Time, which marshals to RFC3339Nano (ISO8601) by default in JSON
+          const subscriptionData = {
+            id: data.id, // Stripe Subscription ID
+            tier,
+            status: data.status, // e.g., 'active', 'trialing', 'canceled'
+            // Ensure these are valid Date objects or ISO strings
+            currentPeriodEnd: data.current_period_end ? new Date(data.current_period_end * 1000).toISOString() : '',
+            currentPeriodStart: data.current_period_start ? new Date(data.current_period_start * 1000).toISOString() : '',
+            cancelAtPeriodEnd: data.cancel_at_period_end,
+            priceId: data.plan_id,
+            // Add trial_end if backend sends it
+            trialEnd: data.trial_end ? new Date(data.trial_end * 1000).toISOString() : null,
+          };
+          console.log('Setting current subscription:', subscriptionData);
+          setCurrentSubscription(subscriptionData);
+        } else {
+          console.error('Could not determine plan tier from price ID:', data.plan_id);
+          setCurrentSubscription(null); // Set null if tier determination fails
+        }
+
       } catch (error) {
-        console.error('Subscription fetch error:', error);
+        console.error('Subscription fetch network/parsing error:', error);
+        // Optionally: toast.error('Error fetching subscription details.');
+        setCurrentSubscription(null); // Set to null on error
       }
     };
 
     fetchSubscriptionData();
-  }, [user]);
+  }, [user]); // Re-fetch when user logs in/out
+
 
   useEffect(() => {
     console.log('Current subscription state:', currentSubscription);
@@ -188,34 +222,66 @@ const PricingPage: React.FC = () => {
       }
     : null;
 
-  const handleCancelSubscription = async () => {
-    try {
-      setIsProcessing(true);
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/${currentSubscription?.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to cancel subscription');
+    const handleCancelSubscription = async () => {
+      // Ensure we have a subscription to cancel
+      if (!currentSubscription) {
+        toast.error('No active subscription found to cancel.');
+        return;
       }
-
-      toast.success('Subscription cancelled successfully');
-      setShowCancelModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error('Cancel error:', error);
-      toast.error('Failed to cancel subscription');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
+  
+      setIsProcessing(true); // Indicate processing starts
+  
+      try {
+        // Send the DELETE request to the backend
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/${currentSubscription.id}`, // Use the ID from state
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+  
+        // Check if the backend request itself failed
+        if (!response.ok) {
+          let errorMsg = 'Failed to request subscription cancellation.';
+          try {
+              const body = await response.json();
+              errorMsg = body.error || body.message || errorMsg;
+          } catch(e) {
+              // Ignore parsing error if body is not JSON or empty
+              console.warn("Could not parse error response from cancellation endpoint.");
+          }
+          throw new Error(errorMsg);
+        }
+  
+        // --- SUCCESS ---
+        toast.success('Subscription cancellation scheduled successfully!');
+        setShowCancelModal(false);
+  
+        // *** Update Frontend State Immediately ***
+        // Update the local state to reflect cancellation pending at period end
+        setCurrentSubscription(prevSub => {
+            if (!prevSub) return null;
+            // Return a new object with the updated property
+            return {
+                ...prevSub,
+                cancelAtPeriodEnd: true, // Set this immediately in the UI state
+            };
+        });
+  
+        // *** REMOVED: window.location.reload(); ***
+        // The state update above will trigger a re-render
+  
+      } catch (error) {
+        console.error('Cancel error:', error);
+        const message = error instanceof Error ? error.message : 'Failed to cancel subscription';
+        toast.error(message);
+      } finally {
+        setIsProcessing(false); // Indicate processing finished
+      }
+    };
   const handleChangePlan = async () => {
     if (!selectedPlan) return;
 
