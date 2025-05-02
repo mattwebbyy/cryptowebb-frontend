@@ -86,30 +86,34 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-
 const About = () => {
-
   // Define the full sequence of text for height calculation and animation
   const fullTextSequence = [
     "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.",
-    "This terminal provides high-fidelity insights derived from complex data streams across the digital ether.",
+    'This terminal provides high-fidelity insights derived from complex data streams across the digital ether.',
     `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.`,
     `Data integrity is paramount; all feeds are cross-referenced and validated against decentralized oracles.`,
     `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.`,
-    `Remember, the data flows constantly; adapt or be deprecated.`
+    `Remember, the data flows constantly; adapt or be deprecated.`,
   ].join('\n'); // Join with newlines to mimic final structure
 
   // Create the sequence array for TypeAnimation
   const animationSequence = [
-    "Welcome, operator.", 1000,
-    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.", 1000,
-    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.\nThis terminal provides high-fidelity insights derived from complex data streams across the digital ether.", 2000,
-    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.`, 1500,
-    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.\nData integrity is paramount; all feeds are cross-referenced and validated against decentralized oracles.`, 2500,
-    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.`, 1500,
-    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.\nRemember, the data flows constantly; adapt or be deprecated.`, 5000,
+    'Welcome, operator.',
+    1000,
+    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.",
+    1000,
+    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.\nThis terminal provides high-fidelity insights derived from complex data streams across the digital ether.",
+    2000,
+    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.`,
+    1500,
+    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.\nData integrity is paramount; all feeds are cross-referenced and validated against decentralized oracles.`,
+    2500,
+    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.`,
+    1500,
+    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.\nRemember, the data flows constantly; adapt or be deprecated.`,
+    5000,
   ];
-
 
   return (
     <div className="min-h-screen flex items-center justify-center pt-20 px-4 pb-12">
@@ -120,7 +124,6 @@ const About = () => {
         className="w-full max-w-4xl"
       >
         <Card className="bg-black/80 border-2 border-matrix-green shadow-lg shadow-matrix-green/20 text-matrix-green font-mono backdrop-blur-sm p-6 md:p-8 overflow-hidden">
-
           {/* Title */}
           <motion.h1
             variants={itemVariants}
@@ -143,7 +146,7 @@ const About = () => {
           >
             {/* Hidden text block to establish the full height needed */}
             <p className="invisible h-0 overflow-hidden whitespace-pre-line" aria-hidden="true">
-                {fullTextSequence}
+              {fullTextSequence}
             </p>
 
             {/* Typing Animation */}
@@ -161,12 +164,12 @@ const About = () => {
           {/* Matrix System Info Art */}
 
           {/* Footer line */}
-           <motion.p
-              variants={itemVariants}
-              className="text-matrix-green/60 text-xs md:text-sm border-t border-matrix-green/30 pt-4 mt-8"
-           >
-              // System Version: 3.14.1-GAMMA // Secure Connection Established // END_OF_TRANSMISSION
-           </motion.p>
+          <motion.p
+            variants={itemVariants}
+            className="text-matrix-green/60 text-xs md:text-sm border-t border-matrix-green/30 pt-4 mt-8"
+          >
+            // System Version: 3.14.1-GAMMA // Secure Connection Established // END_OF_TRANSMISSION
+          </motion.p>
         </Card>
       </motion.div>
     </div>

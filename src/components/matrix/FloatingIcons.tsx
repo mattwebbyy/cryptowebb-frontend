@@ -20,19 +20,19 @@ export const FloatingIcons = () => {
       const startY = Math.random() * window.innerHeight;
       const moveX = (Math.random() - 0.5) * 200;
       const moveY = (Math.random() - 0.5) * 200;
-      
+
       const newIcon: FloatingIcon = {
         id,
         symbol: matrixSymbols[Math.floor(Math.random() * matrixSymbols.length)],
         x: startX,
         y: startY,
         moveX,
-        moveY
+        moveY,
       };
 
-      setIcons(prev => [...prev, newIcon]);
+      setIcons((prev) => [...prev, newIcon]);
       setTimeout(() => {
-        setIcons(prev => prev.filter(icon => icon.id !== id));
+        setIcons((prev) => prev.filter((icon) => icon.id !== id));
       }, 20000);
     };
 
@@ -42,16 +42,18 @@ export const FloatingIcons = () => {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-[1]">
-      {icons.map(icon => (
+      {icons.map((icon) => (
         <div
           key={icon.id}
           className="absolute text-2xl opacity-30 float"
-          style={{
-            left: `${icon.x}px`,
-            top: `${icon.y}px`,
-            '--moveX': `${icon.moveX}px`,
-            '--moveY': `${icon.moveY}px`
-          } as React.CSSProperties}
+          style={
+            {
+              left: `${icon.x}px`,
+              top: `${icon.y}px`,
+              '--moveX': `${icon.moveX}px`,
+              '--moveY': `${icon.moveY}px`,
+            } as React.CSSProperties
+          }
         >
           {icon.symbol}
         </div>

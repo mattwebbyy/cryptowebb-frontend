@@ -1,4 +1,3 @@
-
 // src/components/matrix/Terminal.tsx
 import { motion } from 'framer-motion';
 

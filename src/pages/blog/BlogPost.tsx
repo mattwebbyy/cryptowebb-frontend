@@ -38,7 +38,7 @@ interface CodeProps {
   children?: React.ReactNode;
 }
 
- function BlogPost() {
+function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const [tableOfContents, setTableOfContents] = useState<TableOfContentsItem[]>([]);
@@ -53,7 +53,7 @@ interface CodeProps {
       );
       return response.data;
     },
-    enabled: !!slug
+    enabled: !!slug,
   });
 
   // Fetch related posts
@@ -61,18 +61,15 @@ interface CodeProps {
     queryKey: ['related-blogs', post?.id, post?.tags],
     queryFn: async () => {
       if (!post?.id || !post?.tags.length) return [];
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/related`,
-        {
-          params: {
-            tags: post.tags.join(','),
-            postId: post.id
-          }
-        }
-      );
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/related`, {
+        params: {
+          tags: post.tags.join(','),
+          postId: post.id,
+        },
+      });
       return response.data.posts || [];
     },
-    enabled: !!post?.id && !!post?.tags.length
+    enabled: !!post?.id && !!post?.tags.length,
   });
 
   // Generate table of contents from markdown content
@@ -80,7 +77,7 @@ interface CodeProps {
     if (post?.content) {
       const headers: TableOfContentsItem[] = [];
       const lines = post.content.split('\n');
-      
+
       lines.forEach((line) => {
         const match = line.match(/^(#{1,3})\s+(.+)$/);
         if (match) {
@@ -90,7 +87,7 @@ interface CodeProps {
           headers.push({ id, title, level });
         }
       });
-      
+
       setTableOfContents(headers);
     }
   }, [post?.content]);
@@ -131,8 +128,8 @@ interface CodeProps {
           <div className="text-center">
             <h2 className="text-2xl font-mono text-matrix-green">Post not found</h2>
             <p className="mt-2 text-gray-400">The blog post you're looking for doesn't exist.</p>
-            <Link 
-              to="/blog" 
+            <Link
+              to="/blog"
               className="mt-4 inline-block text-matrix-green hover:text-matrix-green/80 font-mono"
             >
               ← Return to blog list
@@ -146,7 +143,7 @@ interface CodeProps {
   const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
   return (
     <>
@@ -173,11 +170,7 @@ interface CodeProps {
           {/* Hero Image Section */}
           {post.image_url && (
             <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
-              <img
-                src={post.image_url}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
+              <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8">
                 <h1 className="text-5xl font-mono text-white mb-4">{post.title}</h1>
@@ -210,9 +203,7 @@ interface CodeProps {
                         <a
                           key={id}
                           href={`#${id}`}
-                          className={`block text-sm ${
-                            level > 1 ? 'pl-' + (level - 1) * 2 : ''
-                          } ${
+                          className={`block text-sm ${level > 1 ? 'pl-' + (level - 1) * 2 : ''} ${
                             activeSection === id
                               ? 'text-matrix-green'
                               : 'text-gray-400 hover:text-matrix-green/80'
@@ -260,45 +251,65 @@ interface CodeProps {
                   rehypePlugins={[rehypeRaw]}
                   className="text-gray-300"
                   components={{
-                    h1: ({node, ...props}) => (
-                      <h1 id={props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-')} className="text-matrix-green font-mono text-3xl mt-8 mb-4" {...props} />
+                    h1: ({ node, ...props }) => (
+                      <h1
+                        id={props.children
+                          ?.toString()
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')}
+                        className="text-matrix-green font-mono text-3xl mt-8 mb-4"
+                        {...props}
+                      />
                     ),
-                    h2: ({node, ...props}) => (
-                      <h2 id={props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-')} className="text-matrix-green font-mono text-2xl mt-6 mb-3" {...props} />
+                    h2: ({ node, ...props }) => (
+                      <h2
+                        id={props.children
+                          ?.toString()
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')}
+                        className="text-matrix-green font-mono text-2xl mt-6 mb-3"
+                        {...props}
+                      />
                     ),
-                    h3: ({node, ...props}) => (
-                      <h3 id={props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-')} className="text-matrix-green font-mono text-xl mt-4 mb-2" {...props} />
+                    h3: ({ node, ...props }) => (
+                      <h3
+                        id={props.children
+                          ?.toString()
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')}
+                        className="text-matrix-green font-mono text-xl mt-4 mb-2"
+                        {...props}
+                      />
                     ),
-                    p: ({node, ...props}) => (
-                      <p className="text-gray-300 mb-4" {...props} />
-                    ),
-                    a: ({node, ...props}) => (
-                      <a 
+                    p: ({ node, ...props }) => <p className="text-gray-300 mb-4" {...props} />,
+                    a: ({ node, ...props }) => (
+                      <a
                         className="text-matrix-green hover:text-matrix-green/80 underline"
                         target="_blank"
                         rel="noopener noreferrer"
                         {...props}
                       />
                     ),
-                    ul: ({node, ...props}) => (
+                    ul: ({ node, ...props }) => (
                       <ul className="list-disc list-inside mb-4 text-gray-300" {...props} />
                     ),
-                    ol: ({node, ...props}) => (
+                    ol: ({ node, ...props }) => (
                       <ol className="list-decimal list-inside mb-4 text-gray-300" {...props} />
                     ),
-                    li: ({node, ...props}) => (
-                      <li className="mb-1" {...props} />
-                    ),
-                    blockquote: ({node, ...props}) => (
-                      <blockquote 
+                    li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote
                         className="border-l-4 border-matrix-green pl-4 my-4 italic text-gray-400"
                         {...props}
                       />
                     ),
-                    code: ({node, inline, className, children, ...props}: CodeProps) => {
+                    code: ({ node, inline, className, children, ...props }: CodeProps) => {
                       if (inline) {
                         return (
-                          <code className="bg-black/50 text-matrix-green px-1 rounded font-mono" {...props}>
+                          <code
+                            className="bg-black/50 text-matrix-green px-1 rounded font-mono"
+                            {...props}
+                          >
                             {children}
                           </code>
                         );
@@ -311,27 +322,33 @@ interface CodeProps {
                         </div>
                       );
                     },
-                    pre: ({node, ...props}) => (
-                      <pre className="w-full overflow-x-auto bg-black/50 border border-matrix-green p-4 rounded-lg mb-4" {...props} />
+                    pre: ({ node, ...props }) => (
+                      <pre
+                        className="w-full overflow-x-auto bg-black/50 border border-matrix-green p-4 rounded-lg mb-4"
+                        {...props}
+                      />
                     ),
-                    img: ({node, ...props}) => (
-                      <img 
+                    img: ({ node, ...props }) => (
+                      <img
                         className="max-w-full h-auto rounded-lg border border-matrix-green/50"
                         {...props}
                       />
                     ),
-                    hr: ({node, ...props}) => (
+                    hr: ({ node, ...props }) => (
                       <hr className="border-matrix-green/30 my-8" {...props} />
                     ),
-                    table: ({node, ...props}) => (
+                    table: ({ node, ...props }) => (
                       <div className="overflow-x-auto mb-4">
                         <table className="min-w-full border border-matrix-green/30" {...props} />
                       </div>
                     ),
-                    th: ({node, ...props}) => (
-                      <th className="border border-matrix-green/30 p-2 bg-matrix-green/10 text-matrix-green font-mono" {...props} />
+                    th: ({ node, ...props }) => (
+                      <th
+                        className="border border-matrix-green/30 p-2 bg-matrix-green/10 text-matrix-green font-mono"
+                        {...props}
+                      />
                     ),
-                    td: ({node, ...props}) => (
+                    td: ({ node, ...props }) => (
                       <td className="border border-matrix-green/30 p-2 text-gray-300" {...props} />
                     ),
                   }}
@@ -360,11 +377,7 @@ interface CodeProps {
                   <h2 className="text-2xl font-mono text-matrix-green mb-6">Related Posts</h2>
                   <div className="grid md:grid-cols-3 gap-6">
                     {relatedPosts.map((relatedPost) => (
-                      <Link
-                        key={relatedPost.id}
-                        to={`/blog/${relatedPost.slug}`}
-                        className="group"
-                      >
+                      <Link key={relatedPost.id} to={`/blog/${relatedPost.slug}`} className="group">
                         <Card className="h-full bg-black/50 border border-matrix-green/50 hover:border-matrix-green transition-colors duration-200">
                           {relatedPost.image_url && (
                             <div className="h-48 overflow-hidden">
@@ -392,8 +405,8 @@ interface CodeProps {
 
               {/* Navigation */}
               <div className="mt-12 pt-8 border-t border-matrix-green/30 flex justify-between items-center">
-                <Link 
-                  to="/blog" 
+                <Link
+                  to="/blog"
                   className="flex items-center gap-2 text-matrix-green hover:text-matrix-green/80 font-mono group"
                 >
                   <ChevronLeft className="transition-transform group-hover:-translate-x-1" />
@@ -402,7 +415,10 @@ interface CodeProps {
                 <div className="flex gap-4">
                   {user?.role === 'admin' && (
                     <Link to={`/dashboard/blog/edit/${post.id}`}>
-                      <Button variant="outline" className="border-matrix-green text-matrix-green hover:bg-matrix-green/20">
+                      <Button
+                        variant="outline"
+                        className="border-matrix-green text-matrix-green hover:bg-matrix-green/20"
+                      >
                         Edit Post
                       </Button>
                     </Link>

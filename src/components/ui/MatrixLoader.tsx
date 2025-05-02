@@ -6,7 +6,7 @@ export const MatrixLoader = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDots(prev => prev.length >= 3 ? '' : prev + '.');
+      setDots((prev) => (prev.length >= 3 ? '' : prev + '.'));
     }, 500);
 
     return () => clearInterval(interval);
@@ -15,14 +15,18 @@ export const MatrixLoader = () => {
   return (
     // Added pt-20 (adjust this value based on your navbar height)
     // Kept high z-index
-    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[9999] pt-40"> {/* <-- Added pt-20 (adjust as needed) */}
+    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[9999] pt-40">
+      {' '}
+      {/* <-- Added pt-20 (adjust as needed) */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h2 className="text-2xl mb-4 font-mono text-matrix-green"
-            style={{ textShadow: '0 0 10px #33ff33' }}>
+        <h2
+          className="text-2xl mb-4 font-mono text-matrix-green"
+          style={{ textShadow: '0 0 10px #33ff33' }}
+        >
           INITIALIZING SYSTEM
           <span className="inline-block w-16 text-left">{dots}</span>
         </h2>
@@ -35,7 +39,7 @@ export const MatrixLoader = () => {
             transition={{
               duration: 2,
               repeat: Infinity,
-              ease: 'linear'
+              ease: 'linear',
             }}
           />
         </div>

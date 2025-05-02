@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -18,8 +15,8 @@ export default {
       },
       animation: {
         'matrix-rain': 'matrix-rain 20s linear infinite',
-        'float': 'float 20s linear infinite',
-        'glitch': 'glitch 1s ease-in-out infinite',
+        float: 'float 20s linear infinite',
+        glitch: 'glitch 1s ease-in-out infinite',
         'fade-in': 'fadeIn 0.5s ease-in forwards',
         'slide-up': 'slideUp 0.5s ease-out forwards',
       },
@@ -60,4 +57,4 @@ export default {
       className: 'prose', // This is important
     }),
   ],
-}
+};

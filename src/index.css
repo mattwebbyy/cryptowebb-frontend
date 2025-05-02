@@ -13,8 +13,14 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes glitchIn {
@@ -26,13 +32,19 @@ body {
   10% {
     opacity: 0.3;
     transform: translateX(10px);
-    text-shadow: -2px 0 #ff0000, 2px 2px #0000ff;
+    text-shadow:
+      -2px 0 #ff0000,
+      2px 2px #0000ff;
   }
   20% {
     transform: translateX(-5px);
-    text-shadow: 2px -2px #ff0000, -2px 2px #0000ff;
+    text-shadow:
+      2px -2px #ff0000,
+      -2px 2px #0000ff;
   }
-  30% { transform: translateX(5px); }
+  30% {
+    transform: translateX(5px);
+  }
   40% {
     transform: translateX(0);
     text-shadow: none;
@@ -56,7 +68,9 @@ body {
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes float {
@@ -64,8 +78,12 @@ body {
     transform: translate(0, 0) rotate(0deg);
     opacity: 0;
   }
-  10% { opacity: 0.3; }
-  90% { opacity: 0.3; }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
   100% {
     transform: translate(var(--moveX), var(--moveY)) rotate(360deg);
     opacity: 0;
@@ -92,12 +110,13 @@ body {
   animation: float 20s linear infinite;
 }
 
-
 .w-md-editor {
   background-color: transparent !important;
 }
 
-.w-md-editor-text-pre, .w-md-editor-text-input, .w-md-editor-text {
+.w-md-editor-text-pre,
+.w-md-editor-text-input,
+.w-md-editor-text {
   color: #00ff00 !important;
   font-family: monospace !important;
 }

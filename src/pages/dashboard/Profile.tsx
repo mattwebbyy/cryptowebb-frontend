@@ -57,7 +57,7 @@ const Profile = () => {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       credentials: 'include',
     });
@@ -68,7 +68,7 @@ const Profile = () => {
       try {
         const response = await makeAuthRequest('/api/v1/users/me');
         if (!response.ok) throw new Error('Failed to load profile');
-        
+
         const data = await response.json();
         setProfileData({
           firstName: data.firstName || '',
@@ -88,12 +88,12 @@ const Profile = () => {
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({ ...prev, [name]: value }));
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({ ...prev, [name]: value }));
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarClick = () => {
@@ -107,62 +107,62 @@ const Profile = () => {
     // Add file size check
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
-        toast.error('File size must be less than 5MB');
-        return;
+      toast.error('File size must be less than 5MB');
+      return;
     }
 
     // Add file type check
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-        toast.error('Only JPEG, PNG and WEBP files are allowed');
-        return;
+      toast.error('Only JPEG, PNG and WEBP files are allowed');
+      return;
     }
 
     try {
-        setStatus('submitting');
+      setStatus('submitting');
 
-        // Convert file to base64
-        const base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
+      // Convert file to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
 
-        const response = await makeAuthRequest('/api/v1/users/me/avatar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                avatar: base64,
-                fileName: file.name
-            }),
-        });
+      const response = await makeAuthRequest('/api/v1/users/me/avatar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avatar: base64,
+          fileName: file.name,
+        }),
+      });
 
-        let data;
-        const responseText = await response.text();
-        try {
-            data = responseText ? JSON.parse(responseText) : null;
-        } catch (e) {
-            console.error('Failed to parse response:', responseText);
-            throw new Error('Invalid server response');
-        }
+      let data;
+      const responseText = await response.text();
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch (e) {
+        console.error('Failed to parse response:', responseText);
+        throw new Error('Invalid server response');
+      }
 
-        if (!response.ok) {
-            throw new Error(data?.error || 'Failed to upload avatar');
-        }
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to upload avatar');
+      }
 
-        toast.success('Avatar uploaded successfully');
-        // Update the avatar URL state
-        if (data?.avatarUrl) {
-            setAvatarUrl(data.avatarUrl);
-        }
+      toast.success('Avatar uploaded successfully');
+      // Update the avatar URL state
+      if (data?.avatarUrl) {
+        setAvatarUrl(data.avatarUrl);
+      }
     } catch (error) {
-        console.error('Avatar upload error:', error);
-        toast.error(error instanceof Error ? error.message : 'Failed to upload avatar');
+      console.error('Avatar upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload avatar');
     } finally {
-        setStatus('idle');
+      setStatus('idle');
     }
   };
 
@@ -249,11 +249,7 @@ const Profile = () => {
               className="w-24 h-24 rounded-full bg-matrix-green/20 border-2 border-matrix-green flex items-center justify-center cursor-pointer hover:bg-matrix-green/30 transition-colors overflow-hidden"
             >
               {avatarUrl ? (
-                <img 
-                  src={avatarUrl} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
+                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <Camera className="w-8 h-8 text-matrix-green" />
               )}

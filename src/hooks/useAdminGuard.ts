@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth';
 
 export const useAdminGuard = () => {
-    const { user, isLoading } = useAuth();
-    const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!isLoading && (!user || user.role !== 'admin')) {
-            navigate('/blog');
-        }
-    }, [user, isLoading, navigate]);
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'admin')) {
+      navigate('/blog');
+    }
+  }, [user, isLoading, navigate]);
 
-    return { isAdmin: user?.role === 'admin', isLoading };
+  return { isAdmin: user?.role === 'admin', isLoading };
 };

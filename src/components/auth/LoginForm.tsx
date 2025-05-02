@@ -57,13 +57,16 @@ export const LoginForm = () => {
       const handleGoogleCallback = async () => {
         try {
           console.log('Handling Google callback with code:', code);
-          const response = await fetch(`http://localhost:8080/api/v1/auth/google/callback?code=${code}`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-          });
+          const response = await fetch(
+            `http://localhost:8080/api/v1/auth/google/callback?code=${code}`,
+            {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
           if (!response.ok) {
             const errorData = await response.json();
@@ -142,9 +145,7 @@ export const LoginForm = () => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-lg w-full p-8 border border-matrix-green bg-black/30 shadow-lg"
     >
-      <h2 className="text-3xl mb-8 text-center text-matrix-green font-bold px-16">
-        System Login
-      </h2>
+      <h2 className="text-3xl mb-8 text-center text-matrix-green font-bold px-16">System Login</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <input

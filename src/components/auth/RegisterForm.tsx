@@ -18,7 +18,7 @@ export const RegisterForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       const response = await fetch('http://localhost:8080/api/v1/auth/register', {
         method: 'POST',
@@ -34,7 +34,7 @@ export const RegisterForm = () => {
 
       // Display a success toast notification
       toast.success('Registered successfully!', {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000, // 3 seconds
         hideProgressBar: false,
         closeOnClick: true,
@@ -46,7 +46,6 @@ export const RegisterForm = () => {
       setTimeout(() => {
         navigate('/login');
       }, 500);
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     }
@@ -58,9 +57,7 @@ export const RegisterForm = () => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md w-full p-6 border border-matrix-green bg-black/30"
     >
-      <h2 className="text-2xl mb-6 text-center text-matrix-green">
-        Initialize New Account
-      </h2>
+      <h2 className="text-2xl mb-6 text-center text-matrix-green">Initialize New Account</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -69,9 +66,7 @@ export const RegisterForm = () => {
               placeholder="First Name"
               className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
               value={formData.firstName}
-              onChange={(e) =>
-                setFormData({ ...formData, firstName: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
             />
           </div>
           <div>
@@ -80,9 +75,7 @@ export const RegisterForm = () => {
               placeholder="Last Name"
               className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
               value={formData.lastName}
-              onChange={(e) =>
-                setFormData({ ...formData, lastName: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
             />
           </div>
         </div>
@@ -93,9 +86,7 @@ export const RegisterForm = () => {
             placeholder="Email"
             className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
         </div>
 
@@ -105,9 +96,7 @@ export const RegisterForm = () => {
             placeholder="Password"
             className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
             value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
         </div>
 

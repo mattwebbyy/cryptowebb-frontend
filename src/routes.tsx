@@ -72,9 +72,7 @@ export function Routes() {
           <Route path="datasources" element={<DatasourceManager />} />
           <Route path="manage" element={<DashboardManager />} />
           <Route path="cipher-matrix" element={<CipherMatrix />} />
-
         </Route>
-
       </RouterRoutes>
     </Suspense>
   );

@@ -18,7 +18,7 @@ const fetchProfile = async (): Promise<Profile> => {
   const response = await fetch('http://localhost:8080/api/v1/users/me', {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
   if (!response.ok) {
@@ -29,7 +29,11 @@ const fetchProfile = async (): Promise<Profile> => {
 };
 
 const Dashboard = () => {
-  const { data: profile, isLoading, error } = useQuery<Profile>({
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useQuery<Profile>({
     queryKey: ['profile'],
     queryFn: fetchProfile,
   });
@@ -40,9 +44,7 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="p-6 text-red-500">
-        Error loading profile: {(error as Error).message}
-      </div>
+      <div className="p-6 text-red-500">Error loading profile: {(error as Error).message}</div>
     );
   }
 

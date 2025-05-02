@@ -8,9 +8,9 @@ export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 // Request Interceptor: Inject Authorization Token
@@ -23,7 +23,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error("Axios Request Error:", error);
+    console.error('Axios Request Error:', error);
     return Promise.reject(error);
   }
 );
@@ -32,7 +32,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => {
     // *** IMPORTANT: Explicitly return response.data here ***
-    return response.data; 
+    return response.data;
   },
   (error) => {
     let errorMessage = 'An unexpected error occurred';
@@ -42,25 +42,27 @@ apiClient.interceptors.response.use(
       // Server responded with a status code outside 2xx range
       errorCode = error.response.status;
       console.error(`API Error Response (Status ${errorCode}):`, error.response.data);
-      errorMessage = error.response.data?.error || error.response.data?.message || `Request failed with status ${errorCode}`;
+      errorMessage =
+        error.response.data?.error ||
+        error.response.data?.message ||
+        `Request failed with status ${errorCode}`;
 
       if (errorCode === 401) {
-        errorMessage = "Session expired or invalid. Please log in again.";
+        errorMessage = 'Session expired or invalid. Please log in again.';
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user'); 
+        localStorage.removeItem('user');
         setTimeout(() => {
           if (window.location.pathname !== '/login') {
-             window.location.href = '/login';
+            window.location.href = '/login';
           }
         }, 1500);
       } else if (errorCode === 403) {
-         errorMessage = "Permission denied.";
-      } 
+        errorMessage = 'Permission denied.';
+      }
       toast.error(errorMessage);
-
     } else if (error.request) {
-      console.error("API No Response Error:", error.request);
+      console.error('API No Response Error:', error.request);
       errorMessage = 'Network error or server unavailable.';
       toast.error(errorMessage);
     } else {

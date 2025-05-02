@@ -16,7 +16,9 @@ const NotFound = () => {
         </h1>
         <p className="text-2xl mb-8">SYSTEM ERROR: Path Not Found</p>
         <div className="space-y-4">
-          <p className="text-matrix-green/70">The requested path has been disconnected from the Matrix.</p>
+          <p className="text-matrix-green/70">
+            The requested path has been disconnected from the Matrix.
+          </p>
           <Link
             to="/"
             className="matrix-button inline-block hover:bg-matrix-green hover:text-black transition-colors"

@@ -98,14 +98,14 @@ const PricingPage: React.FC = () => {
   const determineTier = (priceId: string): PlanTier | null => {
     const id = priceId.toLowerCase();
     const priceMap: Record<string, PlanTier> = {
-      'price_1qoar4ehgug1cYsgzmwqvzsn': 'basic',
-      'price_1qojfhehgug1cysgsovk83rz': 'basic',
-      'price_1qojgeehgug1cysga6vrix4o': 'basic',
-      'price_1qoas7ehgug1cysg0pybroux': 'pro',
-      'price_1qojilehgug1cysghjvxwsbz': 'pro',
-      'price_1qojjpehgug1cysgchmvtzsw': 'enterprise',
-      'price_1qojjsehgug1cysgzaa4stjq': 'enterprise',
-      'price_1qojkmehgug1cysgjllrgpov': 'enterprise',
+      price_1qoar4ehgug1cYsgzmwqvzsn: 'basic',
+      price_1qojfhehgug1cysgsovk83rz: 'basic',
+      price_1qojgeehgug1cysga6vrix4o: 'basic',
+      price_1qoas7ehgug1cysg0pybroux: 'pro',
+      price_1qojilehgug1cysghjvxwsbz: 'pro',
+      price_1qojjpehgug1cysgchmvtzsw: 'enterprise',
+      price_1qojjsehgug1cysgzaa4stjq: 'enterprise',
+      price_1qojkmehgug1cysgjllrgpov: 'enterprise',
     };
 
     const normalizedId = priceId.toLowerCase().replace(/[_-]/g, '');
@@ -129,9 +129,9 @@ const PricingPage: React.FC = () => {
 
       const token = localStorage.getItem('token');
       if (!token) {
-          console.warn('No auth token found, cannot fetch subscription.');
-          setCurrentSubscription(null);
-          return;
+        console.warn('No auth token found, cannot fetch subscription.');
+        setCurrentSubscription(null);
+        return;
       }
 
       try {
@@ -150,18 +150,18 @@ const PricingPage: React.FC = () => {
 
         // Handle cases where no active subscription is found (e.g., 404)
         if (subResponse.status === 404) {
-            console.log('No active subscription found for user.');
-            setCurrentSubscription(null);
-            return; // Exit successfully, no active subscription
+          console.log('No active subscription found for user.');
+          setCurrentSubscription(null);
+          return; // Exit successfully, no active subscription
         }
 
         // Handle other potential errors
         if (!subResponse.ok) {
-             const errorText = await subResponse.text();
-             console.error('Subscription fetch failed:', subResponse.status, errorText);
-             // Optionally: toast.error(`Failed to fetch subscription: ${subResponse.status}`);
-             setCurrentSubscription(null); // Set to null on error
-             return; // Exit on error
+          const errorText = await subResponse.text();
+          console.error('Subscription fetch failed:', subResponse.status, errorText);
+          // Optionally: toast.error(`Failed to fetch subscription: ${subResponse.status}`);
+          setCurrentSubscription(null); // Set to null on error
+          return; // Exit on error
         }
 
         // Parse the successful response
@@ -182,8 +182,12 @@ const PricingPage: React.FC = () => {
             tier,
             status: data.status, // e.g., 'active', 'trialing', 'canceled'
             // Ensure these are valid Date objects or ISO strings
-            currentPeriodEnd: data.current_period_end ? new Date(data.current_period_end * 1000).toISOString() : '',
-            currentPeriodStart: data.current_period_start ? new Date(data.current_period_start * 1000).toISOString() : '',
+            currentPeriodEnd: data.current_period_end
+              ? new Date(data.current_period_end * 1000).toISOString()
+              : '',
+            currentPeriodStart: data.current_period_start
+              ? new Date(data.current_period_start * 1000).toISOString()
+              : '',
             cancelAtPeriodEnd: data.cancel_at_period_end,
             priceId: data.plan_id,
             // Add trial_end if backend sends it
@@ -195,7 +199,6 @@ const PricingPage: React.FC = () => {
           console.error('Could not determine plan tier from price ID:', data.plan_id);
           setCurrentSubscription(null); // Set null if tier determination fails
         }
-
       } catch (error) {
         console.error('Subscription fetch network/parsing error:', error);
         // Optionally: toast.error('Error fetching subscription details.');
@@ -205,7 +208,6 @@ const PricingPage: React.FC = () => {
 
     fetchSubscriptionData();
   }, [user]); // Re-fetch when user logs in/out
-
 
   useEffect(() => {
     console.log('Current subscription state:', currentSubscription);
@@ -222,66 +224,65 @@ const PricingPage: React.FC = () => {
       }
     : null;
 
-    const handleCancelSubscription = async () => {
-      // Ensure we have a subscription to cancel
-      if (!currentSubscription) {
-        toast.error('No active subscription found to cancel.');
-        return;
-      }
-  
-      setIsProcessing(true); // Indicate processing starts
-  
-      try {
-        // Send the DELETE request to the backend
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/${currentSubscription.id}`, // Use the ID from state
-          {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
-  
-        // Check if the backend request itself failed
-        if (!response.ok) {
-          let errorMsg = 'Failed to request subscription cancellation.';
-          try {
-              const body = await response.json();
-              errorMsg = body.error || body.message || errorMsg;
-          } catch(e) {
-              // Ignore parsing error if body is not JSON or empty
-              console.warn("Could not parse error response from cancellation endpoint.");
-          }
-          throw new Error(errorMsg);
+  const handleCancelSubscription = async () => {
+    // Ensure we have a subscription to cancel
+    if (!currentSubscription) {
+      toast.error('No active subscription found to cancel.');
+      return;
+    }
+
+    setIsProcessing(true); // Indicate processing starts
+
+    try {
+      // Send the DELETE request to the backend
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/${currentSubscription.id}`, // Use the ID from state
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         }
-  
-        // --- SUCCESS ---
-        toast.success('Subscription cancellation scheduled successfully!');
-        setShowCancelModal(false);
-  
-        // *** Update Frontend State Immediately ***
-        // Update the local state to reflect cancellation pending at period end
-        setCurrentSubscription(prevSub => {
-            if (!prevSub) return null;
-            // Return a new object with the updated property
-            return {
-                ...prevSub,
-                cancelAtPeriodEnd: true, // Set this immediately in the UI state
-            };
-        });
-  
-        // *** REMOVED: window.location.reload(); ***
-        // The state update above will trigger a re-render
-  
-      } catch (error) {
-        console.error('Cancel error:', error);
-        const message = error instanceof Error ? error.message : 'Failed to cancel subscription';
-        toast.error(message);
-      } finally {
-        setIsProcessing(false); // Indicate processing finished
+      );
+
+      // Check if the backend request itself failed
+      if (!response.ok) {
+        let errorMsg = 'Failed to request subscription cancellation.';
+        try {
+          const body = await response.json();
+          errorMsg = body.error || body.message || errorMsg;
+        } catch (e) {
+          // Ignore parsing error if body is not JSON or empty
+          console.warn('Could not parse error response from cancellation endpoint.');
+        }
+        throw new Error(errorMsg);
       }
-    };
+
+      // --- SUCCESS ---
+      toast.success('Subscription cancellation scheduled successfully!');
+      setShowCancelModal(false);
+
+      // *** Update Frontend State Immediately ***
+      // Update the local state to reflect cancellation pending at period end
+      setCurrentSubscription((prevSub) => {
+        if (!prevSub) return null;
+        // Return a new object with the updated property
+        return {
+          ...prevSub,
+          cancelAtPeriodEnd: true, // Set this immediately in the UI state
+        };
+      });
+
+      // *** REMOVED: window.location.reload(); ***
+      // The state update above will trigger a re-render
+    } catch (error) {
+      console.error('Cancel error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to cancel subscription';
+      toast.error(message);
+    } finally {
+      setIsProcessing(false); // Indicate processing finished
+    }
+  };
   const handleChangePlan = async () => {
     if (!selectedPlan) return;
 
@@ -328,9 +329,7 @@ const PricingPage: React.FC = () => {
     if (!currentSubscription?.currentPeriodEnd) return null;
     const endDate = new Date(currentSubscription.currentPeriodEnd);
     const now = new Date();
-    const days = Math.ceil(
-      (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const days = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return days;
   };
 
@@ -437,8 +436,7 @@ const PricingPage: React.FC = () => {
         }, 1500);
       } catch (err) {
         console.error('Subscription error:', err);
-        const errorMessage =
-          err instanceof Error ? err.message : 'An unexpected error occurred';
+        const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
         setError(errorMessage);
         toast.error(errorMessage);
       }
@@ -455,40 +453,40 @@ const PricingPage: React.FC = () => {
 
   const handleFreeTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!stripe || !elements || !selectedPlan) {
       setError('Please select a plan');
       return;
     }
-  
+
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
       setError('Card element not found');
       return;
     }
-  
+
     if (!email && !user) {
       setError('Please enter your email');
       return;
     }
-  
+
     setIsProcessing(true);
     setError(null);
-  
+
     try {
       const { error: cardError, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
       });
-  
+
       if (cardError) {
         throw cardError;
       }
-  
+
       if (!paymentMethod) {
         throw new Error('Payment method creation failed');
       }
-  
+
       const formData = {
         priceId: STRIPE_CONFIG.prices[selectedPlan.tier][billingCycle],
         paymentMethodId: paymentMethod.id,
@@ -496,26 +494,29 @@ const PricingPage: React.FC = () => {
         billingCycle,
         // DO NOT pass trialPeriodDays from client; free trial is forced on backend.
       };
-  
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       if (user) {
         headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
       }
-  
+
       console.log('Sending free trial request with data:', formData);
-  
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/free-trial`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(formData),
-        credentials: 'include',
-      });
-  
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/free-trial`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(formData),
+          credentials: 'include',
+        }
+      );
+
       const responseText = await response.text();
       console.log('Raw server response (free trial):', responseText);
-  
+
       if (!response.ok) {
         let errorMessage = 'Failed to create free trial subscription';
         if (responseText) {
@@ -529,7 +530,7 @@ const PricingPage: React.FC = () => {
         }
         throw new Error(errorMessage);
       }
-  
+
       toast.success('Free trial subscription created successfully!');
       setTimeout(() => {
         window.location.href = '/dashboard';
@@ -543,74 +544,73 @@ const PricingPage: React.FC = () => {
       setIsProcessing(false);
     }
   };
-  
 
   return (
     <div className="relative w-full min-h-screen text-matrix-green">
-        <div className="max-w-7xl mx-auto p-8">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-xl">Scale your capabilities with our flexible pricing</p>
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
+          <p className="text-xl">Scale your capabilities with our flexible pricing</p>
 
-            {currentSubscription && (
-              <div className="mt-4 flex justify-center gap-4">
+          {currentSubscription && (
+            <div className="mt-4 flex justify-center gap-4">
+              <button
+                onClick={() => setShowHistory(true)}
+                className="px-4 py-2 bg-matrix-green/20 text-matrix-green rounded hover:bg-matrix-green/30"
+              >
+                <FaHistory className="inline mr-2" />
+                Subscription History
+              </button>
+              {!currentSubscription.cancelAtPeriodEnd && (
                 <button
-                  onClick={() => setShowHistory(true)}
-                  className="px-4 py-2 bg-matrix-green/20 text-matrix-green rounded hover:bg-matrix-green/30"
+                  onClick={() => setShowCancelModal(true)}
+                  className="px-4 py-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30"
                 >
-                  <FaHistory className="inline mr-2" />
-                  Subscription History
+                  <FaTimes className="inline mr-2" />
+                  Cancel Subscription
                 </button>
-                {!currentSubscription.cancelAtPeriodEnd && (
-                  <button
-                    onClick={() => setShowCancelModal(true)}
-                    className="px-4 py-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30"
-                  >
-                    <FaTimes className="inline mr-2" />
-                    Cancel Subscription
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
+        </div>
 
-          {/* Plan Selection Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {Object.entries(STRIPE_CONFIG.plans).map(([tier, plan]) => {
-              const Icon = planIcons[tier as PlanTier];
-              const isCurrentSub = currentSubscription?.tier === tier;
-              const daysRemaining = getSubscriptionTimeRemaining();
+        {/* Plan Selection Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {Object.entries(STRIPE_CONFIG.plans).map(([tier, plan]) => {
+            const Icon = planIcons[tier as PlanTier];
+            const isCurrentSub = currentSubscription?.tier === tier;
+            const daysRemaining = getSubscriptionTimeRemaining();
 
-              return (
-                <motion.div
-                  key={tier}
-                  whileHover={{ scale: isCurrentSub ? 1 : 1.01 }}
-                  className={`relative rounded-xl border-2 ${
-                    isCurrentSub ? 'cursor-default border-matrix-green/50' : 'cursor-pointer'
-                  } ${plan.popular ? 'border-matrix-green' : 'border-gray-700'} ${
-                    selectedTier === tier ? 'border-matrix-green bg-matrix-green/10' : ''
-                  } ${isCurrentSub ? 'border-matrix-green/50' : ''} bg-black p-6 shadow-xl flex flex-col`}
-                  onClick={() => handleSelectPlan(tier as PlanTier)}
-                >
-                  {isCurrentSub && (
-                    <>
-                      <div className="absolute top-4 right-4 px-2 py-1 bg-matrix-green text-black text-sm rounded-full">
-                        Current Plan
+            return (
+              <motion.div
+                key={tier}
+                whileHover={{ scale: isCurrentSub ? 1 : 1.01 }}
+                className={`relative rounded-xl border-2 ${
+                  isCurrentSub ? 'cursor-default border-matrix-green/50' : 'cursor-pointer'
+                } ${plan.popular ? 'border-matrix-green' : 'border-gray-700'} ${
+                  selectedTier === tier ? 'border-matrix-green bg-matrix-green/10' : ''
+                } ${isCurrentSub ? 'border-matrix-green/50' : ''} bg-black p-6 shadow-xl flex flex-col`}
+                onClick={() => handleSelectPlan(tier as PlanTier)}
+              >
+                {isCurrentSub && (
+                  <>
+                    <div className="absolute top-4 right-4 px-2 py-1 bg-matrix-green text-black text-sm rounded-full">
+                      Current Plan
+                    </div>
+                    {currentSubscription.cancelAtPeriodEnd && (
+                      <div className="absolute top-14 right-4 px-2 py-1 bg-red-500/20 text-red-500 text-xs rounded-full">
+                        Cancels at period end
                       </div>
-                      {currentSubscription.cancelAtPeriodEnd && (
-                        <div className="absolute top-14 right-4 px-2 py-1 bg-red-500/20 text-red-500 text-xs rounded-full">
-                          Cancels at period end
-                        </div>
-                      )}
-                      {daysRemaining && (
-                        <div className="absolute top-20 right-4 px-2 py-1 text-matrix-green text-xs">
-                          {daysRemaining} days remaining
-                        </div>
-                      )}
-                    </>
-                  )}
-<div className="flex-grow">
+                    )}
+                    {daysRemaining && (
+                      <div className="absolute top-20 right-4 px-2 py-1 text-matrix-green text-xs">
+                        {daysRemaining} days remaining
+                      </div>
+                    )}
+                  </>
+                )}
+                <div className="flex-grow">
                   <div className="text-center mb-8">
                     <Icon className="w-12 h-12 mx-auto mb-4 text-matrix-green" />
                     <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
@@ -628,211 +628,45 @@ const PricingPage: React.FC = () => {
                       </li>
                     ))}
                   </ul>
-                  </div>
-                  <div className="mt-auto"> 
+                </div>
+                <div className="mt-auto">
                   <button
                     className={`w-full py-3 rounded-lg font-semibold ${
                       isCurrentSub
                         ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
                         : selectedTier === tier
-                        ? 'bg-matrix-green text-black'
-                        : 'border border-matrix-green text-matrix-green hover:bg-matrix-green/10'
+                          ? 'bg-matrix-green text-black'
+                          : 'border border-matrix-green text-matrix-green hover:bg-matrix-green/10'
                     }`}
                     disabled={isCurrentSub}
                   >
                     {isCurrentSub
                       ? 'Current Plan'
                       : selectedTier === tier
-                      ? 'Selected'
-                      : isDowngrade(tier as PlanTier)
-                      ? 'Downgrade'
-                      : currentSubscription
-                      ? 'Upgrade'
-                      : 'Select Plan'}
+                        ? 'Selected'
+                        : isDowngrade(tier as PlanTier)
+                          ? 'Downgrade'
+                          : currentSubscription
+                            ? 'Upgrade'
+                            : 'Select Plan'}
                   </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Payment Form */}
-          {showPaymentForm && selectedPlan && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-3xl mx-auto mb-12"
-            >
-              <div className="bg-black/30 border-2 border-matrix-green rounded-xl p-8 space-y-8">
-                {/* Billing Cycle Selection */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold mb-4">Billing Cycle</h3>
-                  <div className="space-y-3">
-                    {['monthly', 'six_months', 'yearly'].map((cycle) => (
-                      <label
-                        key={cycle}
-                        className="flex items-center justify-between p-3 border border-gray-700 rounded cursor-pointer hover:border-matrix-green"
-                      >
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            checked={billingCycle === cycle}
-                            onChange={() => setBillingCycle(cycle as BillingCycle)}
-                            className="mr-3"
-                          />
-                          <span>
-                            {cycle === 'monthly'
-                              ? 'Monthly'
-                              : cycle === 'six_months'
-                              ? '6 Months'
-                              : 'Yearly'}
-                          </span>
-                        </div>
-                        <span>${getPricePerMonth(selectedPlan.basePrice, cycle as BillingCycle)}/mo</span>
-                      </label>
-                    ))}
-                  </div>
                 </div>
+              </motion.div>
+            );
+          })}
+        </div>
 
-                {/* Account Creation (if not logged in) */}
-                {!user && (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold">Create Account</h3>
-                    <input
-                      type="email"
-                      placeholder="Enter email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full p-3 bg-black rounded border border-gray-700 text-matrix-green focus:border-matrix-green focus:ring-1 focus:ring-matrix-green"
-                    />
-                  </div>
-                )}
-
-                {/* Payment Method */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Payment Method</h3>
-                  <div className="p-4 border border-gray-700 rounded">
-                    <CardElement
-                      options={{
-                        style: {
-                          base: {
-                            fontSize: '16px',
-                            color: '#10B981',
-                            '::placeholder': {
-                              color: '#6B7280',
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Promo Code */}
-                {!showPromoInput ? (
-                  <button
-                    onClick={() => setShowPromoInput(true)}
-                    className="text-matrix-green hover:text-matrix-green/80"
-                  >
-                    Apply promo code
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      placeholder="Enter promo code"
-                      className="flex-1 p-2 bg-black border border-gray-700 rounded text-matrix-green"
-                    />
-                    <button className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90">
-                      Apply
-                    </button>
-                  </div>
-                )}
-
-                {/* Summary */}
-                <div className="border-t border-gray-700 pt-4">
-                  <div className="flex justify-between mb-2">
-                    <span>
-                      {selectedPlan.name} Plan{' '}
-                      {billingCycle === 'yearly'
-                        ? 'Yearly'
-                        : billingCycle === 'six_months'
-                        ? '6 Months'
-                        : 'Monthly'}
-                    </span>
-                    <span>${calculatePrice(selectedPlan.basePrice, billingCycle)}</span>
-                  </div>
-
-                  {billingCycle !== 'monthly' && (
-                    <div className="flex justify-between text-green-400">
-                      <span>Annual Savings</span>
-                      <span>-${getAnnualSavings()}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Submit Button */}
-                <motion.button
-                  onClick={handleSubmit}
-                  disabled={isProcessing || !stripe}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full p-3 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90 transition-colors disabled:opacity-50"
-                >
-                  {isProcessing ? 'Processing...' : 'Subscribe Now'}
-                </motion.button>
-
-                {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-
-                <div className="flex items-center justify-center gap-2 text-gray-400">
-                  <FaLock className="w-4 h-4" />
-                  <span className="text-sm">Secure payment</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Modals */}
-          <Modal isOpen={showCancelModal} onClose={() => setShowCancelModal(false)} title="Cancel Subscription">
-            <div className="space-y-4">
-              <p className="text-gray-300">
-                Are you sure you want to cancel your subscription? Your subscription will remain active until the end of your current billing period.
-              </p>
-              <div className="flex justify-end gap-4 mt-6">
-                <button
-                  onClick={() => setShowCancelModal(false)}
-                  className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
-                >
-                  Keep Subscription
-                </button>
-                <button
-                  onClick={handleCancelSubscription}
-                  disabled={isProcessing}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                >
-                  {isProcessing ? 'Canceling...' : 'Confirm Cancel'}
-                </button>
-              </div>
-            </div>
-          </Modal>
-
-          <Modal
-            isOpen={showChangeModal}
-            onClose={() => setShowChangeModal(false)}
-            title={`${isDowngrade(selectedTier as PlanTier) ? 'Downgrade' : 'Upgrade'} Plan`}
+        {/* Payment Form */}
+        {showPaymentForm && selectedPlan && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-3xl mx-auto mb-12"
           >
-            <div className="space-y-6">
-              <p className="text-gray-300">
-                {isDowngrade(selectedTier as PlanTier)
-                  ? 'Are you sure you want to downgrade your plan? You may lose access to some features.'
-                  : 'Upgrade your plan to access more features and higher limits.'}
-              </p>
-
+            <div className="bg-black/30 border-2 border-matrix-green rounded-xl p-8 space-y-8">
               {/* Billing Cycle Selection */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-matrix-green">Billing Cycle</h3>
+                <h3 className="text-xl font-semibold mb-4">Billing Cycle</h3>
                 <div className="space-y-3">
                   {['monthly', 'six_months', 'yearly'].map((cycle) => (
                     <label
@@ -850,21 +684,58 @@ const PricingPage: React.FC = () => {
                           {cycle === 'monthly'
                             ? 'Monthly'
                             : cycle === 'six_months'
-                            ? '6 Months'
-                            : 'Yearly'}
+                              ? '6 Months'
+                              : 'Yearly'}
                         </span>
                       </div>
-                      <span className="text-matrix-green">
-                        ${getPricePerMonth(selectedPlan?.basePrice || 0, cycle as BillingCycle)}/mo
+                      <span>
+                        ${getPricePerMonth(selectedPlan.basePrice, cycle as BillingCycle)}/mo
                       </span>
                     </label>
                   ))}
                 </div>
               </div>
 
+              {/* Account Creation (if not logged in) */}
+              {!user && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold">Create Account</h3>
+                  <input
+                    type="email"
+                    placeholder="Enter email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-3 bg-black rounded border border-gray-700 text-matrix-green focus:border-matrix-green focus:ring-1 focus:ring-matrix-green"
+                  />
+                </div>
+              )}
+
+              {/* Payment Method */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Payment Method</h3>
+                <div className="p-4 border border-gray-700 rounded">
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: '16px',
+                          color: '#10B981',
+                          '::placeholder': {
+                            color: '#6B7280',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+
               {/* Promo Code */}
               {!showPromoInput ? (
-                <button onClick={() => setShowPromoInput(true)} className="text-matrix-green hover:text-matrix-green/80">
+                <button
+                  onClick={() => setShowPromoInput(true)}
+                  className="text-matrix-green hover:text-matrix-green/80"
+                >
                   Apply promo code
                 </button>
               ) : (
@@ -883,73 +754,216 @@ const PricingPage: React.FC = () => {
               )}
 
               {/* Summary */}
-              <div className="border-t border-gray-700 pt-4 space-y-3">
-                <div className="flex justify-between text-lg">
-                  <span>New Plan Summary</span>
-                </div>
-                <div className="flex justify-between">
-                  <div className="flex justify-between">
-                    <span>
-                      {selectedPlan?.name} Plan{' '}
-                      {billingCycle === 'yearly'
-                        ? 'Yearly'
-                        : billingCycle === 'six_months'
+              <div className="border-t border-gray-700 pt-4">
+                <div className="flex justify-between mb-2">
+                  <span>
+                    {selectedPlan.name} Plan{' '}
+                    {billingCycle === 'yearly'
+                      ? 'Yearly'
+                      : billingCycle === 'six_months'
                         ? '6 Months'
                         : 'Monthly'}
-                    </span>
-                    <span>${calculatePrice(selectedPlan?.basePrice || 0, billingCycle)}</span>
-                  </div>
-                  {billingCycle !== 'monthly' && (
-                    <div className="flex justify-between text-green-400">
-                      <span>Annual Savings</span>
-                      <span>-${getAnnualSavings()}</span>
-                    </div>
-                  )}
+                  </span>
+                  <span>${calculatePrice(selectedPlan.basePrice, billingCycle)}</span>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-4 mt-6">
-                <button
-                  onClick={() => setShowChangeModal(false)}
-                  className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleChangePlan}
-                  disabled={isChangingPlan}
-                  className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90 disabled:opacity-50"
-                >
-                  {isChangingPlan ? 'Processing...' : 'Confirm Change'}
-                </button>
-              </div>
-            </div>
-          </Modal>
-
-          <Modal isOpen={showHistory} onClose={() => setShowHistory(false)} title="Subscription History">
-            <div className="space-y-4 max-h-96 ">
-              {subscriptionHistory.length === 0 ? (
-                <p className="text-gray-400">No subscription history available.</p>
-              ) : (
-                subscriptionHistory.map((sub) => (
-                  <div key={sub.id} className="border border-gray-700 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-semibold">{sub.tier.toUpperCase()} Plan</span>
-                      <span className="text-matrix-green">${sub.amount}</span>
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      <div>Start: {format(new Date(sub.startDate), 'PPP')}</div>
-                      <div>End: {format(new Date(sub.endDate), 'PPP')}</div>
-                      <div className="capitalize">Status: {sub.status}</div>
-                    </div>
+                {billingCycle !== 'monthly' && (
+                  <div className="flex justify-between text-green-400">
+                    <span>Annual Savings</span>
+                    <span>-${getAnnualSavings()}</span>
                   </div>
-                ))
-              )}
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                onClick={handleSubmit}
+                disabled={isProcessing || !stripe}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full p-3 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90 transition-colors disabled:opacity-50"
+              >
+                {isProcessing ? 'Processing...' : 'Subscribe Now'}
+              </motion.button>
+
+              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+
+              <div className="flex items-center justify-center gap-2 text-gray-400">
+                <FaLock className="w-4 h-4" />
+                <span className="text-sm">Secure payment</span>
+              </div>
             </div>
-          </Modal>
-        </div>
+          </motion.div>
+        )}
+
+        {/* Modals */}
+        <Modal
+          isOpen={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          title="Cancel Subscription"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-300">
+              Are you sure you want to cancel your subscription? Your subscription will remain
+              active until the end of your current billing period.
+            </p>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
+              >
+                Keep Subscription
+              </button>
+              <button
+                onClick={handleCancelSubscription}
+                disabled={isProcessing}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              >
+                {isProcessing ? 'Canceling...' : 'Confirm Cancel'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={showChangeModal}
+          onClose={() => setShowChangeModal(false)}
+          title={`${isDowngrade(selectedTier as PlanTier) ? 'Downgrade' : 'Upgrade'} Plan`}
+        >
+          <div className="space-y-6">
+            <p className="text-gray-300">
+              {isDowngrade(selectedTier as PlanTier)
+                ? 'Are you sure you want to downgrade your plan? You may lose access to some features.'
+                : 'Upgrade your plan to access more features and higher limits.'}
+            </p>
+
+            {/* Billing Cycle Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-matrix-green">Billing Cycle</h3>
+              <div className="space-y-3">
+                {['monthly', 'six_months', 'yearly'].map((cycle) => (
+                  <label
+                    key={cycle}
+                    className="flex items-center justify-between p-3 border border-gray-700 rounded cursor-pointer hover:border-matrix-green"
+                  >
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={billingCycle === cycle}
+                        onChange={() => setBillingCycle(cycle as BillingCycle)}
+                        className="mr-3"
+                      />
+                      <span>
+                        {cycle === 'monthly'
+                          ? 'Monthly'
+                          : cycle === 'six_months'
+                            ? '6 Months'
+                            : 'Yearly'}
+                      </span>
+                    </div>
+                    <span className="text-matrix-green">
+                      ${getPricePerMonth(selectedPlan?.basePrice || 0, cycle as BillingCycle)}/mo
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Promo Code */}
+            {!showPromoInput ? (
+              <button
+                onClick={() => setShowPromoInput(true)}
+                className="text-matrix-green hover:text-matrix-green/80"
+              >
+                Apply promo code
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  placeholder="Enter promo code"
+                  className="flex-1 p-2 bg-black border border-gray-700 rounded text-matrix-green"
+                />
+                <button className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90">
+                  Apply
+                </button>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="border-t border-gray-700 pt-4 space-y-3">
+              <div className="flex justify-between text-lg">
+                <span>New Plan Summary</span>
+              </div>
+              <div className="flex justify-between">
+                <div className="flex justify-between">
+                  <span>
+                    {selectedPlan?.name} Plan{' '}
+                    {billingCycle === 'yearly'
+                      ? 'Yearly'
+                      : billingCycle === 'six_months'
+                        ? '6 Months'
+                        : 'Monthly'}
+                  </span>
+                  <span>${calculatePrice(selectedPlan?.basePrice || 0, billingCycle)}</span>
+                </div>
+                {billingCycle !== 'monthly' && (
+                  <div className="flex justify-between text-green-400">
+                    <span>Annual Savings</span>
+                    <span>-${getAnnualSavings()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => setShowChangeModal(false)}
+                className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePlan}
+                disabled={isChangingPlan}
+                className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90 disabled:opacity-50"
+              >
+                {isChangingPlan ? 'Processing...' : 'Confirm Change'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={showHistory}
+          onClose={() => setShowHistory(false)}
+          title="Subscription History"
+        >
+          <div className="space-y-4 max-h-96 ">
+            {subscriptionHistory.length === 0 ? (
+              <p className="text-gray-400">No subscription history available.</p>
+            ) : (
+              subscriptionHistory.map((sub) => (
+                <div key={sub.id} className="border border-gray-700 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">{sub.tier.toUpperCase()} Plan</span>
+                    <span className="text-matrix-green">${sub.amount}</span>
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    <div>Start: {format(new Date(sub.startDate), 'PPP')}</div>
+                    <div>End: {format(new Date(sub.endDate), 'PPP')}</div>
+                    <div className="capitalize">Status: {sub.status}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Modal>
       </div>
+    </div>
   );
 };
 

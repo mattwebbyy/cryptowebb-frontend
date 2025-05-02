@@ -11,7 +11,7 @@ const OAuthCallback = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const token = searchParams.get('token');
-    
+
     if (token) {
       const authData = {
         token,

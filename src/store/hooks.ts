@@ -2,12 +2,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import type { RootState, AppDispatch } from './store';
-import { 
-  setSpeed, 
-  setDensity, 
-  setGlitchIntensity, 
-  setTheme 
-} from './slices/matrixSlice';
+import { setSpeed, setDensity, setGlitchIntensity, setTheme } from './slices/matrixSlice';
 import type { MatrixState } from './slices/matrixSlice';
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`

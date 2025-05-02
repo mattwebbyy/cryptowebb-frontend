@@ -1,50 +1,76 @@
-# React + TypeScript + Vite
+# Project Matrix (Replace with your actual Project Name)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a web application featuring interactive dashboards, data visualization with a distinctive matrix-inspired theme, user authentication, subscription management via Stripe, and a blog section.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* **Dashboards:** Configurable dashboards displaying various data charts.
+* **Charts:** Multiple chart types (Line, Bar, Pie, Gauge, Table) powered by Highcharts, styled with a custom matrix theme.
+* **Real-time Updates:** WebSocket integration for live data updates on charts (optional).
+* **Authentication:** User login and registration (implementation details assumed).
+* **Subscription:** Stripe integration for handling monthly, semi-annual, and yearly subscription plans (Basic, Pro, Enterprise).
+* **Blog:** Section for displaying and managing blog posts with Markdown support.
+* **Matrix Theme:** Unique visual theme inspired by "The Matrix" across the UI and charts.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+* **Frontend Framework:** React 18+
+* **Build Tool:** Vite
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS v3 with JIT, PostCSS, CSS Modules (as needed)
+* **State Management:** Redux Toolkit (for matrix theme state, potentially more)
+* **Data Fetching/Caching:** React Query (TanStack Query v5)
+* **Charting:** Highcharts, highcharts-react-official
+* **Routing:** React Router v6
+* **API Client:** Axios
+* **Real-time:** WebSockets
+* **Linting:** ESLint
+* **Formatting:** Prettier
+* **Testing:** Jest, React Testing Library
 
-- Configure the top-level `parserOptions` property like this:
+## Setup Instructions
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repository-url>
+    cd <your-project-directory>
+    ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+3.  **Environment Variables:**
+    * Create a `.env` file in the project root.
+    * Copy the contents of `.env.example` (if you create one) or add the required variables. See the `env.d.ts` file for required variables like:
+        * `VITE_API_URL`: URL for your primary API.
+        * `VITE_BACKEND_URL`: Base URL for the backend (used by Axios).
+        * `VITE_WEBSOCKET_URL`: URL for WebSocket connections (if applicable).
+        * `VITE_STRIPE_PUBLIC_KEY`: Your Stripe publishable key.
+        * `VITE_STRIPE_..._PRICE_ID`: Various Stripe Price IDs for different plans and billing cycles.
+        * `VITE_USE_MOCK_DATA`: Set to `true` to use mock data for charts, `false` to fetch real data.
+    * **Example `.env` structure:**
+        ```env
+        VITE_BACKEND_URL=http://localhost:8080
+        VITE_STRIPE_PUBLIC_KEY=pk_test_YOUR_KEY_HERE
+        VITE_STRIPE_BASIC_MONTHLY_PRICE_ID=price_...
+        # ... other variables
+        VITE_USE_MOCK_DATA=true
+        ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The application should now be running on `http://localhost:5173` (or another port if specified).
+
+## Available Scripts
+
+* `npm run dev`: Starts the development server with hot module replacement.
+* `npm run build`: Builds the application for production.
+* `npm run preview`: Serves the production build locally for previewing.
+* `npm run lint`: Lints the codebase using ESLint.
+* `npm run format`: Formats the code using Prettier.
+* `npm run check-format`: Checks if the code is formatted correctly according to Prettier rules.
+* `npm run test`: Runs the test suite using Jest.

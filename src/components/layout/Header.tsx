@@ -16,7 +16,7 @@ export const Header = () => {
 
   // Add base nav links
   const navLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
-  
+
   // Add authenticated-only links
   if (isAuthenticated) {
     navLinks.push('dashboard');
@@ -35,11 +35,7 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex gap-6">
             {navLinks.map((path) => (
-              <motion.div
-                key={path}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <motion.div key={path} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   to={`/${path}`}
                   className={`matrix-button capitalize ${
@@ -57,29 +53,21 @@ export const Header = () => {
           <div className="hidden md:flex gap-4">
             {isAuthenticated ? (
               <>
-                {user && (
-                  <span className="text-white">
-                    Hello, {user.firstName || user.email}
-                  </span>
-                )}
-                <button 
-                  onClick={logout} 
-                  className="matrix-button"
-                  title="Log out"
-                >
+                {user && <span className="text-white">Hello, {user.firstName || user.email}</span>}
+                <button onClick={logout} className="matrix-button" title="Log out">
                   Logout
                 </button>
               </>
             ) : (
               <div className="flex gap-2">
-                <Link 
+                <Link
                   to="/login"
                   className="text-sm px-4 py-1.5 border border-matrix-green bg-black/50 hover:bg-matrix-green/20 transition-all duration-300 flex items-center gap-2"
                 >
                   <span className="w-2 h-2 bg-matrix-green rounded-full animate-pulse" />
                   INITIALIZE
                 </Link>
-                <Link 
+                <Link
                   to="/register"
                   className="text-sm px-4 py-1.5 border border-matrix-green/50 hover:border-matrix-green bg-black/30 hover:bg-matrix-green/10 transition-all duration-300"
                 >
@@ -143,7 +131,7 @@ export const Header = () => {
                     <span className="block text-white px-4">
                       Hello, {user?.firstName || user?.email}
                     </span>
-                    <button 
+                    <button
                       onClick={() => {
                         logout();
                         setIsMenuOpen(false);

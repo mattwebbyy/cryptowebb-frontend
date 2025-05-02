@@ -20,8 +20,8 @@ const formatDate = (dateString: string | undefined | null): string => {
     const date = new Date(dateString);
     // Check if the date is valid after parsing
     if (isNaN(date.getTime())) {
-        console.error('Invalid Date object created for:', dateString);
-        return 'Invalid Date';
+      console.error('Invalid Date object created for:', dateString);
+      return 'Invalid Date';
     }
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -30,14 +30,13 @@ const formatDate = (dateString: string | undefined | null): string => {
       hour: '2-digit',
       minute: '2-digit',
       timeZoneName: 'short',
-      timeZone: 'UTC' // Displaying in UTC as per original code
+      timeZone: 'UTC', // Displaying in UTC as per original code
     }).format(date);
   } catch (e) {
     console.error('Date formatting error:', e, dateString);
     return 'Invalid Date';
   }
 };
-
 
 const Settings = () => {
   const queryClient = useQueryClient();
@@ -53,7 +52,7 @@ const Settings = () => {
     const response = await fetch('http://localhost:8080/api/v1/users/me/api-keys', {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     });
 
@@ -74,12 +73,19 @@ const Settings = () => {
     return Array.isArray(data) ? data : [];
   };
 
-  const { data: keys, isLoading, error: fetchError } = useQuery<APIKey[], Error>({
+  const {
+    data: keys,
+    isLoading,
+    error: fetchError,
+  } = useQuery<APIKey[], Error>({
     queryKey: ['apiKeys'],
     queryFn: fetchApiKeys,
   });
 
-  const generateApiKey = async (payload: { name: string; expiresIn: number }): Promise<APIKeyResponse> => {
+  const generateApiKey = async (payload: {
+    name: string;
+    expiresIn: number;
+  }): Promise<APIKeyResponse> => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token not found.');
 
@@ -105,7 +111,7 @@ const Settings = () => {
         const errorData = await response.json();
         errorMsg = errorData?.error || errorMsg;
       } catch (e) {
-       // Ignore if response is not JSON
+        // Ignore if response is not JSON
       }
       throw new Error(errorMsg);
     }
@@ -125,16 +131,16 @@ const Settings = () => {
       setCopySuccess(false); // Reset copy status
     },
     onError: (error) => {
-        console.error("Generate API Key Error:", error.message);
-        // Optionally: display error to user using a toast notification or state variable
-    }
+      console.error('Generate API Key Error:', error.message);
+      // Optionally: display error to user using a toast notification or state variable
+    },
   });
 
   const revokeApiKey = async (keyId: string): Promise<void> => {
     const token = localStorage.getItem('token');
-     if (!token) throw new Error('Authentication token not found.');
+    if (!token) throw new Error('Authentication token not found.');
 
-    console.log('Revoking key:', keyId);  // Debug log
+    console.log('Revoking key:', keyId); // Debug log
 
     const response = await fetch(`http://localhost:8080/api/v1/users/me/api-keys/${keyId}`, {
       method: 'DELETE',
@@ -145,17 +151,17 @@ const Settings = () => {
     });
 
     if (!response.ok) {
-       let errorMsg = 'Failed to revoke API key';
+      let errorMsg = 'Failed to revoke API key';
       try {
         // Attempt to parse error only if response has content and indicates JSON
         if (response.headers.get('content-type')?.includes('application/json')) {
-            const errorData = await response.json();
-            errorMsg = errorData?.error || errorMsg;
+          const errorData = await response.json();
+          errorMsg = errorData?.error || errorMsg;
         } else {
-            errorMsg = `${errorMsg} (Status: ${response.status})`;
+          errorMsg = `${errorMsg} (Status: ${response.status})`;
         }
       } catch (e) {
-         errorMsg = `${errorMsg} (Status: ${response.status})`;
+        errorMsg = `${errorMsg} (Status: ${response.status})`;
       }
       console.error('Revoke error response:', response.status, errorMsg); // Debug log
       throw new Error(errorMsg);
@@ -164,17 +170,16 @@ const Settings = () => {
     // Check if response has content before trying to parse JSON
     // For DELETE requests, often a 204 No Content is returned
     if (response.status !== 204 && response.headers.get('content-length') !== '0') {
-        try {
-           return await response.json();
-        } catch(e) {
-           console.warn("Could not parse JSON response for DELETE, but status was OK.");
-           return; // Or handle as needed
-        }
+      try {
+        return await response.json();
+      } catch (e) {
+        console.warn('Could not parse JSON response for DELETE, but status was OK.');
+        return; // Or handle as needed
+      }
     }
     // Return void or handle 204 No Content appropriately
     return;
   };
-
 
   const revokeMutation = useMutation<void, Error, string>({
     mutationFn: revokeApiKey,
@@ -191,11 +196,11 @@ const Settings = () => {
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim()) {
-        alert("Please provide a name for the API key."); // Simple validation
-        return;
+      alert('Please provide a name for the API key.'); // Simple validation
+      return;
     }
     const expiresInDays = parseInt(newKeyExpiry, 10);
-     // Close the generated key display if a new one is requested
+    // Close the generated key display if a new one is requested
     setGeneratedKey(null);
     generateMutation.mutate({
       name: newKeyName.trim(),
@@ -219,7 +224,7 @@ const Settings = () => {
     }
   };
 
-   // --- Render Logic ---
+  // --- Render Logic ---
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -232,7 +237,9 @@ const Settings = () => {
 
           <form onSubmit={handleGenerate} className="space-y-6">
             <div>
-              <label htmlFor="keyName" className="block mb-2 text-matrix-green font-medium">Key Name</label>
+              <label htmlFor="keyName" className="block mb-2 text-matrix-green font-medium">
+                Key Name
+              </label>
               <input
                 id="keyName"
                 type="text"
@@ -247,7 +254,9 @@ const Settings = () => {
             </div>
 
             <div>
-              <label htmlFor="keyExpiry" className="block mb-2 text-matrix-green font-medium">Expiration Period</label>
+              <label htmlFor="keyExpiry" className="block mb-2 text-matrix-green font-medium">
+                Expiration Period
+              </label>
               <select
                 id="keyExpiry"
                 value={newKeyExpiry}
@@ -280,23 +289,25 @@ const Settings = () => {
           {/* Display Generated Key */}
           {generateMutation.error && (
             <div className="mt-4 p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm">
-                Error generating key: {generateMutation.error.message}
+              Error generating key: {generateMutation.error.message}
             </div>
-           )}
+          )}
 
           {generatedKey && (
             <div className="mt-6 p-4 bg-black/50 rounded-lg border border-matrix-green animate-fadeIn">
               <p className="text-matrix-green font-medium mb-2">
-                Your new API key has been generated. <strong className="text-yellow-400">Copy it now, it won't be shown again:</strong>
+                Your new API key has been generated.{' '}
+                <strong className="text-yellow-400">Copy it now, it won't be shown again:</strong>
               </p>
               {/* Flex container for key and copy button */}
               <div className="flex items-center justify-between mt-2 gap-4">
                 {/* API Key Display: allow scroll on overflow */}
-                <pre className="flex-1 p-3 bg-black/70 rounded-lg text-matrix-green
+                <pre
+                  className="flex-1 p-3 bg-black/70 rounded-lg text-matrix-green
                               font-mono text-sm overflow-x-auto border border-matrix-green/30
                               scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50"
-                      style={{ minWidth: 0 }} // Prevents flex item from overflowing its container
-                      >
+                  style={{ minWidth: 0 }} // Prevents flex item from overflowing its container
+                >
                   {generatedKey.key}
                 </pre>
                 {/* Copy Button: prevent shrinking */}
@@ -325,46 +336,63 @@ const Settings = () => {
           )}
 
           {/* Fetch Error State */}
-           {fetchError && (
-                <div className="p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm text-center">
-                    Error loading keys: {fetchError.message}
-                </div>
-           )}
-
+          {fetchError && (
+            <div className="p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm text-center">
+              Error loading keys: {fetchError.message}
+            </div>
+          )}
 
           {/* Empty State (after loading, no error) */}
           {!isLoading && !fetchError && (!keys || keys.length === 0) && (
             <div className="text-matrix-green/70 text-center py-4">No active API keys found.</div>
           )}
 
-           {/* Revoke Error State */}
-           {revokeMutation.error && (
-                <div className="mt-4 mb-4 p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm">
-                    Error revoking key: {revokeMutation.error.message}
-                </div>
-           )}
+          {/* Revoke Error State */}
+          {revokeMutation.error && (
+            <div className="mt-4 mb-4 p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm">
+              Error revoking key: {revokeMutation.error.message}
+            </div>
+          )}
 
           {/* Display Keys (after loading, no error, keys exist) */}
           {!isLoading && !fetchError && keys && keys.length > 0 && (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2
-                           scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50">
+            <div
+              className="space-y-4 max-h-[400px] overflow-y-auto pr-2
+                           scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50"
+            >
               {keys.map((key) => (
-                <div key={key.id}
-                     className="p-4 bg-black/50 rounded-lg border border-matrix-green/30
-                                hover:border-matrix-green/50 transition-colors duration-200">
+                <div
+                  key={key.id}
+                  className="p-4 bg-black/50 rounded-lg border border-matrix-green/30
+                                hover:border-matrix-green/50 transition-colors duration-200"
+                >
                   <div className="flex justify-between items-start gap-4">
                     {/* Key Details */}
-                    <div className="space-y-1 flex-1 min-w-0"> {/* min-w-0 prevents overflow issues with flex */}
-                       <h4 className="text-lg font-medium text-matrix-green truncate" title={key.Name}>{key.Name}</h4>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      {' '}
+                      {/* min-w-0 prevents overflow issues with flex */}
+                      <h4
+                        className="text-lg font-medium text-matrix-green truncate"
+                        title={key.Name}
+                      >
+                        {key.Name}
+                      </h4>
                       <div className="space-y-1 text-sm text-matrix-green/70">
-                        <p className="flex items-center gap-2 flex-wrap"> {/* flex-wrap for smaller screens */}
+                        <p className="flex items-center gap-2 flex-wrap">
+                          {' '}
+                          {/* flex-wrap for smaller screens */}
                           <span className="font-medium">Created:</span>
                           <span>{formatDate(key.created_at)}</span>
                         </p>
                         <p className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium">Expires:</span>
                           {/* Check for non-expiring keys if backend uses a specific value like null or zero date */}
-                          <span>{formatDate(key.ExpiresAt) === formatDate(new Date(0).toISOString()) || formatDate(key.ExpiresAt) === 'N/A' ? 'Never' : formatDate(key.ExpiresAt)}</span>
+                          <span>
+                            {formatDate(key.ExpiresAt) === formatDate(new Date(0).toISOString()) ||
+                            formatDate(key.ExpiresAt) === 'N/A'
+                              ? 'Never'
+                              : formatDate(key.ExpiresAt)}
+                          </span>
                         </p>
                         {key.last_used_at && (
                           <p className="flex items-center gap-2 flex-wrap">
@@ -372,18 +400,22 @@ const Settings = () => {
                             <span>{formatDate(key.last_used_at)}</span>
                           </p>
                         )}
-                         <p className="flex items-center gap-2 flex-wrap font-mono text-xs">
-                            <span className="font-medium">Prefix:</span>
-                            <span>{key.prefix}...</span>
-                         </p>
+                        <p className="flex items-center gap-2 flex-wrap font-mono text-xs">
+                          <span className="font-medium">Prefix:</span>
+                          <span>{key.prefix}...</span>
+                        </p>
                       </div>
                     </div>
                     {/* Revoke Button */}
                     <button
                       onClick={() => {
                         // Optional: Add confirmation dialog
-                        if (window.confirm(`Are you sure you want to revoke the key "${key.Name}"? This action cannot be undone.`)) {
-                           revokeMutation.mutate(key.id);
+                        if (
+                          window.confirm(
+                            `Are you sure you want to revoke the key "${key.Name}"? This action cannot be undone.`
+                          )
+                        ) {
+                          revokeMutation.mutate(key.id);
                         }
                       }}
                       // Disable button if this specific key is being revoked
@@ -393,9 +425,11 @@ const Settings = () => {
                                  rounded-md text-red-400 text-sm transition
                                  duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed
                                  flex-shrink-0 ml-auto`} // Use ml-auto if needed, though justify-between should handle it
-                        aria-label={`Revoke API key ${key.Name}`}
+                      aria-label={`Revoke API key ${key.Name}`}
                     >
-                      {(revokeMutation.isPending && revokeMutation.variables === key.id) ? 'Revoking...' : 'Revoke'}
+                      {revokeMutation.isPending && revokeMutation.variables === key.id
+                        ? 'Revoking...'
+                        : 'Revoke'}
                     </button>
                   </div>
                 </div>

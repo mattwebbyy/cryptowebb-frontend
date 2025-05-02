@@ -10,29 +10,27 @@ import { HelmetProvider } from 'react-helmet-async';
 function App() {
   return (
     <HelmetProvider>
-
-    <AuthProvider>
-      <StripeProvider>
-        <div className="app-container">
-          <MatrixRain />
-          <Layout>
-            <Routes />
-          </Layout>
-          <ToastContainer
-            position="bottom-right"
-            autoClose={5000}
-            newestOnTop
-            closeOnClick
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-          />
-        </div>
-      </StripeProvider>
-    </AuthProvider>
-        </HelmetProvider>
-
+      <AuthProvider>
+        <StripeProvider>
+          <div className="app-container">
+            <MatrixRain />
+            <Layout>
+              <Routes />
+            </Layout>
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              newestOnTop
+              closeOnClick
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+          </div>
+        </StripeProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

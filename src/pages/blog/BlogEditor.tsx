@@ -41,14 +41,11 @@ export default function BlogEditor() {
     queryKey: ['blog-edit', id],
     queryFn: async () => {
       if (!id) return null;
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/id/${id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/id/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       return response.data;
     },
     enabled: !!id,
@@ -84,7 +81,7 @@ export default function BlogEditor() {
         newPost,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
@@ -107,7 +104,7 @@ export default function BlogEditor() {
         updatedPost,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
@@ -127,7 +124,10 @@ export default function BlogEditor() {
     e.preventDefault();
     const formattedPost = {
       ...post,
-      tags: tagInput.split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: tagInput
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean),
     };
 
     if (isEditing) {
@@ -137,15 +137,13 @@ export default function BlogEditor() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setPost(prev => ({ ...prev, [name]: value }));
+    setPost((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleContentChange = (value?: string) => {
-    setPost(prev => ({ ...prev, content: value || '' }));
+    setPost((prev) => ({ ...prev, content: value || '' }));
   };
 
   return (
@@ -162,9 +160,7 @@ export default function BlogEditor() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-matrix-green font-mono mb-2">
-                Title
-              </label>
+              <label className="block text-matrix-green font-mono mb-2">Title</label>
               <input
                 type="text"
                 name="title"
@@ -194,9 +190,7 @@ export default function BlogEditor() {
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">
-                Image URL
-              </label>
+              <label className="block text-matrix-green font-mono mb-2">Image URL</label>
               <input
                 type="url"
                 name="image_url"
@@ -220,9 +214,7 @@ export default function BlogEditor() {
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">
-                Meta Description
-              </label>
+              <label className="block text-matrix-green font-mono mb-2">Meta Description</label>
               <textarea
                 name="meta_desc"
                 value={post.meta_desc}
@@ -237,12 +229,10 @@ export default function BlogEditor() {
                 type="checkbox"
                 name="is_published"
                 checked={post.is_published}
-                onChange={(e) => setPost(prev => ({ ...prev, is_published: e.target.checked }))}
+                onChange={(e) => setPost((prev) => ({ ...prev, is_published: e.target.checked }))}
                 className="mr-2 bg-black/50 border-matrix-green text-matrix-green focus:ring-matrix-green"
               />
-              <label className="text-matrix-green font-mono">
-                Publish immediately
-              </label>
+              <label className="text-matrix-green font-mono">Publish immediately</label>
             </div>
 
             <div className="flex justify-end space-x-4">
@@ -261,8 +251,8 @@ export default function BlogEditor() {
                 {createMutation.isPending || updateMutation.isPending
                   ? 'Saving...'
                   : isEditing
-                  ? 'Update Post'
-                  : 'Create Post'}
+                    ? 'Update Post'
+                    : 'Create Post'}
               </Button>
             </div>
           </form>

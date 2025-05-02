@@ -19,9 +19,11 @@ const DashboardLayout = () => {
                     to="/dashboard"
                     end
                     className={({ isActive }) =>
-                      `flex items-center gap-2 py-1 ${isActive 
-                        ? 'text-matrix-green font-medium' 
-                        : 'text-matrix-green/70 hover:text-matrix-green'}`
+                      `flex items-center gap-2 py-1 ${
+                        isActive
+                          ? 'text-matrix-green font-medium'
+                          : 'text-matrix-green/70 hover:text-matrix-green'
+                      }`
                     }
                   >
                     <Home size={18} />
@@ -32,9 +34,11 @@ const DashboardLayout = () => {
                   <NavLink
                     to="/dashboard/profile"
                     className={({ isActive }) =>
-                      `flex items-center gap-2 py-1 ${isActive 
-                        ? 'text-matrix-green font-medium' 
-                        : 'text-matrix-green/70 hover:text-matrix-green'}`
+                      `flex items-center gap-2 py-1 ${
+                        isActive
+                          ? 'text-matrix-green font-medium'
+                          : 'text-matrix-green/70 hover:text-matrix-green'
+                      }`
                     }
                   >
                     <User size={18} />
@@ -45,9 +49,11 @@ const DashboardLayout = () => {
                   <NavLink
                     to="/dashboard/settings"
                     className={({ isActive }) =>
-                      `flex items-center gap-2 py-1 ${isActive 
-                        ? 'text-matrix-green font-medium' 
-                        : 'text-matrix-green/70 hover:text-matrix-green'}`
+                      `flex items-center gap-2 py-1 ${
+                        isActive
+                          ? 'text-matrix-green font-medium'
+                          : 'text-matrix-green/70 hover:text-matrix-green'
+                      }`
                     }
                   >
                     <SettingsIcon size={18} />
@@ -56,8 +62,6 @@ const DashboardLayout = () => {
                 </li>
               </ul>
             </div>
-            
-          
           </nav>
         </aside>
         <main className="flex-1 p-6 overflow-y-auto">

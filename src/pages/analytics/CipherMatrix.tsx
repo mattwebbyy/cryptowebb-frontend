@@ -1,7 +1,24 @@
 // src/pages/analytics/CipherMatrix.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, AlertTriangle, Shield, ArrowUpDown, ExternalLink, Info, TrendingUp, TrendingDown, Zap, Clock, Lock, Unlock, Sliders, Eye, EyeOff } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  AlertTriangle,
+  Shield,
+  ArrowUpDown,
+  ExternalLink,
+  Info,
+  TrendingUp,
+  TrendingDown,
+  Zap,
+  Clock,
+  Lock,
+  Unlock,
+  Sliders,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { Sparklines, SparklinesLine, SparklinesSpots } from 'react-sparklines';
 import TokenDetailModal from '@/components/analytics/TokenDetailModal';
 
@@ -95,7 +112,7 @@ const mockTokens: Token[] = [
         commits: 450,
         contributors: 8,
       },
-    }
+    },
   },
   {
     id: '2',
@@ -130,7 +147,7 @@ const mockTokens: Token[] = [
       twitterFollowers: 2800,
       discordMembers: 1500,
       telegramMembers: 3200,
-    }
+    },
   },
   {
     id: '3',
@@ -172,7 +189,7 @@ const mockTokens: Token[] = [
         commits: 780,
         contributors: 15,
       },
-    }
+    },
   },
   {
     id: '4',
@@ -205,7 +222,7 @@ const mockTokens: Token[] = [
       twitterFollowers: 1200,
       discordMembers: 850,
       telegramMembers: 2100,
-    }
+    },
   },
   {
     id: '5',
@@ -246,7 +263,7 @@ const mockTokens: Token[] = [
         commits: 240,
         contributors: 4,
       },
-    }
+    },
   },
   {
     id: '6',
@@ -290,7 +307,7 @@ const mockTokens: Token[] = [
         commits: 310,
         contributors: 6,
       },
-    }
+    },
   },
 ];
 
@@ -341,7 +358,7 @@ const CipherMatrix = () => {
 
   // Show token details modal
   const showTokenDetails = (tokenId: string) => {
-    const token = tokens.find(t => t.id === tokenId);
+    const token = tokens.find((t) => t.id === tokenId);
     if (token) {
       setSelectedToken(token);
       setIsTokenDetailOpen(true);
@@ -367,26 +384,26 @@ const CipherMatrix = () => {
   // Filter and sort the tokens
   const sortedTokens = React.useMemo(() => {
     let filteredTokens = [...tokens];
-    
+
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filteredTokens = filteredTokens.filter(
-        token => 
-          token.name.toLowerCase().includes(query) || 
+        (token) =>
+          token.name.toLowerCase().includes(query) ||
           token.symbol.toLowerCase().includes(query) ||
           token.address.toLowerCase().includes(query)
       );
     }
-    
+
     // Apply verified filter
     if (filterVerified !== null) {
-      filteredTokens = filteredTokens.filter(token => token.verified === filterVerified);
+      filteredTokens = filteredTokens.filter((token) => token.verified === filterVerified);
     }
-    
+
     // Apply risk filter
     if (filterRisk !== null) {
-      filteredTokens = filteredTokens.filter(token => {
+      filteredTokens = filteredTokens.filter((token) => {
         if (filterRisk === 'low') return token.riskScore < 30;
         if (filterRisk === 'medium') return token.riskScore >= 30 && token.riskScore < 60;
         return token.riskScore >= 60;
@@ -395,43 +412,56 @@ const CipherMatrix = () => {
 
     // Apply advanced filters
     if (filterChain !== null && filterChain !== 'all') {
-      filteredTokens = filteredTokens.filter(token => token.chainName === filterChain);
+      filteredTokens = filteredTokens.filter((token) => token.chainName === filterChain);
     }
 
     if (filterAudited !== null) {
-      filteredTokens = filteredTokens.filter(token => token.auditStatus.isAudited === filterAudited);
+      filteredTokens = filteredTokens.filter(
+        (token) => token.auditStatus.isAudited === filterAudited
+      );
     }
 
     if (filterDoxxed !== null) {
-      filteredTokens = filteredTokens.filter(token => token.team.isDoxxed === filterDoxxed);
+      filteredTokens = filteredTokens.filter((token) => token.team.isDoxxed === filterDoxxed);
     }
 
     if (filterMinHolders !== null) {
-      filteredTokens = filteredTokens.filter(token => token.holders >= filterMinHolders);
+      filteredTokens = filteredTokens.filter((token) => token.holders >= filterMinHolders);
     }
 
     if (filterMinLiquidity !== null) {
-      filteredTokens = filteredTokens.filter(token => token.liquidity >= filterMinLiquidity);
+      filteredTokens = filteredTokens.filter((token) => token.liquidity >= filterMinLiquidity);
     }
-    
+
     // Sort tokens
     if (sortConfig !== null) {
-        filteredTokens.sort((a, b) => {
-          const aValue = a[sortConfig.key] as any;
-          const bValue = b[sortConfig.key] as any;
-          
-          if (aValue < bValue) {
-            return sortConfig.direction === 'asc' ? -1 : 1;
-          }
-          if (aValue > bValue) {
-            return sortConfig.direction === 'asc' ? 1 : -1;
-          }
-          return 0;
-        });
-      }
-    
+      filteredTokens.sort((a, b) => {
+        const aValue = a[sortConfig.key] as any;
+        const bValue = b[sortConfig.key] as any;
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
     return filteredTokens;
-  }, [tokens, sortConfig, searchQuery, filterVerified, filterRisk, filterChain, filterAudited, filterDoxxed, filterMinHolders, filterMinLiquidity]);
+  }, [
+    tokens,
+    sortConfig,
+    searchQuery,
+    filterVerified,
+    filterRisk,
+    filterChain,
+    filterAudited,
+    filterDoxxed,
+    filterMinHolders,
+    filterMinLiquidity,
+  ]);
 
   // Simplified API fetch simulation
   useEffect(() => {
@@ -442,7 +472,7 @@ const CipherMatrix = () => {
     //   setTokens(data);
     // };
     // fetchTokens();
-    
+
     // For demo purposes, we're using the mock data
     setTokens(mockTokens);
   }, []);
@@ -462,8 +492,10 @@ const CipherMatrix = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-matrix-green/30">
-        <h2 className="text-xl font-mono text-matrix-green mb-4">Cipher Matrix: Token Surveillance System</h2>
-        
+        <h2 className="text-xl font-mono text-matrix-green mb-4">
+          Cipher Matrix: Token Surveillance System
+        </h2>
+
         {/* Search and basic filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="relative flex-1">
@@ -476,7 +508,7 @@ const CipherMatrix = () => {
               className="w-full pl-10 pr-4 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none focus:ring-1 focus:ring-matrix-green/50"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <select
               value={filterVerified === null ? '' : filterVerified ? 'verified' : 'unverified'}
@@ -490,11 +522,11 @@ const CipherMatrix = () => {
               <option value="verified">Verified Only</option>
               <option value="unverified">Unverified Only</option>
             </select>
-            
+
             <select
               value={filterRisk || ''}
               onChange={(e) => {
-                setFilterRisk(e.target.value as 'low' | 'medium' | 'high' | null || null);
+                setFilterRisk((e.target.value as 'low' | 'medium' | 'high' | null) || null);
               }}
               className="px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
             >
@@ -529,7 +561,9 @@ const CipherMatrix = () => {
                     <label className="block text-matrix-green/80 mb-1 text-sm">Chain</label>
                     <select
                       value={filterChain || 'all'}
-                      onChange={(e) => setFilterChain(e.target.value === 'all' ? null : e.target.value)}
+                      onChange={(e) =>
+                        setFilterChain(e.target.value === 'all' ? null : e.target.value)
+                      }
                       className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
                     >
                       <option value="all">All Chains</option>
@@ -543,7 +577,9 @@ const CipherMatrix = () => {
                   <div>
                     <label className="block text-matrix-green/80 mb-1 text-sm">Audit Status</label>
                     <select
-                      value={filterAudited === null ? 'all' : filterAudited ? 'audited' : 'unaudited'}
+                      value={
+                        filterAudited === null ? 'all' : filterAudited ? 'audited' : 'unaudited'
+                      }
                       onChange={(e) => {
                         if (e.target.value === 'all') setFilterAudited(null);
                         else setFilterAudited(e.target.value === 'audited');
@@ -591,7 +627,9 @@ const CipherMatrix = () => {
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">Min. Liquidity</label>
+                    <label className="block text-matrix-green/80 mb-1 text-sm">
+                      Min. Liquidity
+                    </label>
                     <select
                       value={filterMinLiquidity === null ? 'all' : filterMinLiquidity.toString()}
                       onChange={(e) => {
@@ -622,14 +660,14 @@ const CipherMatrix = () => {
           )}
         </AnimatePresence>
       </div>
-      
+
       {/* Token table */}
       <div className="flex-1 overflow-auto">
         <table className="w-full">
           <thead className="sticky top-0 bg-black/90 backdrop-blur-sm border-b border-matrix-green/30">
             <tr>
               <th className="px-4 py-3 text-left">
-                <button 
+                <button
                   onClick={() => handleSort('name')}
                   className="flex items-center text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -637,7 +675,7 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-right">
-                <button 
+                <button
                   onClick={() => handleSort('price')}
                   className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -645,7 +683,7 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-right">
-                <button 
+                <button
                   onClick={() => handleSort('priceChange24h')}
                   className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -653,7 +691,7 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-right">
-                <button 
+                <button
                   onClick={() => handleSort('marketCap')}
                   className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -661,7 +699,7 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-right">
-                <button 
+                <button
                   onClick={() => handleSort('holders')}
                   className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -669,7 +707,7 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-center">
-                <button 
+                <button
                   onClick={() => handleSort('riskScore')}
                   className="flex items-center justify-center text-matrix-green/80 hover:text-matrix-green"
                 >
@@ -677,22 +715,20 @@ const CipherMatrix = () => {
                 </button>
               </th>
               <th className="px-4 py-3 text-right">
-                <button 
+                <button
                   onClick={() => handleSort('launchDate')}
                   className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
                 >
                   Launch Date <ArrowUpDown size={14} className="ml-1" />
                 </button>
               </th>
-              <th className="px-4 py-3 text-right">
-                Actions
-              </th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {sortedTokens.length > 0 ? (
               sortedTokens.map((token) => (
-                <motion.tr 
+                <motion.tr
                   key={token.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -701,16 +737,26 @@ const CipherMatrix = () => {
                   <td className="px-4 py-3">
                     <div className="flex items-center">
                       {token.verified ? (
-                        <Shield size={16} className="text-green-400 mr-2" aria-label="Verified Token" />
+                        <Shield
+                          size={16}
+                          className="text-green-400 mr-2"
+                          aria-label="Verified Token"
+                        />
                       ) : (
-                        <AlertTriangle size={16} className="text-yellow-400 mr-2" aria-label="Unverified Token" />
+                        <AlertTriangle
+                          size={16}
+                          className="text-yellow-400 mr-2"
+                          aria-label="Unverified Token"
+                        />
                       )}
                       <div>
                         <div className="font-semibold text-matrix-green">{token.name}</div>
                         <div className="text-sm text-matrix-green/70 flex items-center gap-1">
                           <span>{token.symbol}</span>
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-matrix-green/10">{token.chainName}</span>
-                          
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-matrix-green/10">
+                            {token.chainName}
+                          </span>
+
                           {/* Add check for code audit */}
                           {token.auditStatus?.isAudited && (
                             <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 flex items-center gap-0.5">
@@ -718,7 +764,7 @@ const CipherMatrix = () => {
                               <span>Audited</span>
                             </span>
                           )}
-                          
+
                           {/* Add check for team doxxed status */}
                           {token.team?.isDoxxed ? (
                             <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 flex items-center gap-0.5">
@@ -732,11 +778,12 @@ const CipherMatrix = () => {
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Short address display */}
                         <div className="text-xs text-matrix-green/50 mt-1">
-                          {token.address.substring(0, 6)}...{token.address.substring(token.address.length - 4)}
-                          <button 
+                          {token.address.substring(0, 6)}...
+                          {token.address.substring(token.address.length - 4)}
+                          <button
                             onClick={() => navigator.clipboard.writeText(token.address)}
                             className="ml-1 hover:text-matrix-green"
                             title="Copy address"
@@ -747,7 +794,7 @@ const CipherMatrix = () => {
                       </div>
                     </div>
                   </td>
-                  
+
                   {/* Price column with sparkline */}
                   <td className="px-4 py-3">
                     <div>
@@ -755,9 +802,9 @@ const CipherMatrix = () => {
                       {token.priceHistory && token.priceHistory.length > 0 && (
                         <div className="h-10 mt-1">
                           <Sparklines data={token.priceHistory} limit={20} width={80} height={30}>
-                            <SparklinesLine 
-                              color={token.priceChange24h >= 0 ? '#22c55e' : '#ef4444'} 
-                              style={{ fill: "none" }} 
+                            <SparklinesLine
+                              color={token.priceChange24h >= 0 ? '#22c55e' : '#ef4444'}
+                              style={{ fill: 'none' }}
                             />
                             <SparklinesSpots size={1} />
                           </Sparklines>
@@ -765,30 +812,41 @@ const CipherMatrix = () => {
                       )}
                     </div>
                   </td>
-                  
+
                   {/* Enhanced 24h change column */}
-                  <td className={`px-4 py-3 text-right font-mono ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <td
+                    className={`px-4 py-3 text-right font-mono ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                  >
                     <div className="flex items-center justify-end gap-1">
                       {token.priceChange24h >= 0 ? (
                         <TrendingUp size={14} />
                       ) : (
                         <TrendingDown size={14} />
                       )}
-                      <span>{token.priceChange24h >= 0 ? '+' : ''}{token.priceChange24h.toFixed(2)}%</span>
+                      <span>
+                        {token.priceChange24h >= 0 ? '+' : ''}
+                        {token.priceChange24h.toFixed(2)}%
+                      </span>
                     </div>
                   </td>
-                  
-                  <td className="px-4 py-3 text-right font-mono">{formatCurrency(token.marketCap)}</td>
-                  <td className="px-4 py-3 text-right font-mono">{token.holders.toLocaleString()}</td>
-                  
+
+                  <td className="px-4 py-3 text-right font-mono">
+                    {formatCurrency(token.marketCap)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono">
+                    {token.holders.toLocaleString()}
+                  </td>
+
                   {/* Risk Level column with tooltip */}
                   <td className="px-4 py-3">
                     <div className="flex justify-center relative group">
-                      <span className={`px-2 py-1 rounded text-xs ${getRiskColor(token.riskScore)} bg-black/30 border border-current flex items-center gap-1`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${getRiskColor(token.riskScore)} bg-black/30 border border-current flex items-center gap-1`}
+                      >
                         {getRiskText(token.riskScore)}
                         <Info size={10} />
                       </span>
-                      
+
                       {/* Tooltip that shows on hover */}
                       <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-60 p-2 bg-black border border-matrix-green rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                         <div className="text-sm">
@@ -802,82 +860,88 @@ const CipherMatrix = () => {
                           ) : (
                             <p className="text-xs text-green-400">No significant risk factors</p>
                           )}
-                          
+
                           {token.lockupPeriod && (
-                                                       <div className="mt-1.5 pt-1.5 border-t border-matrix-green/20">
-                                                       <div className="text-xs flex gap-1 items-center">
-                                                         <Lock size={10} />
-                                                         <span>{token.lockupPercentage}% tokens locked for {token.lockupPeriod} days</span>
-                                                       </div>
-                                                     </div>
-                                                   )}
-                                                 </div>
-                                               </div>
-                                             </div>
-                                           </td>
-                                           
-                                           {/* Enhanced Launch Date column with "New" badge for recent tokens */}
-                                           <td className="px-4 py-3 text-right">
-                                             <div>
-                                               <div className="text-matrix-green/70">
-                                                 {new Date(token.launchDate).toLocaleDateString()}
-                                               </div>
-                                               {Date.now() - new Date(token.launchDate).getTime() < 1000 * 60 * 60 * 24 * 2 && (
-                                                 <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs bg-matrix-green text-black">
-                                                   <Zap size={10} className="mr-0.5" />
-                                                   New
-                                                 </span>
-                                               )}
-                                             </div>
-                                           </td>
-                                           
-                                           {/* Actions column */}
-                                           <td className="px-4 py-3 text-right">
-                                             <div className="flex justify-end space-x-2">
-                                               <button 
-                                                 onClick={() => window.open(`https://etherscan.io/token/${token.address}`, '_blank')}
-                                                 className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
-                                                 title="View on Blockchain Explorer"
-                                               >
-                                                 <ExternalLink size={14} className="text-matrix-green" />
-                                               </button>
-                                               
-                                               <button 
-                                                 onClick={() => showTokenDetails(token.id)}
-                                                 className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
-                                                 title="View Details"
-                                               >
-                                                 <Eye size={14} className="text-matrix-green" />
-                                               </button>
-                                             </div>
-                                           </td>
-                                         </motion.tr>
-                                       ))
-                                     ) : (
-                                       <tr>
-                                         <td colSpan={8} className="px-4 py-8 text-center text-matrix-green/50">
-                                           No tokens match your search criteria
-                                         </td>
-                                       </tr>
-                                     )}
-                                   </tbody>
-                                 </table>
-                               </div>
-                               
-                               {/* Footer with stats */}
-                               <div className="p-3 border-t border-matrix-green/30 text-sm text-matrix-green/60 flex justify-between">
-                                 <div>Displaying {sortedTokens.length} tokens</div>
-                                 <div>Last updated: {new Date().toLocaleTimeString()}</div>
-                               </div>
-                         
-                               {/* Token Detail Modal */}
-                               <TokenDetailModal
-                                 isOpen={isTokenDetailOpen}
-                                 onClose={() => setIsTokenDetailOpen(false)}
-                                 token={selectedToken}
-                               />
-                             </div>
-                           );
-                         };
-                         
-                         export default CipherMatrix;
+                            <div className="mt-1.5 pt-1.5 border-t border-matrix-green/20">
+                              <div className="text-xs flex gap-1 items-center">
+                                <Lock size={10} />
+                                <span>
+                                  {token.lockupPercentage}% tokens locked for {token.lockupPeriod}{' '}
+                                  days
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Enhanced Launch Date column with "New" badge for recent tokens */}
+                  <td className="px-4 py-3 text-right">
+                    <div>
+                      <div className="text-matrix-green/70">
+                        {new Date(token.launchDate).toLocaleDateString()}
+                      </div>
+                      {Date.now() - new Date(token.launchDate).getTime() <
+                        1000 * 60 * 60 * 24 * 2 && (
+                        <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs bg-matrix-green text-black">
+                          <Zap size={10} className="mr-0.5" />
+                          New
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Actions column */}
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() =>
+                          window.open(`https://etherscan.io/token/${token.address}`, '_blank')
+                        }
+                        className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
+                        title="View on Blockchain Explorer"
+                      >
+                        <ExternalLink size={14} className="text-matrix-green" />
+                      </button>
+
+                      <button
+                        onClick={() => showTokenDetails(token.id)}
+                        className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
+                        title="View Details"
+                      >
+                        <Eye size={14} className="text-matrix-green" />
+                      </button>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-matrix-green/50">
+                  No tokens match your search criteria
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer with stats */}
+      <div className="p-3 border-t border-matrix-green/30 text-sm text-matrix-green/60 flex justify-between">
+        <div>Displaying {sortedTokens.length} tokens</div>
+        <div>Last updated: {new Date().toLocaleTimeString()}</div>
+      </div>
+
+      {/* Token Detail Modal */}
+      <TokenDetailModal
+        isOpen={isTokenDetailOpen}
+        onClose={() => setIsTokenDetailOpen(false)}
+        token={selectedToken}
+      />
+    </div>
+  );
+};
+
+export default CipherMatrix;

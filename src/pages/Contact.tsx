@@ -22,7 +22,7 @@ const Contact = () => {
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
   });
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -31,16 +31,16 @@ const Contact = () => {
     e.preventDefault();
     setStatus('submitting');
     setErrorMessage('');
-    
+
     try {
       const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
       console.log('Using API URL:', API_URL); // Debug log
-      
+
       const response = await fetch(`${API_URL}/api/v1/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify(formData),
       });
@@ -69,11 +69,11 @@ const Contact = () => {
       setErrorMessage(error instanceof Error ? error.message : 'Something went wrong');
       console.error('Contact form submission error:', error);
     }
-};
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -86,7 +86,7 @@ const Contact = () => {
       >
         <Card className="p-8 px-24 bg-black/90 border border-matrix-green">
           <h1 className="text-4xl mb-8 text-center text-matrix-green font-mono">CONTACT</h1>
-          
+
           {status === 'error' && (
             <motion.div
               initial={{ opacity: 0 }}

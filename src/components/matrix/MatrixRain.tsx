@@ -20,7 +20,8 @@ export const MatrixRain = () => {
     window.addEventListener('resize', resizeCanvas);
 
     // Matrix rain configuration
-    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    const chars =
+      '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
     const fontSize = 14;
     const columns = Math.floor(canvas.width / fontSize);
     const drops: number[] = new Array(columns).fill(1);
@@ -42,7 +43,7 @@ export const MatrixRain = () => {
         // Random opacity for more dynamic effect
         const opacity = Math.random() * 0.5 + 0.5;
         ctx.fillStyle = `rgba(51, 255, 51, ${opacity})`;
-        
+
         ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
         // Reset when reaching bottom or randomly

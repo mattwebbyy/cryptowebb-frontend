@@ -1,7 +1,24 @@
 // src/components/analytics/TokenDetailModal.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Shield, AlertTriangle, ExternalLink, TrendingUp, TrendingDown, Github as GitHub, Twitter, FileText, Lock, Unlock, Users, DollarSign, Percent, Activity, BarChart2 } from 'lucide-react';
+import {
+  X,
+  Shield,
+  AlertTriangle,
+  ExternalLink,
+  TrendingUp,
+  TrendingDown,
+  Github as GitHub,
+  Twitter,
+  FileText,
+  Lock,
+  Unlock,
+  Users,
+  DollarSign,
+  Percent,
+  Activity,
+  BarChart2,
+} from 'lucide-react';
 import { Sparklines, SparklinesLine, SparklinesSpots } from 'react-sparklines';
 
 // Use the enhanced Token interface from CipherMatrix.tsx
@@ -85,7 +102,8 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
   };
 
   const formatPrice = (price: number) => {
-    if (price < 0.00001 && price > 0) { // Handle potential zero price
+    if (price < 0.00001 && price > 0) {
+      // Handle potential zero price
       return `$${price.toExponential(4)}`;
     }
     return `$${price.toFixed(6)}`;
@@ -111,27 +129,27 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
 
   // TODO: Replace with a function that gets the correct explorer URL based on chainName/chainId
   const getExplorerUrl = (address: string, chainName: string) => {
-      // Simple example, expand as needed
-      if (chainName.toLowerCase().includes('ethereum')) {
-          return `https://etherscan.io/token/${address}`;
-      }
-      if (chainName.toLowerCase().includes('bsc') || chainName.toLowerCase().includes('binance')) {
-          return `https://bscscan.com/token/${address}`;
-      }
-      // Add more chains (Polygon, Arbitrum, etc.)
-      return `https://etherscan.io/token/${address}`; // Default fallback
-  }
+    // Simple example, expand as needed
+    if (chainName.toLowerCase().includes('ethereum')) {
+      return `https://etherscan.io/token/${address}`;
+    }
+    if (chainName.toLowerCase().includes('bsc') || chainName.toLowerCase().includes('binance')) {
+      return `https://bscscan.com/token/${address}`;
+    }
+    // Add more chains (Polygon, Arbitrum, etc.)
+    return `https://etherscan.io/token/${address}`; // Default fallback
+  };
 
   const calculateUnlockDate = (launch: string, period: number) => {
-      try {
-          const launchDate = new Date(launch);
-          const unlockTimestamp = launchDate.getTime() + period * 24 * 60 * 60 * 1000;
-          return new Date(unlockTimestamp).toLocaleDateString();
-      } catch (e) {
-          console.error("Error calculating unlock date:", e);
-          return "Invalid Date";
-      }
-  }
+    try {
+      const launchDate = new Date(launch);
+      const unlockTimestamp = launchDate.getTime() + period * 24 * 60 * 60 * 1000;
+      return new Date(unlockTimestamp).toLocaleDateString();
+    } catch (e) {
+      console.error('Error calculating unlock date:', e);
+      return 'Invalid Date';
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-sm">
@@ -153,7 +171,9 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             <h2 className="text-xl font-mono text-matrix-green flex items-center gap-2">
               {token.name} <span className="text-matrix-green/70 text-base">({token.symbol})</span>
             </h2>
-            <span className="text-xs px-2 py-1 rounded bg-matrix-green/10 text-matrix-green/80">{token.chainName}</span>
+            <span className="text-xs px-2 py-1 rounded bg-matrix-green/10 text-matrix-green/80">
+              {token.chainName}
+            </span>
           </div>
           <button
             onClick={onClose}
@@ -174,22 +194,35 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Current Price:</span>
-                  <span className="text-matrix-green font-mono font-bold">{formatPrice(token.price)}</span>
+                  <span className="text-matrix-green font-mono font-bold">
+                    {formatPrice(token.price)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">24h Change:</span>
-                  <span className={`font-mono font-bold flex items-center gap-1 ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {token.priceChange24h >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                    {token.priceChange24h >= 0 ? '+' : ''}{token.priceChange24h.toFixed(2)}%
+                  <span
+                    className={`font-mono font-bold flex items-center gap-1 ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                  >
+                    {token.priceChange24h >= 0 ? (
+                      <TrendingUp size={14} />
+                    ) : (
+                      <TrendingDown size={14} />
+                    )}
+                    {token.priceChange24h >= 0 ? '+' : ''}
+                    {token.priceChange24h.toFixed(2)}%
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Market Cap:</span>
-                  <span className="text-matrix-green font-mono">{formatCurrency(token.marketCap)}</span>
+                  <span className="text-matrix-green font-mono">
+                    {formatCurrency(token.marketCap)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Liquidity:</span>
-                  <span className="text-matrix-green font-mono">{formatCurrency(token.liquidity)}</span>
+                  <span className="text-matrix-green font-mono">
+                    {formatCurrency(token.liquidity)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Holders:</span>
@@ -197,7 +230,9 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Launch Date:</span>
-                  <span className="text-matrix-green">{new Date(token.launchDate).toLocaleDateString()}</span>
+                  <span className="text-matrix-green">
+                    {new Date(token.launchDate).toLocaleDateString()}
+                  </span>
                 </div>
                 {/* --- FIX 1: Added opening <a> tag --- */}
                 <div className="pt-2 mt-2 border-t border-matrix-green/20">
@@ -217,13 +252,19 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
 
             {/* Price Chart */}
             <div className="md:col-span-2 bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">Price History (7d - Placeholder)</h3>
+              <h3 className="text-lg font-medium text-matrix-green mb-4">
+                Price History (7d - Placeholder)
+              </h3>
               <div className="h-40">
                 {token.priceHistory && token.priceHistory.length > 1 ? ( // Need at least 2 points to draw a line
                   <Sparklines data={token.priceHistory} margin={10} height={120}>
                     <SparklinesLine
-                      color={token.priceHistory[token.priceHistory.length -1] >= token.priceHistory[0] ? '#10b981' : '#ef4444'} // Color based on start vs end
-                      style={{ strokeWidth: 2, fill: "none" }}
+                      color={
+                        token.priceHistory[token.priceHistory.length - 1] >= token.priceHistory[0]
+                          ? '#10b981'
+                          : '#ef4444'
+                      } // Color based on start vs end
+                      style={{ strokeWidth: 2, fill: 'none' }}
                     />
                     <SparklinesSpots size={3} style={{ fill: '#0f0' }} />
                   </Sparklines>
@@ -244,45 +285,57 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Total Supply:</span>
-                  <span className="text-matrix-green font-mono">{formatNumber(token.totalSupply)}</span>
+                  <span className="text-matrix-green font-mono">
+                    {formatNumber(token.totalSupply)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Circulating Supply:</span>
-                  <span className="text-matrix-green font-mono">{formatNumber(token.circulatingSupply)}</span>
+                  <span className="text-matrix-green font-mono">
+                    {formatNumber(token.circulatingSupply)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Circulation Ratio:</span>
                   <span className="text-matrix-green font-mono">
-                    {token.totalSupply > 0 ? ((token.circulatingSupply / token.totalSupply) * 100).toFixed(2) : '0.00'}%
+                    {token.totalSupply > 0
+                      ? ((token.circulatingSupply / token.totalSupply) * 100).toFixed(2)
+                      : '0.00'}
+                    %
                   </span>
                 </div>
 
-                {token.lockupPeriod !== undefined && token.lockupPercentage !== undefined && ( // Check both exist
-                  <>
-                    <div className="border-t border-matrix-green/20 my-2 pt-2">
-                      <div className="flex items-center gap-1 text-matrix-green mb-2">
-                        <Lock size={14} />
-                        <span className="font-semibold">Token Lockup</span>
+                {token.lockupPeriod !== undefined &&
+                  token.lockupPercentage !== undefined && ( // Check both exist
+                    <>
+                      <div className="border-t border-matrix-green/20 my-2 pt-2">
+                        <div className="flex items-center gap-1 text-matrix-green mb-2">
+                          <Lock size={14} />
+                          <span className="font-semibold">Token Lockup</span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-matrix-green/70">Locked Tokens:</span>
+                            <span className="text-matrix-green font-mono">
+                              {token.lockupPercentage}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-matrix-green/70">Lock Duration:</span>
+                            <span className="text-matrix-green font-mono">
+                              {token.lockupPeriod} days
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-matrix-green/70">Unlock Date:</span>
+                            <span className="text-matrix-green font-mono">
+                              {calculateUnlockDate(token.launchDate, token.lockupPeriod)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-matrix-green/70">Locked Tokens:</span>
-                          <span className="text-matrix-green font-mono">{token.lockupPercentage}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-matrix-green/70">Lock Duration:</span>
-                          <span className="text-matrix-green font-mono">{token.lockupPeriod} days</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-matrix-green/70">Unlock Date:</span>
-                          <span className="text-matrix-green font-mono">
-                             {calculateUnlockDate(token.launchDate, token.lockupPeriod)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
               </div>
             </div>
 
@@ -296,7 +349,9 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Identity Status:</span>
-                  <span className={`${token.team.isDoxxed ? 'text-green-400' : 'text-yellow-400'} flex items-center gap-1`}>
+                  <span
+                    className={`${token.team.isDoxxed ? 'text-green-400' : 'text-yellow-400'} flex items-center gap-1`}
+                  >
                     {token.team.isDoxxed ? (
                       <>
                         <Unlock size={14} />
@@ -312,7 +367,11 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                 </div>
                 <div className="flex justify-between">
                   <span className="text-matrix-green/70">Prior Projects:</span>
-                  <span className={`${token.team.hasPriorProjects ? 'text-yellow-400' : 'text-green-400'}`}> {/* Often prior projects by anon teams are negative */}
+                  <span
+                    className={`${token.team.hasPriorProjects ? 'text-yellow-400' : 'text-green-400'}`}
+                  >
+                    {' '}
+                    {/* Often prior projects by anon teams are negative */}
                     {token.team.hasPriorProjects ? 'Yes' : 'No'}
                   </span>
                 </div>
@@ -332,13 +391,17 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                       {token.auditStatus.auditCompany && (
                         <div className="flex justify-between">
                           <span className="text-matrix-green/70">Audit Company:</span>
-                          <span className="text-matrix-green">{token.auditStatus.auditCompany}</span>
+                          <span className="text-matrix-green">
+                            {token.auditStatus.auditCompany}
+                          </span>
                         </div>
                       )}
                       {token.auditStatus.score !== undefined && (
                         <div className="flex justify-between">
                           <span className="text-matrix-green/70">Audit Score:</span>
-                          <span className={`${token.auditStatus.score > 70 ? 'text-green-400' : token.auditStatus.score > 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          <span
+                            className={`${token.auditStatus.score > 70 ? 'text-green-400' : token.auditStatus.score > 40 ? 'text-yellow-400' : 'text-red-400'}`}
+                          >
                             {token.auditStatus.score}/100
                           </span>
                         </div>
@@ -378,17 +441,27 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                     <Twitter size={14} />
                     <span>Twitter:</span>
                   </span>
-                  <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.twitterFollowers)} followers</span>
+                  <span className="text-matrix-green font-mono">
+                    {formatNumber(token.socialMetrics.twitterFollowers)} followers
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                   {/* Assuming Discord Icon isn't directly available in lucide, using Users */}
-                   <span className="text-matrix-green/70 flex items-center gap-1"><Users size={14} /> Discord:</span>
-                   <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.discordMembers)} members</span>
+                  {/* Assuming Discord Icon isn't directly available in lucide, using Users */}
+                  <span className="text-matrix-green/70 flex items-center gap-1">
+                    <Users size={14} /> Discord:
+                  </span>
+                  <span className="text-matrix-green font-mono">
+                    {formatNumber(token.socialMetrics.discordMembers)} members
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                   {/* Assuming Telegram Icon isn't directly available in lucide, using Users */}
-                   <span className="text-matrix-green/70 flex items-center gap-1"><Users size={14} /> Telegram:</span>
-                   <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.telegramMembers)} members</span>
+                  {/* Assuming Telegram Icon isn't directly available in lucide, using Users */}
+                  <span className="text-matrix-green/70 flex items-center gap-1">
+                    <Users size={14} /> Telegram:
+                  </span>
+                  <span className="text-matrix-green font-mono">
+                    {formatNumber(token.socialMetrics.telegramMembers)} members
+                  </span>
                 </div>
 
                 {token.socialMetrics.githubStats && (
@@ -400,19 +473,27 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-matrix-green/70">Stars:</span>
-                        <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.githubStats.stars)}</span>
+                        <span className="text-matrix-green font-mono">
+                          {formatNumber(token.socialMetrics.githubStats.stars)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-matrix-green/70">Forks:</span>
-                        <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.githubStats.forks)}</span>
+                        <span className="text-matrix-green font-mono">
+                          {formatNumber(token.socialMetrics.githubStats.forks)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-matrix-green/70">Contributors:</span>
-                        <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.githubStats.contributors)}</span>
+                        <span className="text-matrix-green font-mono">
+                          {formatNumber(token.socialMetrics.githubStats.contributors)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-matrix-green/70">Commits (all time):</span>
-                        <span className="text-matrix-green font-mono">{formatNumber(token.socialMetrics.githubStats.commits)}</span>
+                        <span className="text-matrix-green font-mono">
+                          {formatNumber(token.socialMetrics.githubStats.commits)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -428,7 +509,9 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getRiskBgColor(token.riskScore)} ${getRiskColor(token.riskScore)} border ${getRiskColor(token.riskScore)}`}>
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${getRiskBgColor(token.riskScore)} ${getRiskColor(token.riskScore)} border ${getRiskColor(token.riskScore)}`}
+                  >
                     <span className="text-xl font-bold">{token.riskScore}</span>
                   </div>
                   <div>
@@ -451,10 +534,12 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                       ))}
                     </ul>
                   ) : (
-                     <div className="flex items-start gap-2 text-green-400">
-                         <Shield size={14} className="flex-shrink-0 mt-1" />
-                         <span className="text-sm">No major specific risk factors identified based on available data.</span>
-                     </div>
+                    <div className="flex items-start gap-2 text-green-400">
+                      <Shield size={14} className="flex-shrink-0 mt-1" />
+                      <span className="text-sm">
+                        No major specific risk factors identified based on available data.
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -463,69 +548,97 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
               <div className="space-y-4">
                 <h4 className="font-medium text-matrix-green">Risk Breakdown (Illustrative):</h4>
                 <div className="space-y-3">
-                   {/* Team Risk */}
-                   <div>
-                       <div className="flex justify-between mb-1">
-                           <span className="text-sm text-matrix-green/70">Team Risk (Anon/Doxxed)</span>
-                           <span className="text-sm text-matrix-green/70">
-                               {token.team.isDoxxed ? 'Low' : 'Medium'}
-                           </span>
-                       </div>
-                       <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
-                           <div
-                               className={`h-full ${token.team.isDoxxed ? 'bg-green-400' : 'bg-yellow-400'}`}
-                               style={{ width: token.team.isDoxxed ? '30%' : '60%' }}
-                           ></div>
-                       </div>
-                   </div>
+                  {/* Team Risk */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-matrix-green/70">Team Risk (Anon/Doxxed)</span>
+                      <span className="text-sm text-matrix-green/70">
+                        {token.team.isDoxxed ? 'Low' : 'Medium'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                      <div
+                        className={`h-full ${token.team.isDoxxed ? 'bg-green-400' : 'bg-yellow-400'}`}
+                        style={{ width: token.team.isDoxxed ? '30%' : '60%' }}
+                      ></div>
+                    </div>
+                  </div>
 
-                   {/* Code Security Risk */}
-                   <div>
-                       <div className="flex justify-between mb-1">
-                           <span className="text-sm text-matrix-green/70">Code Security (Audit Status)</span>
-                           <span className="text-sm text-matrix-green/70">
-                               {token.auditStatus.isAudited ? (token.auditStatus.score !== undefined && token.auditStatus.score < 50 ? 'Medium' : 'Low') : 'High'}
-                           </span>
-                       </div>
-                       <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
-                           <div
-                               className={`h-full ${token.auditStatus.isAudited ? (token.auditStatus.score !== undefined && token.auditStatus.score < 50 ? 'bg-yellow-400' : 'bg-green-400') : 'bg-red-400'}`}
-                               style={{ width: token.auditStatus.isAudited ? (token.auditStatus.score !== undefined && token.auditStatus.score < 50 ? '50%' : '20%') : '80%' }}
-                           ></div>
-                       </div>
-                   </div>
+                  {/* Code Security Risk */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-matrix-green/70">
+                        Code Security (Audit Status)
+                      </span>
+                      <span className="text-sm text-matrix-green/70">
+                        {token.auditStatus.isAudited
+                          ? token.auditStatus.score !== undefined && token.auditStatus.score < 50
+                            ? 'Medium'
+                            : 'Low'
+                          : 'High'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                      <div
+                        className={`h-full ${token.auditStatus.isAudited ? (token.auditStatus.score !== undefined && token.auditStatus.score < 50 ? 'bg-yellow-400' : 'bg-green-400') : 'bg-red-400'}`}
+                        style={{
+                          width: token.auditStatus.isAudited
+                            ? token.auditStatus.score !== undefined && token.auditStatus.score < 50
+                              ? '50%'
+                              : '20%'
+                            : '80%',
+                        }}
+                      ></div>
+                    </div>
+                  </div>
 
-                   {/* Tokenomics Risk */}
-                   <div>
-                       <div className="flex justify-between mb-1">
-                           <span className="text-sm text-matrix-green/70">Tokenomics (Lockup)</span>
-                           <span className="text-sm text-matrix-green/70">
-                               {token.lockupPeriod && token.lockupPeriod > 30 ? 'Low' : 'Medium'} {/* Simplified */}
-                           </span>
-                       </div>
-                       <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
-                           <div
-                               className={`h-full ${token.lockupPeriod && token.lockupPeriod > 30 ? 'bg-green-400' : 'bg-yellow-400'}`}
-                               style={{ width: token.lockupPeriod && token.lockupPeriod > 30 ? '25%' : '50%' }}
-                           ></div>
-                       </div>
-                   </div>
+                  {/* Tokenomics Risk */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-matrix-green/70">Tokenomics (Lockup)</span>
+                      <span className="text-sm text-matrix-green/70">
+                        {token.lockupPeriod && token.lockupPeriod > 30 ? 'Low' : 'Medium'}{' '}
+                        {/* Simplified */}
+                      </span>
+                    </div>
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                      <div
+                        className={`h-full ${token.lockupPeriod && token.lockupPeriod > 30 ? 'bg-green-400' : 'bg-yellow-400'}`}
+                        style={{
+                          width: token.lockupPeriod && token.lockupPeriod > 30 ? '25%' : '50%',
+                        }}
+                      ></div>
+                    </div>
+                  </div>
 
-                   {/* Market Volatility Risk */}
-                   <div>
-                       <div className="flex justify-between mb-1">
-                           <span className="text-sm text-matrix-green/70">Market Volatility (24h Change)</span>
-                           <span className="text-sm text-matrix-green/70">
-                               {Math.abs(token.priceChange24h) > 25 ? 'High' : Math.abs(token.priceChange24h) > 10 ? 'Medium' : 'Low'}
-                           </span>
-                       </div>
-                       <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
-                           <div
-                               className={`h-full ${Math.abs(token.priceChange24h) > 25 ? 'bg-red-400' : Math.abs(token.priceChange24h) > 10 ? 'bg-yellow-400' : 'bg-green-400'}`}
-                               style={{ width: Math.abs(token.priceChange24h) > 25 ? '75%' : Math.abs(token.priceChange24h) > 10 ? '50%' : '25%' }}
-                           ></div>
-                       </div>
-                   </div>
+                  {/* Market Volatility Risk */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-matrix-green/70">
+                        Market Volatility (24h Change)
+                      </span>
+                      <span className="text-sm text-matrix-green/70">
+                        {Math.abs(token.priceChange24h) > 25
+                          ? 'High'
+                          : Math.abs(token.priceChange24h) > 10
+                            ? 'Medium'
+                            : 'Low'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                      <div
+                        className={`h-full ${Math.abs(token.priceChange24h) > 25 ? 'bg-red-400' : Math.abs(token.priceChange24h) > 10 ? 'bg-yellow-400' : 'bg-green-400'}`}
+                        style={{
+                          width:
+                            Math.abs(token.priceChange24h) > 25
+                              ? '75%'
+                              : Math.abs(token.priceChange24h) > 10
+                                ? '50%'
+                                : '25%',
+                        }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -544,7 +657,8 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             Copy Address
           </button>
         </div>
-      </motion.div> {/* This is the closing tag for the main motion.div */}
+      </motion.div>{' '}
+      {/* This is the closing tag for the main motion.div */}
     </div>
   );
 };
