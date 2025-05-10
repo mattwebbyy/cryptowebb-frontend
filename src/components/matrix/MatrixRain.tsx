@@ -1,6 +1,12 @@
+// src/components/matrix/MatrixRain.tsx
 import { useEffect, useRef } from 'react';
+import { cn } from '../../lib/utils'; // Import the cn utility
 
-export const MatrixRain = () => {
+interface MatrixRainProps {
+  className?: string; // Define props to accept className
+}
+
+export const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => { // Destructure className from props
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -33,7 +39,7 @@ export const MatrixRain = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Green text
-      ctx.fillStyle = '#33ff33';
+      // ctx.fillStyle = '#33ff33'; // Overridden by character-specific opacity below
       ctx.font = `${fontSize}px monospace`;
 
       // Drawing the characters
@@ -41,8 +47,8 @@ export const MatrixRain = () => {
         // Random character
         const char = chars[Math.floor(Math.random() * chars.length)];
         // Random opacity for more dynamic effect
-        const opacity = Math.random() * 0.5 + 0.5;
-        ctx.fillStyle = `rgba(51, 255, 51, ${opacity})`;
+        const opacity = Math.random() * 0.5 + 0.5; // Opacity between 0.5 and 1.0
+        ctx.fillStyle = `rgba(51, 255, 51, ${opacity})`; // Green with variable opacity
 
         ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
@@ -61,13 +67,14 @@ export const MatrixRain = () => {
       clearInterval(interval);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, []); // Empty dependency array ensures this effect runs only once on mount and cleans up on unmount
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10"
-      style={{ background: 'black' }}
+      // Use cn to merge default classes with the passed className
+      className={cn("fixed top-0 left-0 w-full h-full -z-10", className)}
+      style={{ background: 'black' }} // Explicit background for the canvas itself
     />
   );
 };
