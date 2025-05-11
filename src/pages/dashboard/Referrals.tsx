@@ -1,12 +1,15 @@
 // src/pages/dashboard/Referrals.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import {apiClient} from '../../lib/axios';
+import { apiClient } from '../../lib/axios';
 import { toast } from 'react-toastify';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { SEO } from '../../components/SEO';
-import { FiPlusCircle, FiList, FiCopy } from 'react-icons/fi'; // Example icons
+import { FiPlusCircle, FiList, FiCopy } from 'react-icons/fi';
+
+// Configuration - easy to update if needed
+const REFERRAL_BASE_URL = 'https://cryptowebb.com/ref/';
 
 interface ReferralCode {
   id: string;
@@ -29,8 +32,10 @@ const ReferralsPage: React.FC = () => {
   const [referralCodes, setReferralCodes] = useState<ReferralCode[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Initialize platform to "general" as it's the only option
   const [newCode, setNewCode] = useState<NewReferralCode>({
-    platform: '',
+    platform: 'general', // Default to 'general'
     code: '',
     description: '',
   });
@@ -39,40 +44,108 @@ const ReferralsPage: React.FC = () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const response = await apiClient.get<ReferralCode[]>('/users/referral-codes');
-      setReferralCodes(response.data || []);
+      // Make the API call with proper typing
+      const response = await apiClient.get<any>('/api/v1/users/referral-codes');
+      
+      let codesArray: any[] = [];
+      
+      // The response.data is the correct way to access data in Axios responses
+      if (response.data && typeof response.data === 'object') {
+        // Check if response.data has a referralCodes property
+        if (response.data.referralCodes && Array.isArray(response.data.referralCodes)) {
+          codesArray = response.data.referralCodes;
+        } 
+        // Check if response.data is directly the array
+        else if (Array.isArray(response.data)) {
+          codesArray = response.data;
+        } 
+        // Last resort - search for any arrays in the response.data
+        else {
+          const findArrays = (obj: any): any[] => {
+            if (!obj || typeof obj !== 'object') return [];
+            
+            for (const key in obj) {
+              if (Array.isArray(obj[key])) {
+                return obj[key];
+              } else if (obj[key] && typeof obj[key] === 'object') {
+                const found = findArrays(obj[key]);
+                if (found.length > 0) return found;
+              }
+            }
+            
+            return [];
+          };
+          
+          codesArray = findArrays(response.data);
+        }
+      }
+      
+      // Normalize the data by handling field capitalization differences
+      if (codesArray.length > 0) {
+        const normalizedCodes = codesArray.map((code: any) => ({
+          id: code.ID || code.id || '',
+          platform: code.Platform || code.platform || '',
+          code: code.Code || code.code || '',
+          description: code.Description || code.description || '',
+          active: typeof code.Active !== 'undefined' ? code.Active : 
+                 (typeof code.active !== 'undefined' ? code.active : true),
+          created_at: code.CreatedAt || code.created_at || '',
+          updated_at: code.UpdatedAt || code.updated_at || ''
+        }));
+        
+        setReferralCodes(normalizedCodes);
+      } else {
+        setReferralCodes([]);
+      }
     } catch (error) {
-      toast.error('Failed to fetch referral codes.');
       console.error('Error fetching referral codes:', error);
+      toast.error('Failed to fetch referral codes.');
     } finally {
       setIsLoading(false);
     }
   }, [user]);
-
+  
   useEffect(() => {
     fetchReferralCodes();
   }, [fetchReferralCodes]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setNewCode((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user || !newCode.platform || !newCode.code) {
-      toast.warn('Platform and Code are required.');
+    // Platform is now defaulted and non-empty, so the main check is for code
+    if (!user || !newCode.code) {
+      toast.warn('Referral Code is required.');
       return;
     }
+    // Ensure platform is set (should be by default)
+    if (!newCode.platform) {
+      toast.warn('Platform is required.'); // Should not happen with default
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await apiClient.post('/users/referral-codes', newCode);
+      // Using the full path
+      await apiClient.post('/api/v1/users/referral-codes', newCode);
       toast.success('Referral code added successfully!');
-      setNewCode({ platform: '', code: '', description: '' });
+      // Reset form, keeping platform as 'general'
+      setNewCode({ platform: 'general', code: '', description: '' });
       fetchReferralCodes(); // Refresh the list
     } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.error === 'User already has a referral code for this platform') {
-        toast.error('You already have a referral code for this platform.');
+      if (error.response && error.response.data) {
+        if (error.response.data.error === 'User already has a referral code for this platform') {
+          toast.error('Referral code for this platform already exists.');
+        } else if (error.response.data.error === 'Invalid platform') {
+          toast.error('Invalid platform selected. Please refresh and try again.'); // Should ideally not happen with dropdown
+        } else {
+          toast.error(error.response.data.error || 'Failed to add referral code. Please try again.');
+        }
       } else {
         toast.error('Failed to add referral code. Please try again.');
       }
@@ -82,10 +155,20 @@ const ReferralsPage: React.FC = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => toast.success('Code copied to clipboard!'))
-      .catch(() => toast.error('Failed to copy code.'));
+  // Updated to copy full referral link
+  const copyToClipboard = (code: string) => {
+    const referralLink = `${REFERRAL_BASE_URL}${code}`;
+    
+    navigator.clipboard.writeText(referralLink)
+      .then(() => toast.success('Referral link copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy referral link.'));
+  };
+
+  // Helper function to format a referral link for display
+  const formatReferralLink = (code: string) => {
+    // Remove protocol (https://) for display
+    const displayBaseUrl = REFERRAL_BASE_URL.replace(/^https?:\/\//, '');
+    return `${displayBaseUrl}${code}`;
   };
 
   return (
@@ -107,16 +190,20 @@ const ReferralsPage: React.FC = () => {
               <label htmlFor="platform" className="block text-sm font-medium text-gray-300 mb-1">
                 Platform
               </label>
-              <input
-                type="text"
+              <select
                 name="platform"
                 id="platform"
                 value={newCode.platform}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-white placeholder-gray-400"
-                placeholder="e.g., Binance, Coinbase"
-              />
+                className="mt-1 block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-white"
+              >
+                <option value="general">General</option>
+                {/* If you add more platforms to backend's isValidPlatform, add them here:
+                <option value="binance">Binance</option>
+                <option value="hyperliquid">Hyperliquid</option>
+                */}
+              </select>
             </div>
             <div>
               <label htmlFor="code" className="block text-sm font-medium text-gray-300 mb-1">
@@ -171,7 +258,7 @@ const ReferralsPage: React.FC = () => {
                       Platform
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Code
+                      Referral Link
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Description
@@ -184,9 +271,17 @@ const ReferralsPage: React.FC = () => {
                 <tbody className="bg-gray-750 divide-y divide-gray-600">
                   {referralCodes.map((refCode) => (
                     <tr key={refCode.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{refCode.platform}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{refCode.code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{refCode.description || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                        {refCode.platform}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        <div className="font-mono bg-gray-800 p-2 rounded overflow-x-auto max-w-xs">
+                          {formatReferralLink(refCode.code)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {refCode.description || '-'}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <Button
                           variant="outline"
@@ -194,9 +289,8 @@ const ReferralsPage: React.FC = () => {
                           onClick={() => copyToClipboard(refCode.code)}
                           className="flex items-center"
                         >
-                          <FiCopy className="mr-2" /> Copy
+                          <FiCopy className="mr-2" /> Copy Link
                         </Button>
-                        {/* Add Edit/Delete buttons here if functionality is added in the future */}
                       </td>
                     </tr>
                   ))}
