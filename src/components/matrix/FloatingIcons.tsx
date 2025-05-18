@@ -16,10 +16,19 @@ export const FloatingIcons = () => {
   useEffect(() => {
     const createIcon = () => {
       const id = Date.now();
-      const startX = Math.random() * window.innerWidth;
-      const startY = Math.random() * window.innerHeight;
-      const moveX = (Math.random() - 0.5) * 200;
-      const moveY = (Math.random() - 0.5) * 200;
+      
+      // Ensure icons start within viewport with some padding
+      const padding = 50; // Add padding to prevent icons from appearing at edges
+      const maxWidth = window.innerWidth - padding;
+      const maxHeight = window.innerHeight - padding;
+      
+      const startX = Math.random() * (maxWidth - padding) + padding/2;
+      const startY = Math.random() * (maxHeight - padding) + padding/2;
+      
+      // Reduce movement range to prevent going off-screen
+      const maxMove = 100;
+      const moveX = (Math.random() - 0.5) * maxMove;
+      const moveY = (Math.random() - 0.5) * maxMove;
 
       const newIcon: FloatingIcon = {
         id,
@@ -41,17 +50,19 @@ export const FloatingIcons = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-[1]">
+    <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
       {icons.map((icon) => (
         <div
           key={icon.id}
-          className="absolute text-2xl opacity-30 float"
+          className="absolute text-2xl opacity-30 text-matrix-green animate-float"
           style={
             {
-              left: `${icon.x}px`,
-              top: `${icon.y}px`,
+              left: `${Math.max(0, Math.min(icon.x, window.innerWidth - 50))}px`,
+              top: `${Math.max(0, Math.min(icon.y, window.innerHeight - 50))}px`,
               '--moveX': `${icon.moveX}px`,
               '--moveY': `${icon.moveY}px`,
+              transform: `translate(var(--moveX, 0), var(--moveY, 0))`,
+              animation: 'float 20s ease-in-out infinite',
             } as React.CSSProperties
           }
         >
