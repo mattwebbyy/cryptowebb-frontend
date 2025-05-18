@@ -1,138 +1,142 @@
-// src/pages/analytics/AnalyticsLayout.tsx
-import { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
   Home,
   Database,
   LayoutDashboard,
   ChevronLeft,
   Menu,
-  X,
+  BarChart4, // Icon for Data Metrics
   Eye,
   Settings,
-  InfoCircle,
-  FaCreditCard,
-  FaTimes,
-  FaInfoCircle,
-  FaCheck,
-} from 'lucide-react'; // Added missing icons from previous examples
+  BarChart, // Alternative icon
+  Activity, // Another alternative icon
+} from 'lucide-react';
+import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
+import type { DataMetric } from '@/types/metricsData';
+import { MatrixLoader } from '@/components/ui/MatrixLoader'; // Assuming this component exists
 
-const AnalyticsLayout = () => {
+/**
+ * Layout component for the analytics section.
+ * Includes a sidebar for navigation and a main content area rendered via Outlet.
+ */
+const AnalyticsLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+  const navigate = useNavigate();
+  // Get metricId from URL to highlight the active metric in the sidebar
+  const { metricId: activeMetricIdFromParams } = useParams<{ metricId: string }>();
+
+  // Fetch the list of all available data metrics
+  const { data: metricsList, isLoading: isLoadingMetrics, error: errorMetrics } = useDataMetricsList();
+
+  /**
+   * Handles selection of a metric from the sidebar.
+   * Navigates to the specific metric's chart page.
+   * @param metricId - The ID of the selected metric.
+   */
+  const handleMetricSelect = (metricId: number) => {
+    navigate(`/analytics/metrics/${metricId}`);
+  };
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Common NavLink class generation
+  const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center p-2 rounded-md whitespace-nowrap transition-colors duration-150 ease-in-out
+     ${isActive
+      ? 'bg-matrix-green/20 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
+      : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
+    }`;
+  
+  const getMetricButtonClass = (metricId: number) =>
+    `w-full flex items-center p-2 rounded-md whitespace-nowrap text-left transition-colors duration-150 ease-in-out
+     ${activeMetricIdFromParams === String(metricId)
+      ? 'bg-matrix-green/25 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
+      : 'text-matrix-green/70 hover:bg-matrix-green/15 hover:text-matrix-green'
+    }`;
+
 
   return (
-    // ADDED w-full HERE, removed w-screen previously
-    <div className="h-screen w-full flex flex-col overflow-hidden bg-black/50 text-matrix-green">
-      {/* Top header bar */}
-      <header className="flex items-center justify-between h-12 border-b border-matrix-green/50 bg-black/50 px-4 flex-shrink-0">
-        <div className="flex items-center min-w-0">
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-black text-matrix-green font-mono">
+      {/* Header Bar */}
+      <header className="bg-black/80 border-b border-matrix-green/50 p-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 mr-3 rounded hover:bg-matrix-green/20 flex-shrink-0"
+            onClick={toggleSidebar}
+            className="p-2 rounded-md hover:bg-matrix-green/20 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+            aria-label="Toggle sidebar"
           >
-            {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+            {sidebarOpen ? <ChevronLeft size={22} /> : <Menu size={22} />}
           </button>
-          <h1 className="text-lg font-mono font-bold tracking-wide truncate">
-            CRYPTOWEBB ANALYTICS TERMINAL
-          </h1>
+          <h1 className="ml-3 text-xl font-bold tracking-wider">ANALYTICS PLATFORM</h1>
         </div>
-
-        <div className="flex items-center space-x-4 flex-shrink-0">
-          <NavLink to="/" className="p-1 rounded hover:bg-matrix-green/20" title="Back to Home">
-            <Home size={18} />
-          </NavLink>
-        </div>
+        <NavLink to="/" className={getNavLinkClass({isActive: false}) + " mr-2"}>
+            <Home size={18} className="mr-2"/> Home
+        </NavLink>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {' '}
-        {/* This handles sidebar + main */}
-        {/* Collapsible sidebar */}
+        {/* Sidebar */}
         <aside
           className={`
-            ${sidebarOpen ? 'w-48' : 'w-0'}
-            border-r border-matrix-green/50 bg-black/50
-            transition-all duration-200 ease-in-out
-            overflow-hidden flex flex-col flex-shrink-0
+            ${sidebarOpen ? 'w-64 p-3' : 'w-0'} 
+            bg-black/50 border-r border-matrix-green/30
+            transition-all duration-300 ease-in-out
+            overflow-hidden flex flex-col flex-shrink-0 
           `}
         >
-          {/* Only render content when open for smoother transition */}
           {sidebarOpen && (
-            <div className="p-3 flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-matrix-green/50 scrollbar-track-black/30 space-y-6">
+              {/* Standard Navigation */}
               <nav>
+                <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-1">
+                  Overview
+                </h3>
                 <ul className="space-y-1">
-                  <li>
-                    <NavLink
-                      to="/analytics"
-                      end
-                      className={({ isActive }) =>
-                        `flex items-center p-2 rounded whitespace-nowrap ${
-                          isActive
-                            ? 'bg-matrix-green/20 text-matrix-green font-medium'
-                            : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
-                        }`
-                      }
-                    >
-                      <LayoutDashboard size={18} className="mr-2 flex-shrink-0" />
-                      <span>Dashboards</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
-                      to="/analytics/datasources"
-                      className={({ isActive }) =>
-                        `flex items-center p-2 rounded whitespace-nowrap ${
-                          isActive
-                            ? 'bg-matrix-green/20 text-matrix-green font-medium'
-                            : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
-                        }`
-                      }
-                    >
-                      <Database size={18} className="mr-2 flex-shrink-0" />
-                      <span>Data Sources</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
-                      to="/analytics/cipher-matrix"
-                      className={({ isActive }) =>
-                        `flex items-center p-2 rounded whitespace-nowrap ${
-                          isActive
-                            ? 'bg-matrix-green/20 text-matrix-green font-medium'
-                            : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
-                        }`
-                      }
-                    >
-                      <Eye size={18} className="mr-2 flex-shrink-0" />
-                      <span>Cipher Matrix</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
-                      to="/analytics/manage"
-                      className={({ isActive }) =>
-                        `flex items-center p-2 rounded whitespace-nowrap ${
-                          isActive
-                            ? 'bg-matrix-green/20 text-matrix-green font-medium'
-                            : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
-                        }`
-                      }
-                    >
-                      {/* Assuming you might want a Settings icon here */}
-                      <Settings size={18} className="mr-2 flex-shrink-0" />
-                      <span>Manage</span>
-                    </NavLink>
-                  </li>
+                  <li><NavLink to="/analytics" end className={getNavLinkClass}><LayoutDashboard size={18} className="mr-3 flex-shrink-0" />Dashboards</NavLink></li>
+                  <li><NavLink to="/analytics/datasources" className={getNavLinkClass}><Database size={18} className="mr-3 flex-shrink-0" />Data Sources</NavLink></li>
+                  <li><NavLink to="/analytics/cipher-matrix" className={getNavLinkClass}><Eye size={18} className="mr-3 flex-shrink-0" />Cipher Matrix</NavLink></li>
+                  <li><NavLink to="/analytics/manage" className={getNavLinkClass}><Settings size={18} className="mr-3 flex-shrink-0" />Manage</NavLink></li>
                 </ul>
+              </nav>
+
+              {/* Data Metrics Section */}
+              <nav>
+                <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-1">
+                  Data Metrics
+                </h3>
+                {isLoadingMetrics ? (
+                  <div className="p-2 flex items-center justify-center"> <MatrixLoader /> </div>
+                ) : errorMetrics ? (
+                  <div className="p-2 text-red-400 text-sm">Error loading metrics.</div>
+                ) : (
+                  <ul className="space-y-1">
+                    {metricsList && metricsList.length > 0 ? (
+                      metricsList.map((metric: DataMetric) => (
+                        <li key={metric.MetricID}>
+                          <button
+                            onClick={() => handleMetricSelect(metric.MetricID)}
+                            className={getMetricButtonClass(metric.MetricID)}
+                            title={metric.MetricName}
+                          >
+                            <BarChart4 size={18} className="mr-3 flex-shrink-0" />
+                            <span className="truncate">{metric.MetricName}</span>
+                          </button>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="p-2 text-matrix-green/60 text-sm">No metrics available.</li>
+                    )}
+                  </ul>
+                )}
               </nav>
             </div>
           )}
         </aside>
-        {/* Main content area */}
-        <main className="flex-1 overflow-auto bg-black/50 min-w-0">
-          {/* overflow-auto allows scrolling WITHIN main if Outlet content overflows */}
-          <Outlet />
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-black/60 p-0 md:p-0"> {/* Removed padding for full-width chart page */}
+          <Outlet /> {/* Renders the child route's component, e.g., DataMetricChartPage */}
         </main>
       </div>
     </div>
