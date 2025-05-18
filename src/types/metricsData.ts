@@ -22,6 +22,8 @@ export interface DataMetric {
     DefaultStoragePreference: string;
     CreatedAt: string;
     LastEdited: string;
+    Category?: string; // Added Category field (optional)
+
   }
   
   export interface TimeseriesDataPoint {
