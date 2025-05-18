@@ -10,6 +10,8 @@ export interface DataMetric {
     DefaultStoragePreference: string;
     CreatedAt: string;
     LastEdited: string;
+    Category?: string; // Optional category field
+
   }
   
   export interface DataMetricInfo {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
   Home,
@@ -6,15 +6,15 @@ import {
   LayoutDashboard,
   ChevronLeft,
   Menu,
-  BarChart4, // Icon for Data Metrics
+  BarChart4,
   Eye,
   Settings,
-  BarChart, // Alternative icon
-  Activity, // Another alternative icon
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
 import type { DataMetric } from '@/types/metricsData';
-import { MatrixLoader } from '@/components/ui/MatrixLoader'; // Assuming this component exists
+import { MatrixLoader } from '@/components/ui/MatrixLoader';
 
 /**
  * Layout component for the analytics section.
@@ -22,12 +22,40 @@ import { MatrixLoader } from '@/components/ui/MatrixLoader'; // Assuming this co
  */
 const AnalyticsLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Transactions'])); // Start with one category expanded
   const navigate = useNavigate();
+  
   // Get metricId from URL to highlight the active metric in the sidebar
   const { metricId: activeMetricIdFromParams } = useParams<{ metricId: string }>();
 
   // Fetch the list of all available data metrics
   const { data: metricsList, isLoading: isLoadingMetrics, error: errorMetrics } = useDataMetricsList();
+
+  // Group metrics by category
+  const categorizedMetrics = useMemo(() => {
+    if (!metricsList || metricsList.length === 0) return {};
+    
+    const grouped = metricsList.reduce((acc, metric) => {
+      const category = metric.Category || 'Other'; // Default to 'Other' if no category
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(metric);
+      return acc;
+    }, {} as Record<string, DataMetric[]>);
+    
+    // Sort categories alphabetically and metrics within each category
+    const sortedGrouped: Record<string, DataMetric[]> = {};
+    Object.keys(grouped)
+      .sort()
+      .forEach(category => {
+        sortedGrouped[category] = grouped[category].sort((a, b) => 
+          a.MetricName.localeCompare(b.MetricName)
+        );
+      });
+    
+    return sortedGrouped;
+  }, [metricsList]);
 
   /**
    * Handles selection of a metric from the sidebar.
@@ -36,6 +64,22 @@ const AnalyticsLayout: React.FC = () => {
    */
   const handleMetricSelect = (metricId: number) => {
     navigate(`/analytics/metrics/${metricId}`);
+  };
+
+  /**
+   * Toggles the expanded state of a category
+   * @param category - The category to toggle
+   */
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
   };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -49,12 +93,15 @@ const AnalyticsLayout: React.FC = () => {
     }`;
   
   const getMetricButtonClass = (metricId: number) =>
-    `w-full flex items-center p-2 rounded-md whitespace-nowrap text-left transition-colors duration-150 ease-in-out
+    `w-full flex items-center p-2 pl-8 rounded-md whitespace-nowrap text-left transition-colors duration-150 ease-in-out
      ${activeMetricIdFromParams === String(metricId)
       ? 'bg-matrix-green/25 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
       : 'text-matrix-green/70 hover:bg-matrix-green/15 hover:text-matrix-green'
     }`;
 
+  const getCategoryButtonClass = (category: string) =>
+    `w-full flex items-center justify-between p-2 rounded-md whitespace-nowrap text-left transition-colors duration-150 ease-in-out
+     text-matrix-green/80 hover:bg-matrix-green/10 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50`;
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-black text-matrix-green font-mono">
@@ -100,34 +147,66 @@ const AnalyticsLayout: React.FC = () => {
                 </ul>
               </nav>
 
-              {/* Data Metrics Section */}
+              {/* Categorized Data Metrics Section */}
               <nav>
                 <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-1">
                   Data Metrics
                 </h3>
                 {isLoadingMetrics ? (
-                  <div className="p-2 flex items-center justify-center"> <MatrixLoader /> </div>
+                  <div className="p-2 flex items-center justify-center">
+                    <MatrixLoader />
+                  </div>
                 ) : errorMetrics ? (
                   <div className="p-2 text-red-400 text-sm">Error loading metrics.</div>
-                ) : (
-                  <ul className="space-y-1">
-                    {metricsList && metricsList.length > 0 ? (
-                      metricsList.map((metric: DataMetric) => (
-                        <li key={metric.MetricID}>
-                          <button
-                            onClick={() => handleMetricSelect(metric.MetricID)}
-                            className={getMetricButtonClass(metric.MetricID)}
-                            title={metric.MetricName}
+                ) : Object.keys(categorizedMetrics).length > 0 ? (
+                  <div className="space-y-1">
+                    {Object.entries(categorizedMetrics).map(([category, metrics]) => (
+                      <div key={category}>
+                        {/* Category Header */}
+                        <button
+                          onClick={() => toggleCategory(category)}
+                          className={getCategoryButtonClass(category)}
+                          aria-expanded={expandedCategories.has(category)}
+                          aria-controls={`category-${category}`}
+                        >
+                          <span className="flex items-center">
+                            <BarChart4 size={16} className="mr-2 flex-shrink-0" />
+                            <span className="font-medium">{category}</span>
+                            <span className="ml-1 text-xs text-matrix-green/60">
+                              ({metrics.length})
+                            </span>
+                          </span>
+                          {expandedCategories.has(category) ? (
+                            <ChevronDown size={16} className="flex-shrink-0" />
+                          ) : (
+                            <ChevronRight size={16} className="flex-shrink-0" />
+                          )}
+                        </button>
+                        
+                        {/* Category Metrics */}
+                        {expandedCategories.has(category) && (
+                          <div
+                            id={`category-${category}`}
+                            className="mt-1 space-y-1 animate-in slide-in-from-top-1 duration-200"
                           >
-                            <BarChart4 size={18} className="mr-3 flex-shrink-0" />
-                            <span className="truncate">{metric.MetricName}</span>
-                          </button>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="p-2 text-matrix-green/60 text-sm">No metrics available.</li>
-                    )}
-                  </ul>
+                            {metrics.map((metric: DataMetric) => (
+                              <button
+                                key={metric.MetricID}
+                                onClick={() => handleMetricSelect(metric.MetricID)}
+                                className={getMetricButtonClass(metric.MetricID)}
+                                title={`${metric.MetricName} - ${metric.Description}`}
+                              >
+                                <BarChart4 size={16} className="mr-3 flex-shrink-0 text-matrix-green/60" />
+                                <span className="truncate text-sm">{metric.MetricName}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-2 text-matrix-green/60 text-sm">No metrics available.</div>
                 )}
               </nav>
             </div>
@@ -135,8 +214,8 @@ const AnalyticsLayout: React.FC = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-black/60 p-0 md:p-0"> {/* Removed padding for full-width chart page */}
-          <Outlet /> {/* Renders the child route's component, e.g., DataMetricChartPage */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-black/60 p-0 md:p-0">
+          <Outlet />
         </main>
       </div>
     </div>
