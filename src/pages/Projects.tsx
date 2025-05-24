@@ -13,15 +13,15 @@ interface Project {
 const projects: Project[] = [
   {
     id: 1,
-    title: "Neural Network Visualizer",
-    description: "A real-time visualization of neural network processing using WebGL",
-    tags: ["TypeScript", "WebGL", "React", "Three.js"]
+    title: 'Neural Network Visualizer',
+    description: 'A real-time visualization of neural network processing using WebGL',
+    tags: ['TypeScript', 'WebGL', 'React', 'Three.js'],
   },
   {
     id: 2,
-    title: "Quantum Encryption System",
-    description: "End-to-end encrypted messaging system with quantum-resistant algorithms",
-    tags: ["Rust", "WebAssembly", "React", "Node.js"]
+    title: 'Quantum Encryption System',
+    description: 'End-to-end encrypted messaging system with quantum-resistant algorithms',
+    tags: ['Rust', 'WebAssembly', 'React', 'Node.js'],
   },
   // Add more projects as needed
 ];

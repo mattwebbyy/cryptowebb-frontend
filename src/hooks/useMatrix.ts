@@ -8,11 +8,7 @@ export interface MatrixOptions {
 }
 
 export const useMatrixConfig = (options: MatrixOptions = {}) => {
-  const {
-    fontSize = 14,
-    speed = 50,
-    density = 1
-  } = options;
+  const { fontSize = 14, speed = 50, density = 1 } = options;
 
   const calculateColumns = (width: number) => Math.floor(width / fontSize);
   const generateDrops = (columns: number) => Array(columns).fill(1);
@@ -22,20 +18,21 @@ export const useMatrixConfig = (options: MatrixOptions = {}) => {
     speed,
     density,
     calculateColumns,
-    generateDrops
+    generateDrops,
   };
 };
 
 export const useMatrix = (canvasRef: RefObject<HTMLCanvasElement>) => {
-  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+  const chars =
+    '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
   const fontSize = 14;
 
   const initMatrix = useCallback(() => {
     if (!canvasRef.current) return;
-    
+
     const canvas = canvasRef.current;
     // We don't need to store ctx here as it's not used in this function
-    
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -49,7 +46,7 @@ export const useMatrix = (canvasRef: RefObject<HTMLCanvasElement>) => {
 
   const draw = useCallback(() => {
     if (!canvasRef.current) return;
-    
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;

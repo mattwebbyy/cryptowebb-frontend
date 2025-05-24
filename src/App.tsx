@@ -1,39 +1,36 @@
-import { Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { ToastContainer } from 'react-toastify';
 import { MatrixRain } from './components/matrix/MatrixRain';
 import { Layout } from './components/layout/Layout';
-import { LoginForm } from './components/auth/LoginForm';
-import { RegisterForm } from './components/auth/RegisterForm';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import Home from './pages/Home';
-import About from './pages/About';
-import Projects from './pages/Projects';
-import Contact from './pages/Contact';
 import { AuthProvider } from './hooks/useAuth';
+import { StripeProvider } from './components/providers/StripeProvider';
+import { Routes } from './routes';
+import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
   return (
-    <AuthProvider>
-      <>
-        <MatrixRain />
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            
-            {/* Protected routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <div>Dashboard</div>
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </Layout>
-      </>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <StripeProvider>
+          <div className="app-container">
+            <MatrixRain />
+            <Layout>
+              <Routes />
+            </Layout>
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              newestOnTop
+              closeOnClick
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+          </div>
+        </StripeProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

@@ -17,8 +17,8 @@ const initialState: MatrixState = {
   glitchIntensity: 1,
   theme: {
     primaryColor: '#33ff33',
-    backgroundColor: '#000000'
-  }
+    backgroundColor: '#000000',
+  },
 };
 
 const matrixSlice = createSlice({
@@ -36,15 +36,10 @@ const matrixSlice = createSlice({
     },
     setTheme: (state, action: PayloadAction<Partial<MatrixState['theme']>>) => {
       state.theme = { ...state.theme, ...action.payload };
-    }
-  }
+    },
+  },
 });
 
-export const { 
-  setSpeed, 
-  setDensity, 
-  setGlitchIntensity, 
-  setTheme 
-} = matrixSlice.actions;
+export const { setSpeed, setDensity, setGlitchIntensity, setTheme } = matrixSlice.actions;
 
 export default matrixSlice.reducer;
