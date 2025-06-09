@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'; // Use userEvent for realistic interactions
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { LoginForm } from './LoginForm';
 
 // Mock child components if they have complex logic or side effects

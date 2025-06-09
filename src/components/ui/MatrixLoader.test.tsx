@@ -1,6 +1,7 @@
 // src/components/ui/MatrixLoader.test.tsx
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { MatrixLoader } from './MatrixLoader'; // Adjust path if needed
 
 // Mock framer-motion if necessary (usually not needed for basic rendering tests)

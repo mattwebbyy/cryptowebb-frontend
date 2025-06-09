@@ -9,6 +9,9 @@ export default {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: {
+          esModuleInterop: true,
+        },
       }
     ],
   },
@@ -20,4 +23,6 @@ export default {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  // Mock environment variables
+  setupFiles: ['<rootDir>/src/test/env-setup.ts'],
 };

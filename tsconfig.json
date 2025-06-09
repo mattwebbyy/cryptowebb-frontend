@@ -21,10 +21,8 @@
       "@/*": ["./src/*"]
     },
     "incremental": true,
-
-    // --- Add this line ---
+    "esModuleInterop": true,
     "types": ["vite/client", "jest"]
-    // --------------------
 
   },
   // Ensure test files are included if they aren't already by "src"
