@@ -238,7 +238,7 @@ const Settings = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Generate New Key Section */}
-        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
             <h3 className="text-2xl font-bold text-text mb-8">Generate New API Key</h3>
 
             <form onSubmit={handleGenerate} className="space-y-8">
@@ -331,7 +331,7 @@ const Settings = () => {
             </Card>
 
             {/* Existing API Keys Section */}
-        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
             <h3 className="text-2xl font-bold text-text mb-8">Active API Keys</h3>
 
           {/* Loading State */}

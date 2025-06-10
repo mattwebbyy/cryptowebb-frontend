@@ -1,5 +1,6 @@
 // src/pages/dashboard/DashboardLayout.tsx
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3 } from 'lucide-react';
 
 interface NavItem {
@@ -9,8 +10,83 @@ interface NavItem {
   end?: boolean;
 }
 
+type SubscriptionData = {
+  tier: string;
+  status: string;
+  renewalDate?: string;
+  daysRemaining?: number;
+};
+
+type APIUsageData = {
+  current: number;
+  limit: number;
+  percentage: number;
+};
+
+const makeAuthRequest = async (url: string) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('No authentication token');
+  
+  const response = await fetch(`http://localhost:8080${url}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}`);
+  }
+  
+  return response.json();
+};
+
+const fetchSubscriptionData = async (): Promise<SubscriptionData> => {
+  try {
+    const data = await makeAuthRequest('/api/v1/users/me/subscription');
+    return {
+      tier: data.tier || 'Free',
+      status: data.status || 'Active',
+      daysRemaining: data.daysRemaining,
+      renewalDate: data.renewalDate,
+    };
+  } catch (error) {
+    return {
+      tier: 'Free',
+      status: 'Active',
+    };
+  }
+};
+
+const fetchAPIUsageData = async (): Promise<APIUsageData> => {
+  try {
+    const data = await makeAuthRequest('/api/v1/users/me/api-usage');
+    return {
+      current: data.current || 0,
+      limit: data.limit || 1000,
+      percentage: data.percentage || 0,
+    };
+  } catch (error) {
+    return {
+      current: 0,
+      limit: 1000,
+      percentage: 0,
+    };
+  }
+};
+
 const DashboardLayout = () => {
   const location = useLocation();
+  
+  const { data: subscriptionData } = useQuery<SubscriptionData>({
+    queryKey: ['subscription'],
+    queryFn: fetchSubscriptionData,
+  });
+
+  const { data: apiUsageData } = useQuery<APIUsageData>({
+    queryKey: ['apiUsage'],
+    queryFn: fetchAPIUsageData,
+  });
 
   const navItems: NavItem[] = [
     {
@@ -45,12 +121,13 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Clean Glass Background */}
-      <div className="absolute inset-0 backdrop-blur-2xl bg-black/30"></div>
-      <div className="absolute inset-0 bg-white/5"></div>
+      {/* Matrix Glass Background */}
+      <div className="absolute inset-0 bg-black/70"></div>
+      <div className="absolute inset-0 backdrop-blur-lg bg-matrix-green/[0.02]"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-matrix-green/5 via-transparent to-matrix-green/5"></div>
       
-      {/* Header */}
-      <header className="relative z-10 bg-white/10 backdrop-blur-xl border-b border-white/20 px-6 py-4">
+      {/* Header - Fixed Width */}
+      <header className="relative z-10 bg-matrix-green/10 backdrop-blur-md border-b border-matrix-green/20 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
@@ -80,8 +157,8 @@ const DashboardLayout = () => {
       </header>
 
       <div className="flex">
-        {/* Modern Sidebar */}
-        <aside className="relative z-10 w-72 bg-white/8 backdrop-blur-xl border-r border-white/20 min-h-[calc(100vh-80px)]">
+        {/* Matrix Sidebar */}
+        <aside className="relative z-10 w-72 bg-matrix-green/[0.08] backdrop-blur-md border-r border-matrix-green/20 min-h-[calc(100vh-80px)]">
           <div className="p-6">
             {/* Navigation Section */}
             <div className="space-y-6">
@@ -114,32 +191,38 @@ const DashboardLayout = () => {
               </div>
 
               {/* Quick Stats or Additional Info */}
-              <div className="pt-6 border-t border-white/20">
+              <div className="pt-6 border-t border-matrix-green/20">
                 <h3 className="text-sm font-semibold text-text-secondary/60 uppercase tracking-wider mb-4">
                   Quick Access
                 </h3>
                 <div className="space-y-3">
-                  <div className="p-4 bg-white/8 backdrop-blur-xl rounded-xl border border-white/20">
+                  <div className="p-4 bg-matrix-green/10 backdrop-blur-md rounded-xl border border-matrix-green/30 shadow-lg shadow-matrix-green/20">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-text">Subscription</span>
                       <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full font-medium">
-                        Pro
+                        {subscriptionData?.tier || 'Free'}
                       </span>
                     </div>
                     <p className="text-xs text-text-secondary">
-                      12 days remaining
+                      {subscriptionData?.daysRemaining 
+                        ? `${subscriptionData.daysRemaining} days remaining`
+                        : subscriptionData?.status || 'Active'
+                      }
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-white/8 backdrop-blur-xl rounded-xl border border-white/20">
+                  <div className="p-4 bg-matrix-green/10 backdrop-blur-md rounded-xl border border-matrix-green/30 shadow-lg shadow-matrix-green/20">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-text">API Usage</span>
                       <span className="text-xs text-success font-medium">
-                        1.2k/10k
+                        {apiUsageData?.current.toLocaleString() || '0'}/{apiUsageData?.limit.toLocaleString() || '1k'}
                       </span>
                     </div>
                     <div className="w-full bg-border/50 rounded-full h-2">
-                      <div className="bg-success h-2 rounded-full w-[12%] transition-all duration-300"></div>
+                      <div 
+                        className="bg-success h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(apiUsageData?.percentage || 0, 100)}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -148,14 +231,12 @@ const DashboardLayout = () => {
           </div>
         </aside>
 
-        {/* Main Content - Contained width like before */}
+        {/* Main Content - Contained but consistent */}
         <main className="relative z-10 flex-1 min-h-[calc(100vh-80px)] overflow-y-auto">
           <div className="p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-              {/* Force consistent container size */}
-              <div className="min-h-[calc(100vh-12rem)] w-full">
-                <Outlet />
-              </div>
+            {/* FIXED WIDTH CONTAINER - ALWAYS EXACTLY THE SAME */}
+            <div className="w-[1000px] mx-auto space-y-8">
+              <Outlet />
             </div>
           </div>
         </main>

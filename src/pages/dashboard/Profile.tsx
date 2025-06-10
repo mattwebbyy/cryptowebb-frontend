@@ -246,7 +246,7 @@ const Profile = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Avatar Section */}
-          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
           <div className="flex items-center space-x-6">
             <div
               onClick={handleAvatarClick}
@@ -278,7 +278,7 @@ const Profile = () => {
         </Card>
 
           {/* Profile Form */}
-          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
           <h3 className="text-2xl font-bold text-text mb-8">Personal Information</h3>
           <form onSubmit={handleProfileSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -344,7 +344,7 @@ const Profile = () => {
         </div>
 
         {/* Password Change Form - Full Width */}
-        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
           <h3 className="text-2xl font-bold text-text mb-8">Change Password</h3>
           <form onSubmit={handlePasswordSubmit} className="space-y-8">
             <div className="space-y-2">

@@ -217,10 +217,10 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Quick Stats Grid - More Spacing */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {quickStats.map((stat, index) => (
-          <Card key={index} className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <Card key={index} className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
             <div className="flex items-center justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -247,11 +247,11 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content Grid - Better Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10 mt-12">
         {/* Profile Card */}
         <div className="lg:col-span-1">
-          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     {profile?.avatarUrl ? (
@@ -306,7 +306,7 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="lg:col-span-2">
-          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-text">Quick Actions</h3>
               
