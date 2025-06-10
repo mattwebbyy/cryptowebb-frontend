@@ -232,31 +232,40 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto space-y-8"
-      >
-        <h1 className="text-4xl font-mono text-matrix-green mb-8">Profile Settings</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Profile Settings</h1>
+        <p className="text-text-secondary text-lg">Manage your account information and preferences</p>
+      </div>
 
-        {/* Avatar Section */}
-        <Card className="p-6 bg-black/90 border border-matrix-green">
-          <div className="flex items-center space-x-4">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Avatar Section */}
+          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <div className="flex items-center space-x-6">
             <div
               onClick={handleAvatarClick}
-              className="w-24 h-24 rounded-full bg-matrix-green/20 border-2 border-matrix-green flex items-center justify-center cursor-pointer hover:bg-matrix-green/30 transition-colors overflow-hidden"
+              className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-primary/30 flex items-center justify-center cursor-pointer hover:border-primary/50 hover:shadow-glow transition-all duration-300 overflow-hidden group"
             >
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               ) : (
-                <Camera className="w-8 h-8 text-matrix-green" />
+                <Camera className="w-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />
               )}
             </div>
-            <div>
-              <h3 className="text-xl font-mono text-matrix-green">Profile Picture</h3>
-              <p className="text-gray-400">Click to upload a new avatar</p>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-text">Profile Picture</h3>
+              <p className="text-text-secondary">Click to upload a new avatar (max 5MB)</p>
+              <div className="flex gap-2 text-xs text-text-secondary">
+                <span className="bg-primary/10 px-2 py-1 rounded-lg">JPEG</span>
+                <span className="bg-primary/10 px-2 py-1 rounded-lg">PNG</span>
+                <span className="bg-primary/10 px-2 py-1 rounded-lg">WEBP</span>
+              </div>
             </div>
           </div>
           <input
@@ -268,102 +277,112 @@ const Profile = () => {
           />
         </Card>
 
-        {/* Profile Form */}
-        <Card className="p-6 bg-black/90 border border-matrix-green">
-          <h3 className="text-xl font-mono text-matrix-green mb-6">Personal Information</h3>
-          <form onSubmit={handleProfileSubmit} className="space-y-6">
+          {/* Profile Form */}
+          <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <h3 className="text-2xl font-bold text-text mb-8">Personal Information</h3>
+          <form onSubmit={handleProfileSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-matrix-green font-mono mb-2">First Name</label>
+              <div className="space-y-2">
+                <label className="block text-text font-medium mb-3">First Name</label>
                 <input
                   type="text"
                   name="firstName"
                   value={profileData.firstName}
                   onChange={handleProfileChange}
-                  className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                  className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  placeholder="Enter your first name"
                 />
               </div>
-              <div>
-                <label className="block text-matrix-green font-mono mb-2">Last Name</label>
+              <div className="space-y-2">
+                <label className="block text-text font-medium mb-3">Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={profileData.lastName}
                   onChange={handleProfileChange}
-                  className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                  className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  placeholder="Enter your last name"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-matrix-green font-mono mb-2">Bio</label>
+            <div className="space-y-2">
+              <label className="block text-text font-medium mb-3">Bio</label>
               <textarea
                 name="bio"
                 value={profileData.bio}
                 onChange={handleProfileChange}
                 rows={4}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green resize-none"
+                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 resize-none backdrop-blur-sm"
+                placeholder="Tell us about yourself..."
               />
             </div>
 
-            <div>
-              <label className="block text-matrix-green font-mono mb-2">Phone Number</label>
+            <div className="space-y-2">
+              <label className="block text-text font-medium mb-3">Phone Number</label>
               <input
                 type="tel"
                 name="phoneNumber"
                 value={profileData.phoneNumber}
                 onChange={handleProfileChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                placeholder="Enter your phone number"
               />
             </div>
 
             <Button
               type="submit"
               disabled={status === 'submitting'}
-              className="w-full bg-matrix-green hover:bg-matrix-green/80 text-black font-mono"
+              variant="gradient"
+              size="lg"
+              className="w-full"
             >
               {status === 'submitting' ? 'Updating...' : 'Update Profile'}
             </Button>
           </form>
-        </Card>
+          </Card>
+        </div>
 
-        {/* Password Change Form */}
-        <Card className="p-6 bg-black/90 border border-matrix-green">
-          <h3 className="text-xl font-mono text-matrix-green mb-6">Change Password</h3>
-          <form onSubmit={handlePasswordSubmit} className="space-y-6">
-            <div>
-              <label className="block text-matrix-green font-mono mb-2">Current Password</label>
+        {/* Password Change Form - Full Width */}
+        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+          <h3 className="text-2xl font-bold text-text mb-8">Change Password</h3>
+          <form onSubmit={handlePasswordSubmit} className="space-y-8">
+            <div className="space-y-2">
+              <label className="block text-text font-medium mb-3">Current Password</label>
               <input
                 type="password"
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                placeholder="Enter your current password"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-matrix-green font-mono mb-2">New Password</label>
+            <div className="space-y-2">
+              <label className="block text-text font-medium mb-3">New Password</label>
               <input
                 type="password"
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                placeholder="Enter your new password (min 8 characters)"
                 required
                 minLength={8}
               />
             </div>
 
-            <div>
-              <label className="block text-matrix-green font-mono mb-2">Confirm New Password</label>
+            <div className="space-y-2">
+              <label className="block text-text font-medium mb-3">Confirm New Password</label>
               <input
                 type="password"
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green"
+                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                placeholder="Confirm your new password"
                 required
                 minLength={8}
               />
@@ -372,14 +391,15 @@ const Profile = () => {
             <Button
               type="submit"
               disabled={status === 'submitting'}
-              className="w-full bg-matrix-green hover:bg-matrix-green/80 text-black font-mono"
+              variant="outline"
+              size="lg"
+              className="w-full"
             >
               {status === 'submitting' ? 'Changing Password...' : 'Change Password'}
             </Button>
           </form>
-        </Card>
-      </motion.div>
-    </div>
+      </Card>
+    </motion.div>
   );
 };
 

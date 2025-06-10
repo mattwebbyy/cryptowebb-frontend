@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import ChartRenderer, { ChartRendererRef } from '@/features/charts/components/chartRenderer';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, BarChart3 } from 'lucide-react';
 import DashboardEditorModal from '@/components/analytics/DashboardEditorModal';
 // Ensure these CSS files are imported correctly and accessible
 import '/node_modules/react-grid-layout/css/styles.css';
@@ -314,56 +314,75 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-black/50 text-matrix-green">
-      {/* Header */}
-      <div className="flex justify-between items-center p-3 border-b border-matrix-green/30 flex-shrink-0">
-        <h2 className="text-lg font-mono text-matrix-green truncate pr-4" title={dashboard?.name}>
-          {dashboard?.name || 'No Dashboard Loaded'}
-        </h2>
-        <div className="flex space-x-2 flex-shrink-0">
+    <div className="h-full flex flex-col text-text relative" style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+      {/* Black Background matching chart opacity */}
+      <div className="absolute inset-0 bg-black/70"></div>
+      
+      {/* Modern Header */}
+      <div className="relative z-10 flex justify-between items-center p-6 border-b border-border/30 flex-shrink-0 glass-morphism">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate pr-4" title={dashboard?.name}>
+            {dashboard?.name || 'Analytics Dashboard'}
+          </h2>
+          <p className="text-sm text-text-secondary">
+            {dashboard?.description || 'Create and customize your analytics dashboard'}
+          </p>
+        </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
           {!isEmptyState && dashboard && (
             <button
               onClick={handleEditCurrentDashboard}
-              className="px-3 py-1.5 text-sm flex items-center gap-1 bg-matrix-green/10 border border-matrix-green/30 rounded hover:bg-matrix-green/20"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium glass-morphism border border-border/30 rounded-xl hover:border-primary/50 text-text-secondary hover:text-primary transition-all duration-300 hover:shadow-modern"
             >
-              <Settings size={14} />
-              <span>Edit</span>
+              <Settings size={16} />
+              <span>Edit Dashboard</span>
             </button>
           )}
           <button
             onClick={handleCreateNewDashboard}
-            className="px-3 py-1.5 text-sm flex items-center gap-1 bg-matrix-green/10 border border-matrix-green/30 rounded hover:bg-matrix-green/20"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/15 text-primary transition-all duration-300 shadow-modern"
           >
-            <Plus size={14} />
+            <Plus size={16} />
             <span>New Dashboard</span>
           </button>
         </div>
       </div>
 
-      {/* Grid container */}
-      <div className="flex-1 overflow-auto relative">
+      {/* Modern Grid Container */}
+      <div className="relative z-10 flex-1 overflow-hidden">
         {isEmptyState ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-            {/* Empty State Content... */}
-            <div className="text-center p-6 max-w-lg">
-              <h3 className="text-xl font-mono text-matrix-green mb-4">No Dashboard Loaded</h3>
-              <p className="text-matrix-green/70 mb-8">
-                Create a new dashboard to start visualizing your data.
-              </p>
-              <button
-                onClick={handleCreateNewDashboard}
-                className="px-4 py-2 bg-matrix-green text-black font-mono rounded hover:bg-matrix-green/80 flex items-center gap-2 mx-auto"
-              >
-                <Plus size={18} />
-                <span>Create New Dashboard</span>
-              </button>
+          <div className="h-full flex flex-col items-center justify-center p-8">
+            {/* Modern Empty State */}
+            <div className="text-center max-w-md space-y-6">
+              <div className="w-24 h-24 glass-morphism rounded-3xl flex items-center justify-center mx-auto border border-primary/20 shadow-modern">
+                <BarChart3 className="h-12 w-12 text-primary" />
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold text-text">Create Your First Dashboard</h3>
+                <p className="text-text-secondary leading-relaxed">
+                  Build powerful analytics dashboards with customizable widgets and real-time data visualization.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={handleCreateNewDashboard}
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 mx-auto"
+                >
+                  <Plus size={20} />
+                  <span>Create New Dashboard</span>
+                </button>
+                
+                <p className="text-xs text-text-secondary">
+                  Start with pre-built templates or create from scratch
+                </p>
+              </div>
             </div>
           </div>
         ) : (
           // This container's size determines the width RGL receives via WidthProvider
-          <div ref={gridContainerRef} className="h-full w-full p-2.5">
-            {' '}
-            {/* Added padding for visual spacing from edge */}
+          <div ref={gridContainerRef} className="h-full w-full p-4 overflow-auto">
             <style>{`
                             /* Ensure RGL styles are loaded. These are additions/overrides */
                             .react-grid-layout {
@@ -373,11 +392,20 @@ const AnalyticsDashboard = () => {
                             }
                             .react-grid-item {
                                 transition: all 200ms ease;
-                                transition-property: left, top, width, height; /* Animate position and size */
-                                background: rgba(0, 25, 0, 0.3); /* Dark green background */
-                                border: 1px dashed rgba(51, 255, 51, 0.2); /* Dashed green border */
-                                overflow: hidden; /* Clip content within the grid item div */
+                                transition-property: left, top, width, height;
+                                background: rgba(255, 255, 255, 0.05);
+                                backdrop-filter: blur(16px) saturate(180%);
+                                border: 1px solid rgba(255, 255, 255, 0.1);
+                                border-radius: 16px;
+                                overflow: hidden;
                                 box-sizing: border-box;
+                                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 10px 15px rgba(0, 0, 0, 0.10);
+                            }
+                            
+                            .theme-light .react-grid-item {
+                                background: rgba(255, 255, 255, 0.7);
+                                backdrop-filter: blur(16px) saturate(180%);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
                             }
                             .react-grid-item.cssTransforms {
                                 transition-property: transform, width, height; /* Use transforms if enabled */
@@ -389,8 +417,9 @@ const AnalyticsDashboard = () => {
                             .react-grid-item.react-draggable-dragging {
                                 transition: none; /* Disable transition while dragging actively */
                                 z-index: 3; /* Bring to front */
-                                opacity: 0.6;
-                                box-shadow: 0 5px 15px rgba(51, 255, 51, 0.3); /* Add shadow while dragging */
+                                opacity: 0.8;
+                                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* Modern shadow while dragging */
+                                transform: rotate(2deg); /* Slight rotation while dragging */
                             }
 
                             /* --- CRUCIAL FOR RESIZING --- */
@@ -404,7 +433,7 @@ const AnalyticsDashboard = () => {
                                 cursor: se-resize; /* Diagonal resize cursor */
                                 padding: 0 4px 4px 0; /* Padding affects background position */
                                 /* Visual indicator using SVG */
-                                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" style="background-color:%2300000000" fill="none" stroke="%2333ff33" stroke-width=".5"><path d="M 6 0 L 0 6 M 4 0 L 0 4 M 6 2 L 2 6 M 6 4 L 4 6"/></svg>');
+                                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" style="background-color:%2300000000" fill="none" stroke="%23888" stroke-width="1"><path d="M 6 0 L 0 6 M 4 0 L 0 4 M 6 2 L 2 6 M 6 4 L 4 6"/></svg>');
                                 background-position: bottom right;
                                 background-repeat: no-repeat;
                                 background-origin: content-box; /* Position relative to content area */

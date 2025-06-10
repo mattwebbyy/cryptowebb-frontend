@@ -68,8 +68,8 @@ const AnalyticsLayout: React.FC = () => {
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center p-2 rounded-md whitespace-nowrap transition-all duration-200 ease-in-out transform hover:scale-105
      ${isActive
-      ? 'bg-matrix-green/20 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
-      : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
+      ? 'bg-primary/20 text-primary font-semibold shadow-sm shadow-primary/50'
+      : 'text-text-secondary hover:bg-primary/10 hover:text-primary'
     }`;
 
   const handleMetricSelect = (metricId: number) => {
@@ -79,15 +79,18 @@ const AnalyticsLayout: React.FC = () => {
 
   return (
     <AnalyticsErrorBoundary>
-      <div className="h-screen w-full flex flex-col overflow-hidden bg-black text-matrix-green font-mono">
+      <div className="h-screen w-full flex flex-col overflow-hidden text-text font-mono relative" style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+        {/* Black Background with same opacity as charts */}
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        
         {/* Header Bar */}
-      <header className="bg-black/80 border-b border-matrix-green/50 p-3 flex items-center justify-between flex-shrink-0 backdrop-blur-sm shadow-lg shadow-matrix-green/10">
+      <header className="relative z-10 glass-morphism border-b border-border/30 p-3 flex items-center justify-between flex-shrink-0 shadow-modern">
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
             className={`
-              p-2 rounded-md text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green transition-all duration-200 ease-in-out transform hover:scale-110
-              ${sidebarOpen ? 'hover:bg-matrix-green/20' : 'hover:bg-matrix-green/15'}
+              p-2 rounded-md text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 ease-in-out transform hover:scale-110
+              ${sidebarOpen ? 'hover:bg-primary/20' : 'hover:bg-primary/15'}
             `}
             aria-label="Toggle sidebar"
           >
@@ -95,8 +98,8 @@ const AnalyticsLayout: React.FC = () => {
               {sidebarOpen ? <ChevronLeft size={22} /> : <Menu size={22} />}
             </div>
           </button>
-          <h1 className="ml-3 text-xl font-bold tracking-wider transition-all duration-300 hover:text-matrix-green">
-            <span className="bg-gradient-to-r from-matrix-green to-green-400 bg-clip-text text-transparent">
+          <h1 className="ml-3 text-xl font-bold tracking-wider transition-all duration-300 hover:text-primary">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               ANALYTICS PLATFORM
             </span>
           </h1>
@@ -113,7 +116,7 @@ const AnalyticsLayout: React.FC = () => {
         {/* Mobile backdrop overlay */}
         {isMobile && sidebarOpen && (
           <div 
-            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            className="fixed inset-0 bg-background/50 z-40 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar"
           />
@@ -132,12 +135,12 @@ const AnalyticsLayout: React.FC = () => {
         {/* Main Content Area */}
         <main 
           className={`
-            flex-1 overflow-x-hidden overflow-y-auto bg-black/60 backdrop-blur-sm
-            transition-all duration-300 ease-in-out relative z-0
+            relative z-10 flex-1 flex flex-col overflow-hidden
+            transition-all duration-300 ease-in-out
           `}
         >
           {/* Breadcrumb Navigation */}
-          <div className="border-b border-matrix-green/20 bg-black/40 backdrop-blur-sm">
+          <div className="glass-morphism border-b border-border/30 flex-shrink-0">
             <div className="px-4 py-3">
               <AnalyticsBreadcrumb 
                 metricName={metricInfo?.MetricName}
@@ -146,7 +149,8 @@ const AnalyticsLayout: React.FC = () => {
             </div>
           </div>
           
-          <div className="h-full">
+          {/* Content Area - Let individual pages handle their own scrolling */}
+          <div className="flex-1 overflow-hidden">
             <Outlet />
           </div>
         </main>

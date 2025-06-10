@@ -385,8 +385,10 @@ const DataMetricChartPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 h-full text-matrix-green">
-      <Card className="h-full flex flex-col bg-black/70 border border-matrix-green/50 shadow-lg shadow-matrix-green/30">
+    <div className="h-full flex flex-col overflow-hidden text-matrix-green">
+      <div className="flex-1 overflow-auto p-4 md:p-6">
+        <Card className="h-full flex flex-col bg-black/70 border border-matrix-green/50 shadow-lg shadow-matrix-green/30 min-h-[calc(100vh-12rem)]">
+        
         {/* Header with metric info and controls */}
         {metricInfo && (
           <div className="p-3 border-b border-matrix-green/30 space-y-3">
@@ -413,13 +415,13 @@ const DataMetricChartPage: React.FC = () => {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIndicatorsDropdownOpen(!indicatorsDropdownOpen)}
-                    className="flex items-center justify-between gap-2 bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 text-sm hover:bg-matrix-green/10 transition-colors min-w-[140px] h-10"
+                    className="flex items-center justify-between gap-2 bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 pr-3 text-sm hover:bg-matrix-green/10 transition-colors min-w-[140px] h-10"
                   >
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4" />
                       <span>{selectedIndicators.length === 0 ? 'None' : `${selectedIndicators.length} selected`}</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${indicatorsDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-matrix-green/60 transition-transform ${indicatorsDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {indicatorsDropdownOpen && (
@@ -453,18 +455,24 @@ const DataMetricChartPage: React.FC = () => {
                   <label className="text-sm font-semibold text-matrix-green/80 min-w-max">
                     Granularity:
                   </label>
-                  <select
-                    value={selectedGranularity}
-                    onChange={(e) => setSelectedGranularity(e.target.value as GranularityOption)}
-                    className="bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 text-sm focus:outline-none focus:border-matrix-green hover:bg-matrix-green/10 transition-colors min-w-[100px] h-10"
-                    title="Select data aggregation level"
-                  >
-                    {granularityOptions.map((option) => (
-                      <option key={option.value} value={option.value} title={option.description}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={selectedGranularity}
+                      onChange={(e) => setSelectedGranularity(e.target.value as GranularityOption)}
+                      className="bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 pr-8 text-sm focus:outline-none focus:border-matrix-green hover:bg-matrix-green/10 transition-colors min-w-[100px] h-10 appearance-none cursor-pointer"
+                      title="Select data aggregation level"
+                      style={{
+                        backgroundImage: 'none'
+                      }}
+                    >
+                      {granularityOptions.map((option) => (
+                        <option key={option.value} value={option.value} title={option.description} className="bg-black text-matrix-green">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-matrix-green/60 pointer-events-none" />
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -522,7 +530,8 @@ const DataMetricChartPage: React.FC = () => {
             </div>
           )}
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };

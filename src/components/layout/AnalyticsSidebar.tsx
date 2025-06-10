@@ -105,29 +105,29 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center p-3 rounded-lg whitespace-nowrap transition-all duration-200 ease-in-out group
      ${isActive
-      ? 'bg-matrix-green/20 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
-      : 'text-matrix-green/70 hover:bg-matrix-green/10 hover:text-matrix-green'
+      ? 'bg-primary/20 text-primary font-semibold shadow-sm shadow-primary/50'
+      : 'text-text-secondary hover:bg-primary/10 hover:text-primary'
     }`;
   
   const getMetricButtonClass = (metricId: number) =>
     `w-full flex items-center p-3 rounded-lg text-left transition-all duration-200 ease-in-out group
      ${activeMetricIdFromParams === String(metricId)
-      ? 'bg-matrix-green/25 text-matrix-green font-semibold shadow-sm shadow-matrix-green/50'
-      : 'text-matrix-green/70 hover:bg-matrix-green/15 hover:text-matrix-green'
+      ? 'bg-primary/25 text-primary font-semibold shadow-sm shadow-primary/50'
+      : 'text-text-secondary hover:bg-primary/15 hover:text-primary'
     }`;
 
   const getCategoryButtonClass = () =>
     `w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200 ease-in-out group
-     text-matrix-green/80 hover:bg-matrix-green/10 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50`;
+     text-text-secondary hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50`;
 
   const getBackButtonClass = () =>
     `w-full flex items-center p-3 rounded-lg text-left transition-all duration-200 ease-in-out group mb-4
-     text-matrix-green/80 hover:bg-matrix-green/10 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50
-     border border-matrix-green/30 hover:border-matrix-green/50`;
+     text-text-secondary hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50
+     border border-border hover:border-primary/50`;
 
   // Animation classes
   const getContentClass = () =>
-    `flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-matrix-green/50 scrollbar-track-black/30 space-y-6 p-4
+    `flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-surface/30 space-y-6 p-4
      transition-all duration-300 ease-in-out
      ${isOpen ? (isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0') : 'opacity-0 translate-x-4'}`;
 
@@ -139,15 +139,15 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
         <div className="mb-6">
           <button
             onClick={onOpenCommandPalette}
-            className="w-full flex items-center gap-3 p-3 bg-matrix-green/5 border border-matrix-green/20 rounded-lg hover:bg-matrix-green/10 transition-all duration-200 text-matrix-green/80 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
+            className="w-full flex items-center gap-3 p-3 bg-primary/5 border border-border rounded-lg hover:bg-primary/10 transition-all duration-200 text-text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
             title="Open command palette"
           >
             <Command size={20} className="flex-shrink-0" />
             <div className="flex-1 text-left">
               <div className="font-medium text-sm">Command Palette</div>
-              <div className="text-xs text-matrix-green/60">Quick actions & search</div>
+              <div className="text-xs text-text-secondary/60">Quick actions & search</div>
             </div>
-            <kbd className="text-xs bg-matrix-green/10 px-2 py-1 rounded border border-matrix-green/20">
+            <kbd className="text-xs bg-primary/10 px-2 py-1 rounded border border-border">
               ⌘K
             </kbd>
           </button>
@@ -156,7 +156,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
 
       {/* Standard Navigation */}
       <nav>
-        <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-3">
+        <h3 className="px-2 py-1 text-xs font-semibold text-text-secondary/60 uppercase tracking-wider mb-3">
           Overview
         </h3>
         <ul className="space-y-2">
@@ -201,7 +201,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
 
       {/* Data Metrics Categories */}
       <nav>
-        <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-3">
+        <h3 className="px-2 py-1 text-xs font-semibold text-text-secondary/60 uppercase tracking-wider mb-3">
           Data Metrics
         </h3>
         {isLoadingMetrics ? (
@@ -223,24 +223,24 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                 <span className="flex items-center">
                   <BarChart4 
                     size={20} 
-                    className="mr-3 flex-shrink-0 text-matrix-green/60 transition-all duration-200 group-hover:text-matrix-green group-hover:scale-110" 
+                    className="mr-3 flex-shrink-0 text-text-secondary/60 transition-all duration-200 group-hover:text-primary group-hover:scale-110" 
                   />
                   <span className="font-medium transition-colors duration-200">
                     {category}
                   </span>
-                  <span className="ml-2 text-xs text-matrix-green/60 transition-all duration-200 group-hover:text-matrix-green/80">
+                  <span className="ml-2 text-xs text-text-secondary/60 transition-all duration-200 group-hover:text-primary/80">
                     ({metrics.length})
                   </span>
                 </span>
                 <ChevronRight 
                   size={20} 
-                  className="flex-shrink-0 text-matrix-green/60 transition-all duration-200 group-hover:text-matrix-green group-hover:translate-x-1" 
+                  className="flex-shrink-0 text-text-secondary/60 transition-all duration-200 group-hover:text-primary group-hover:translate-x-1" 
                 />
               </button>
             ))}
           </div>
         ) : (
-          <div className="p-3 text-matrix-green/60 text-sm text-center bg-matrix-green/5 rounded-lg border border-matrix-green/20">
+          <div className="p-3 text-text-secondary/60 text-sm text-center bg-primary/5 rounded-lg border border-border">
             No metrics available.
           </div>
         )}
@@ -263,11 +263,11 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
 
       {/* Category Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-matrix-green flex items-center">
-          <BarChart4 size={24} className="mr-3 text-matrix-green" />
+        <h3 className="text-lg font-semibold text-primary flex items-center">
+          <BarChart4 size={24} className="mr-3 text-primary" />
           {category}
         </h3>
-        <p className="text-sm text-matrix-green/60 mt-1">
+        <p className="text-sm text-text-secondary/60 mt-1">
           {categorizedMetrics[category]?.length || 0} metrics available
         </p>
       </div>
@@ -287,13 +287,13 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
             >
               <BarChart4 
                 size={18} 
-                className="mr-3 flex-shrink-0 text-matrix-green/60 transition-all duration-200 group-hover:text-matrix-green group-hover:scale-110" 
+                className="mr-3 flex-shrink-0 text-text-secondary/60 transition-all duration-200 group-hover:text-primary group-hover:scale-110" 
               />
               <div className="flex-1 text-left">
                 <div className="font-medium text-sm transition-all duration-200">
                   {metric.MetricName}
                 </div>
-                <div className="text-xs text-matrix-green/50 transition-all duration-200 group-hover:text-matrix-green/70 mt-1">
+                <div className="text-xs text-text-secondary/50 transition-all duration-200 group-hover:text-primary/70 mt-1">
                   {metric.DataSourceType} • {metric.Blockchain}
                 </div>
               </div>
@@ -308,11 +308,11 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
     <aside
       className={`
         ${isOpen ? (isMobile ? 'w-80' : 'w-64') + ' opacity-100' : 'w-0 opacity-0'} 
-        bg-black/90 border-r border-matrix-green/30 backdrop-blur-sm
+        bg-surface/90 border-r border-border backdrop-blur-sm
         transition-all duration-300 ease-in-out
         overflow-hidden flex flex-col flex-shrink-0 
-        shadow-lg shadow-matrix-green/10 h-full
-        ${isMobile ? 'border-matrix-green/50' : ''}
+        shadow-lg shadow-primary/10 h-full
+        ${isMobile ? 'border-border' : ''}
       `}
     >
       <div className={getContentClass()}>

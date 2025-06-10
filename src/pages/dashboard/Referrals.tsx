@@ -177,127 +177,141 @@ const ReferralsPage: React.FC = () => {
         title="My Referral Codes"
         description="Manage your referral codes on CryptoWebb."
       />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-primary">Manage Your Referral Codes</h1>
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Referral Management</h1>
+        <p className="text-text-secondary text-lg">Create and manage your referral codes to earn rewards</p>
+      </div>
 
-        <Card className="mb-8">
-          <h2 className="text-2xl font-semibold mb-6 flex items-center">
-            <FiPlusCircle className="mr-3 text-accent" />
-            Add New Referral Code
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="platform" className="block text-sm font-medium text-gray-300 mb-1">
-                Platform
-              </label>
-              <select
-                name="platform"
-                id="platform"
-                value={newCode.platform}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-white"
-              >
-                <option value="general">General</option>
-                {/* If you add more platforms to backend's isValidPlatform, add them here:
-                <option value="binance">Binance</option>
-                <option value="hyperliquid">Hyperliquid</option>
-                */}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-300 mb-1">
-                Referral Code
-              </label>
-              <input
-                type="text"
-                name="code"
-                id="code"
-                value={newCode.code}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-white placeholder-gray-400"
-                placeholder="Your unique referral code"
-              />
-            </div>
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
-                Description (Optional)
-              </label>
-              <textarea
-                name="description"
-                id="description"
-                value={newCode.description}
-                onChange={handleInputChange}
-                rows={3}
-                className="mt-1 block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm text-white placeholder-gray-400"
-                placeholder="e.g., 10% off trading fees"
-              />
-            </div>
-            <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Code'}
-            </Button>
-          </form>
-        </Card>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+            <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
+              <FiPlusCircle className="mr-3 text-primary" />
+              Add New Referral Code
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-2">
+                <label htmlFor="platform" className="block text-text font-medium mb-3">
+                  Platform
+                </label>
+                <select
+                  name="platform"
+                  id="platform"
+                  value={newCode.platform}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
+                >
+                  <option value="general">General</option>
+                  {/* Future platforms can be added here */}
+                </select>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="code" className="block text-text font-medium mb-3">
+                  Referral Code
+                </label>
+                <input
+                  type="text"
+                  name="code"
+                  id="code"
+                  value={newCode.code}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text placeholder-text-secondary/50 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  placeholder="Enter your unique referral code"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="description" className="block text-text font-medium mb-3">
+                  Description (Optional)
+                </label>
+                <textarea
+                  name="description"
+                  id="description"
+                  value={newCode.description}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text placeholder-text-secondary/50 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 resize-none backdrop-blur-sm"
+                  placeholder="e.g., 10% off trading fees, bonus rewards, etc."
+                />
+              </div>
+              
+              <Button type="submit" variant="gradient" size="lg" isLoading={isSubmitting} disabled={isSubmitting} className="w-full">
+                {isSubmitting ? 'Adding...' : 'Add Referral Code'}
+              </Button>
+            </form>
+            </Card>
 
-        <Card>
-          <h2 className="text-2xl font-semibold mb-6 flex items-center">
-            <FiList className="mr-3 text-accent" />
-            Your Referral Codes
-          </h2>
-          {isLoading && <p className="text-gray-400">Loading your codes...</p>}
-          {!isLoading && referralCodes.length === 0 && (
-            <p className="text-gray-400">You haven't added any referral codes yet.</p>
-          )}
-          {!isLoading && referralCodes.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-800">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Platform
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Referral Link
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-gray-750 divide-y divide-gray-600">
-                  {referralCodes.map((refCode) => (
-                    <tr key={refCode.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                        {refCode.platform}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        <div className="font-mono bg-gray-800 p-2 rounded overflow-x-auto max-w-xs">
-                          {formatReferralLink(refCode.code)}
+        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+            <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
+              <FiList className="mr-3 text-primary" />
+              Your Referral Codes
+            </h2>
+            
+            {isLoading && (
+              <div className="text-center py-8">
+                <div className="inline-flex items-center gap-3 text-text-secondary">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  Loading your codes...
+                </div>
+              </div>
+            )}
+            
+            {!isLoading && referralCodes.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <FiList className="h-8 w-8 text-primary" />
+                </div>
+                <p className="text-text-secondary text-lg">No referral codes yet</p>
+                <p className="text-text-secondary/60 text-sm mt-1">Create your first referral code to start earning rewards</p>
+              </div>
+            )}
+            
+            {!isLoading && referralCodes.length > 0 && (
+              <div className="space-y-4">
+                {referralCodes.map((refCode) => (
+                  <div key={refCode.id} className="glass-morphism p-6 rounded-2xl border border-border/30 hover:border-primary/30 transition-all duration-300">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="space-y-3 flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                            {refCode.platform}
+                          </span>
+                          {refCode.active && (
+                            <span className="bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium">
+                              Active
+                            </span>
+                          )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {refCode.description || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="space-y-2">
+                          <p className="text-text font-medium">Referral Link:</p>
+                          <div className="font-mono bg-surface/80 p-3 rounded-xl text-primary text-sm overflow-x-auto border border-border/30">
+                            {formatReferralLink(refCode.code)}
+                          </div>
+                        </div>
+                        {refCode.description && (
+                          <p className="text-text-secondary text-sm">
+                            <span className="font-medium">Description:</span> {refCode.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0">
                         <Button
                           variant="outline"
-                          size="sm"
                           onClick={() => copyToClipboard(refCode.code)}
-                          className="flex items-center"
+                          className="flex items-center gap-2"
                         >
-                          <FiCopy className="mr-2" /> Copy Link
+                          <FiCopy className="h-4 w-4" />
+                          Copy Link
                         </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
         </Card>
       </div>
     </>

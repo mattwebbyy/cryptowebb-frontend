@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 type APIKey = {
   id: string;
@@ -227,17 +229,21 @@ const Settings = () => {
   // --- Render Logic ---
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-8 text-matrix-green">API Key Management</h2>
+    <>
+      <div className="space-y-2">
+        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">API Key Management</h2>
+        <p className="text-text-secondary text-lg">Securely manage your API keys and access tokens</p>
+      </div>
 
-      <div className="space-y-8">
-        {/* Generate New Key Section */}
-        <div className="bg-black/30 p-6 rounded-lg border border-matrix-green/50 shadow-lg">
-          <h3 className="text-2xl font-semibold mb-6 text-matrix-green">Generate New API Key</h3>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Generate New Key Section */}
+        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+            <h3 className="text-2xl font-bold text-text mb-8">Generate New API Key</h3>
 
-          <form onSubmit={handleGenerate} className="space-y-6">
-            <div>
-              <label htmlFor="keyName" className="block mb-2 text-matrix-green font-medium">
+            <form onSubmit={handleGenerate} className="space-y-8">
+              <div className="space-y-2">
+              <label htmlFor="keyName" className="block mb-3 text-text font-medium">
                 Key Name
               </label>
               <input
@@ -246,45 +252,43 @@ const Settings = () => {
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 placeholder="e.g., My Development Key"
-                className="w-full p-3 bg-black/50 border border-matrix-green/50 rounded-lg
-                           text-matrix-green placeholder-matrix-green/30 focus:border-matrix-green
-                           focus:outline-none focus:ring-1 focus:ring-matrix-green/50"
+                className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl
+                           text-text placeholder-text-secondary/50 focus:border-primary/50
+                           focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
                 required
               />
-            </div>
+              </div>
 
-            <div>
-              <label htmlFor="keyExpiry" className="block mb-2 text-matrix-green font-medium">
+              <div className="space-y-2">
+              <label htmlFor="keyExpiry" className="block mb-3 text-text font-medium">
                 Expiration Period
               </label>
               <select
                 id="keyExpiry"
                 value={newKeyExpiry}
                 onChange={(e) => setNewKeyExpiry(e.target.value)}
-                className="w-full p-3 bg-black/50 border border-matrix-green/50 rounded-lg
-                           text-matrix-green focus:border-matrix-green focus:outline-none
-                           focus:ring-1 focus:ring-matrix-green/50 appearance-none"
-                // Consider adding an arrow indicator for the select dropdown if needed
+                className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl
+                           text-text focus:border-primary/50 focus:outline-none
+                           focus:ring-2 focus:ring-primary/50 appearance-none transition-all duration-300 backdrop-blur-sm"
               >
                 <option value="7">7 Days</option>
                 <option value="30">30 Days</option>
                 <option value="90">90 Days</option>
                 <option value="365">1 Year</option>
-                <option value="0">Never Expires</option> {/* Clarify '0' meaning */}
+                <option value="0">Never Expires</option>
               </select>
-            </div>
+              </div>
 
-            <button
+              <Button
               type="submit"
               disabled={generateMutation.isPending}
-              className="w-full py-3 bg-matrix-green/20 hover:bg-matrix-green/30
-                         border border-matrix-green rounded-lg text-matrix-green
-                         font-medium transition duration-200 ease-in-out
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="gradient"
+              size="lg"
+              className="w-full"
             >
               {generateMutation.isPending ? 'Generating...' : 'Generate API Key'}
-            </button>
-          </form>
+              </Button>
+            </form>
 
           {/* Display Generated Key */}
           {generateMutation.error && (
@@ -294,41 +298,41 @@ const Settings = () => {
           )}
 
           {generatedKey && (
-            <div className="mt-6 p-4 bg-black/50 rounded-lg border border-matrix-green animate-fadeIn">
-              <p className="text-matrix-green font-medium mb-2">
-                Your new API key has been generated.{' '}
-                <strong className="text-yellow-400">Copy it now, it won't be shown again:</strong>
+            <div className="mt-8 p-6 glass-morphism rounded-2xl border border-primary/30 animate-scale-in">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                <p className="text-text font-semibold">
+                  Your new API key has been generated
+                </p>
+              </div>
+              <p className="text-warning font-medium mb-4">
+                <strong>⚠️ Copy it now - it won't be shown again!</strong>
               </p>
-              {/* Flex container for key and copy button */}
-              <div className="flex items-center justify-between mt-2 gap-4">
-                {/* API Key Display: allow scroll on overflow */}
+              <div className="flex items-center gap-4">
                 <pre
-                  className="flex-1 p-3 bg-black/70 rounded-lg text-matrix-green
-                              font-mono text-sm overflow-x-auto border border-matrix-green/30
-                              scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50"
-                  style={{ minWidth: 0 }} // Prevents flex item from overflowing its container
+                  className="flex-1 p-4 bg-surface/80 rounded-xl text-primary
+                              font-mono text-sm overflow-x-auto border border-border/30
+                              backdrop-blur-sm"
+                  style={{ minWidth: 0 }}
                 >
                   {generatedKey.key}
                 </pre>
-                {/* Copy Button: prevent shrinking */}
-                <button
+                <Button
                   onClick={() => handleCopyKey(generatedKey.key)}
-                  className="flex-shrink-0 px-3 py-1.5 text-xs
-                             bg-matrix-green/20 hover:bg-matrix-green/30
-                             border border-matrix-green rounded-md
-                             transition duration-200 ease-in-out"
-                  aria-label="Copy API Key"
+                  variant={copySuccess ? 'primary' : 'outline'}
+                  size="sm"
+                  className="flex-shrink-0"
                 >
-                  {copySuccess ? 'Copied!' : 'Copy'}
-                </button>
+                  {copySuccess ? '✓ Copied!' : 'Copy'}
+                </Button>
               </div>
             </div>
           )}
-        </div>
+            </Card>
 
-        {/* Existing API Keys Section */}
-        <div className="bg-black/30 p-6 rounded-lg border border-matrix-green/50 shadow-lg">
-          <h3 className="text-2xl font-semibold mb-6 text-matrix-green">Active API Keys</h3>
+            {/* Existing API Keys Section */}
+        <Card className="p-6 bg-white/8 backdrop-blur-xl border border-white/20 hover:bg-white/12 transition-all duration-300">
+            <h3 className="text-2xl font-bold text-text mb-8">Active API Keys</h3>
 
           {/* Loading State */}
           {isLoading && (
@@ -363,8 +367,8 @@ const Settings = () => {
               {keys.map((key) => (
                 <div
                   key={key.id}
-                  className="p-4 bg-black/50 rounded-lg border border-matrix-green/30
-                                hover:border-matrix-green/50 transition-colors duration-200"
+                  className="p-6 glass-morphism rounded-2xl border border-border/30
+                                hover:border-primary/50 hover:shadow-modern transition-all duration-300"
                 >
                   <div className="flex justify-between items-start gap-4">
                     {/* Key Details */}
@@ -372,12 +376,12 @@ const Settings = () => {
                       {' '}
                       {/* min-w-0 prevents overflow issues with flex */}
                       <h4
-                        className="text-lg font-medium text-matrix-green truncate"
+                        className="text-lg font-semibold text-text truncate"
                         title={key.Name}
                       >
                         {key.Name}
                       </h4>
-                      <div className="space-y-1 text-sm text-matrix-green/70">
+                      <div className="space-y-2 text-sm text-text-secondary">
                         <p className="flex items-center gap-2 flex-wrap">
                           {' '}
                           {/* flex-wrap for smaller screens */}
@@ -420,11 +424,11 @@ const Settings = () => {
                       }}
                       // Disable button if this specific key is being revoked
                       disabled={revokeMutation.isPending && revokeMutation.variables === key.id}
-                      className={`px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30
-                                 border border-red-500/50 hover:border-red-500
-                                 rounded-md text-red-400 text-sm transition
-                                 duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed
-                                 flex-shrink-0 ml-auto`} // Use ml-auto if needed, though justify-between should handle it
+                      className="px-4 py-2 bg-error/10 hover:bg-error/20
+                                 border border-error/30 hover:border-error/50
+                                 rounded-xl text-error font-medium transition-all
+                                 duration-300 disabled:opacity-50 disabled:cursor-not-allowed
+                                 flex-shrink-0"
                       aria-label={`Revoke API key ${key.Name}`}
                     >
                       {revokeMutation.isPending && revokeMutation.variables === key.id
@@ -436,9 +440,9 @@ const Settings = () => {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
-    </div>
+    </>
   );
 };
 
