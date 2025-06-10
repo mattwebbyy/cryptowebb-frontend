@@ -8,6 +8,9 @@ import {
   Settings,
   ChevronRight,
   ArrowLeft,
+  Bell,
+  Zap,
+  Command,
 } from 'lucide-react';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
 import type { DataMetric } from '@/types/metricsData';
@@ -16,6 +19,8 @@ import { MatrixLoader } from '@/components/ui/MatrixLoader';
 interface AnalyticsSidebarProps {
   isOpen: boolean;
   onMetricSelect?: (metricId: number) => void;
+  isMobile?: boolean;
+  onOpenCommandPalette?: () => void;
 }
 
 /**
@@ -24,7 +29,9 @@ interface AnalyticsSidebarProps {
  */
 const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({ 
   isOpen, 
-  onMetricSelect 
+  onMetricSelect,
+  isMobile = false,
+  onOpenCommandPalette
 }) => {
   const [currentView, setCurrentView] = useState<'main' | string>('main');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -127,6 +134,26 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   // Main navigation content
   const renderMainContent = () => (
     <>
+      {/* Command Palette Section */}
+      {onOpenCommandPalette && (
+        <div className="mb-6">
+          <button
+            onClick={onOpenCommandPalette}
+            className="w-full flex items-center gap-3 p-3 bg-matrix-green/5 border border-matrix-green/20 rounded-lg hover:bg-matrix-green/10 transition-all duration-200 text-matrix-green/80 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
+            title="Open command palette"
+          >
+            <Command size={20} className="flex-shrink-0" />
+            <div className="flex-1 text-left">
+              <div className="font-medium text-sm">Command Palette</div>
+              <div className="text-xs text-matrix-green/60">Quick actions & search</div>
+            </div>
+            <kbd className="text-xs bg-matrix-green/10 px-2 py-1 rounded border border-matrix-green/20">
+              ⌘K
+            </kbd>
+          </button>
+        </div>
+      )}
+
       {/* Standard Navigation */}
       <nav>
         <h3 className="px-2 py-1 text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-3">
@@ -149,6 +176,18 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
             <NavLink to="/analytics/cipher-matrix" className={getNavLinkClass}>
               <Eye size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
               <span className="transition-all duration-200">Cipher Matrix</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/analytics/live-crypto" className={getNavLinkClass}>
+              <Zap size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-all duration-200">Live Crypto</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/analytics/alerts" className={getNavLinkClass}>
+              <Bell size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-all duration-200">Alerts</span>
             </NavLink>
           </li>
           <li>
@@ -268,11 +307,12 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   return (
     <aside
       className={`
-        ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0'} 
-        bg-black/50 border-r border-matrix-green/30 backdrop-blur-sm
+        ${isOpen ? (isMobile ? 'w-80' : 'w-64') + ' opacity-100' : 'w-0 opacity-0'} 
+        bg-black/90 border-r border-matrix-green/30 backdrop-blur-sm
         transition-all duration-300 ease-in-out
         overflow-hidden flex flex-col flex-shrink-0 
         shadow-lg shadow-matrix-green/10 h-full
+        ${isMobile ? 'border-matrix-green/50' : ''}
       `}
     >
       <div className={getContentClass()}>

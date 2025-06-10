@@ -4,11 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Legacy support
         'matrix-green': '#33ff33',
         matrix: {
           green: '#33ff33',
           dark: '#001400',
         },
+        // Dynamic theme colors using CSS variables
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        text: {
+          DEFAULT: 'var(--color-text)',
+          secondary: 'var(--color-text-secondary)',
+        },
+        border: 'var(--color-border)',
+        error: 'var(--color-error)',
+        warning: 'var(--color-warning)',
+        success: 'var(--color-success)',
+        // Opacity variations
+        'primary-10': 'var(--color-primary-10)',
+        'primary-20': 'var(--color-primary-20)',
+        'primary-30': 'var(--color-primary-30)',
+        'primary-50': 'var(--color-primary-50)',
+        'primary-70': 'var(--color-primary-70)',
+        'primary-90': 'var(--color-primary-90)',
       },
       fontFamily: {
         mono: ['Courier New', 'monospace'],

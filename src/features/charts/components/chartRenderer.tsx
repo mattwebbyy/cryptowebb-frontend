@@ -14,13 +14,17 @@ import HighchartsReact from 'highcharts-react-official';
 import { useChartData, ChartData, ChartDataRow } from '../api/useChartData';
 import { WebSocketUpdate } from '@/types/data';
 import { Card } from '@/components/ui/Card';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useWebSocketImproved } from '@/hooks/useWebSocketImproved';
+import { ChartSkeleton } from '@/components/ui/Skeleton';
+import { ChartExporter, formatChartTitleForExport } from '@/utils/chartExport';
+import { ChartErrorBoundary } from '@/components/ErrorBoundary';
 import { debounce } from 'lodash';
 
 export interface ChartRendererRef {
   getChart: () => Highcharts.Chart | undefined;
   reflow: () => void;
   updateSize: (width: number, height: number) => void;
+  exportChart: (format: 'png' | 'pdf' | 'svg' | 'csv', filename?: string) => Promise<void>;
 }
 
 interface ChartRendererProps {
@@ -109,13 +113,78 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
     const chartComponentRef = useRef<HighchartsReact.RefObject>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Mounted ref
+    // WebSocket URL for live data
+    const wsUrl = useMemo(() => {
+      if (!isLive) return null;
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsBaseUrl = backendUrl.replace(/^http/, wsProtocol);
+      return `${wsBaseUrl}/ws/live/${chartId}`;
+    }, [isLive, chartId]);
+    
+    // WebSocket message handler
+    const handleWebSocketMessage = useCallback(
+      (wsUpdate: WebSocketUpdate) => {
+        if (!isMountedRef.current) return;
+        console.log(`WebSocket (${chartId}): Received update`, wsUpdate);
+        if (wsUpdate.chartId !== chartId) return;
+
+        setLiveChartData((currentData) => {
+          const baseData: ChartData = currentData ?? initialData ?? [];
+          const payload = wsUpdate.payload;
+
+          switch (wsUpdate.type) {
+            case 'APPEND':
+              const pointsToAdd: ChartData = Array.isArray(payload)
+                ? payload
+                : [payload as ChartDataRow];
+              if (pointsToAdd.length === 0) return baseData;
+              return [...baseData, ...pointsToAdd];
+            case 'REPLACE':
+              return Array.isArray(payload) ? payload : [];
+            case 'UPDATE':
+              console.warn('WebSocket UPDATE strategy not fully implemented');
+              return baseData;
+            default:
+              console.warn(`Unknown update type: ${wsUpdate.type}`);
+              return baseData;
+          }
+        });
+      },
+      [chartId, initialData]
+    );
+
+    // WebSocket hook - MUST be declared before using disconnectWs
+    const { isConnected: isWsConnected, disconnect: disconnectWs } = useWebSocketImproved<WebSocketUpdate>(
+      wsUrl,
+      handleWebSocketMessage,
+      {
+        onOpen: () => console.log(`WebSocket connected for chart ${chartId}`),
+        onError: (err: Event) => console.error(`WebSocket error for chart ${chartId}:`, err),
+        shouldReconnect: () => !!isLive,
+        heartbeatInterval: 30000, // 30 seconds
+        reconnectInterval: 2000,  // 2 seconds
+        reconnectAttempts: 3,     // Fewer attempts for charts
+      }
+    );
+
+    // Mounted ref and cleanup
     const isMountedRef = useRef(true);
     useEffect(() => {
       return () => {
         isMountedRef.current = false;
+        // Cleanup chart on unmount
+        if (chartComponentRef.current?.chart) {
+          try {
+            chartComponentRef.current.chart.destroy();
+          } catch (error) {
+            console.warn('Error destroying chart:', error);
+          }
+        }
+        // Disconnect WebSocket
+        disconnectWs?.();
       };
-    }, []);
+    }, [disconnectWs]);
 
     // Function to update chart dimensions
     const updateChartSize = useCallback(() => {
@@ -154,63 +223,33 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
             console.log(`Explicit size update for chart ${chartId}: ${width}x${height}`);
           }
         },
+        exportChart: async (format: 'png' | 'pdf' | 'svg' | 'csv', filename?: string) => {
+          const chart = chartComponentRef.current?.chart;
+          if (!chart) {
+            throw new Error('Chart not available for export');
+          }
+
+          const exportFilename = filename || ChartExporter.generateFilename(
+            formatChartTitleForExport(title, chartId).replace(/[^a-zA-Z0-9]/g, '_')
+          );
+
+          if (format === 'csv') {
+            ChartExporter.downloadChartDataAsCSV(chart, exportFilename);
+          } else {
+            await ChartExporter.exportChart(chart, {
+              format,
+              filename: exportFilename,
+              width: 1200,
+              height: 800,
+            });
+          }
+        },
       }),
       [chartId, title]
     );
 
     // Combine data
     const displayData = useMemo(() => liveChartData ?? initialData, [liveChartData, initialData]);
-
-    // WebSocket setup for live charts
-    const wsUrl = useMemo(() => {
-      if (!isLive) return null;
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsBaseUrl = backendUrl.replace(/^http/, wsProtocol);
-      return `${wsBaseUrl}/ws/live/${chartId}`;
-    }, [isLive, chartId]);
-
-    // WebSocket message handler
-    const handleWebSocketMessage = useCallback(
-      (wsUpdate: WebSocketUpdate) => {
-        if (!isMountedRef.current) return;
-        console.log(`WebSocket (${chartId}): Received update`, wsUpdate);
-        if (wsUpdate.chartId !== chartId) return;
-
-        setLiveChartData((currentData) => {
-          const baseData: ChartData = currentData ?? initialData ?? [];
-          const payload = wsUpdate.payload;
-
-          switch (wsUpdate.type) {
-            case 'APPEND':
-              const pointsToAdd: ChartData = Array.isArray(payload)
-                ? payload
-                : [payload as ChartDataRow];
-              if (pointsToAdd.length === 0) return baseData;
-              return [...baseData, ...pointsToAdd];
-            case 'REPLACE':
-              return Array.isArray(payload) ? payload : [];
-            case 'UPDATE':
-              console.warn('WebSocket UPDATE strategy not fully implemented');
-              return baseData;
-            default:
-              console.warn(`Unknown update type: ${wsUpdate.type}`);
-              return baseData;
-          }
-        });
-      },
-      [chartId, initialData]
-    );
-
-    const { isConnected: isWsConnected } = useWebSocket<WebSocketUpdate>(
-      wsUrl,
-      handleWebSocketMessage,
-      {
-        onOpen: () => console.log(`WebSocket connected for chart ${chartId}`),
-        onError: (err: Event) => console.error(`WebSocket error for chart ${chartId}:`, err),
-        shouldReconnect: () => !!isLive,
-      }
-    );
 
     // Effect to handle sizing after render and on dimension changes
     useEffect(() => {
@@ -321,16 +360,7 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
     const isLoading = isLoadingInitial && !displayData;
 
     if (isLoading) {
-      return (
-        <Card
-          className="h-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 20, 0, 0.5)' }}
-        >
-          <div className="text-center">
-            <p className="text-matrix-green text-sm animate-pulse">Loading Chart...</p>
-          </div>
-        </Card>
-      );
+      return <ChartSkeleton className="h-full" />;
     }
 
     // Render error state
@@ -434,53 +464,55 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
       }
     }
 
-    // Render Highcharts
+    // Render Highcharts with error boundary
     return (
-      <Card
-        className="h-full w-full flex flex-col overflow-hidden"
-        style={{ background: 'rgba(0, 20, 0, 0.5)' }}
-        ref={containerRef}
-      >
-        {title && (
-          <h3 className="text-md font-mono text-matrix-green px-4 pt-3 pb-1 text-center flex-shrink-0">
-            {title}
-          </h3>
-        )}
-        {isLive && (
-          <div
-            className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${isWsConnected ? 'bg-matrix-green animate-pulse shadow-[0_0_8px_#33ff33]' : 'bg-red-600 shadow-[0_0_8px_#ff0000]'}`}
-            title={isWsConnected ? 'Live' : 'Disconnected'}
-          ></div>
-        )}
+      <ChartErrorBoundary>
+        <Card
+          className="h-full w-full flex flex-col overflow-hidden"
+          style={{ background: 'rgba(0, 20, 0, 0.5)' }}
+          ref={containerRef}
+        >
+          {title && (
+            <h3 className="text-md font-mono text-matrix-green px-4 pt-3 pb-1 text-center flex-shrink-0">
+              {title}
+            </h3>
+          )}
+          {isLive && (
+            <div
+              className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${isWsConnected ? 'bg-matrix-green animate-pulse shadow-[0_0_8px_#33ff33]' : 'bg-red-600 shadow-[0_0_8px_#ff0000]'}`}
+              title={isWsConnected ? 'Live' : 'Disconnected'}
+            ></div>
+          )}
 
-        <div className="flex-1 overflow-hidden">
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={chartOptions}
-            ref={chartComponentRef}
-            containerProps={{
-              className: 'highcharts-wrapper',
-              style: {
-                height: '100%',
-                width: '100%',
-                overflow: 'hidden', // Constrain chart
-              },
-            }}
-            callback={(chart) => {
-              if (chart && isMountedRef.current) {
-                // Force a reflow
-                updateChartSize();
-              }
-            }}
-          />
-        </div>
-
-        {(!displayData || displayData.length === 0) && !isLoading && !error && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
-            <p className="text-matrix-green/70 text-sm">No data available.</p>
+          <div className="flex-1 overflow-hidden">
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={chartOptions}
+              ref={chartComponentRef}
+              containerProps={{
+                className: 'highcharts-wrapper',
+                style: {
+                  height: '100%',
+                  width: '100%',
+                  overflow: 'hidden', // Constrain chart
+                },
+              }}
+              callback={(chart) => {
+                if (chart && isMountedRef.current) {
+                  // Force a reflow
+                  updateChartSize();
+                }
+              }}
+            />
           </div>
-        )}
-      </Card>
+
+          {(!displayData || displayData.length === 0) && !isLoading && !error && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
+              <p className="text-matrix-green/70 text-sm">No data available.</p>
+            </div>
+          )}
+        </Card>
+      </ChartErrorBoundary>
     );
   }
 );

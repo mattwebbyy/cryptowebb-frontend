@@ -1,6 +1,7 @@
 // src/components/matrix/MatrixRain.tsx
 import { useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils'; // Import the cn utility
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface MatrixRainProps {
   className?: string; // Define props to accept className
@@ -8,6 +9,7 @@ interface MatrixRainProps {
 
 export const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => { // Destructure className from props
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -34,21 +36,34 @@ export const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => { // Des
 
     // Animation loop
     const draw = () => {
-      // Black background with opacity for fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      // Theme-appropriate background for fade effect
+      const isLightMode = theme.mode === 'light';
+      if (isLightMode) {
+        // Light mode: white background with fade
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      } else {
+        // Dark mode: black background with fade
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+      }
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Green text
-      // ctx.fillStyle = '#33ff33'; // Overridden by character-specific opacity below
+      // Theme-appropriate text color
       ctx.font = `${fontSize}px monospace`;
 
       // Drawing the characters
       for (let i = 0; i < drops.length; i++) {
         // Random character
         const char = chars[Math.floor(Math.random() * chars.length)];
-        // Random opacity for more dynamic effect
-        const opacity = Math.random() * 0.5 + 0.5; // Opacity between 0.5 and 1.0
-        ctx.fillStyle = `rgba(51, 255, 51, ${opacity})`; // Green with variable opacity
+        // Slightly lower opacity as requested
+        const opacity = Math.random() * 0.3 + 0.4; // Opacity between 0.4 and 0.7 (more subtle)
+        
+        if (isLightMode) {
+          // Light mode: darker green/teal for visibility on white
+          ctx.fillStyle = `rgba(13, 115, 119, ${opacity})`; // Dark teal
+        } else {
+          // Dark mode: bright green Matrix style
+          ctx.fillStyle = `rgba(51, 255, 51, ${opacity})`;
+        }
 
         ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
@@ -67,14 +82,18 @@ export const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => { // Des
       clearInterval(interval);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, []); // Empty dependency array ensures this effect runs only once on mount and cleans up on unmount
+  }, [theme.mode]); // Re-run when theme changes
 
   return (
     <canvas
       ref={canvasRef}
       // Use cn to merge default classes with the passed className
-      className={cn("fixed top-0 left-0 w-full h-full -z-10", className)}
-      style={{ background: 'black' }} // Explicit background for the canvas itself
+      className={cn("fixed top-0 left-0 w-full h-full pointer-events-none", className)}
+      style={{ 
+        background: theme.mode === 'light' ? '#ffffff' : '#000000',
+        zIndex: -999999,
+        position: 'fixed'
+      }} // Theme-appropriate background
     />
   );
 };

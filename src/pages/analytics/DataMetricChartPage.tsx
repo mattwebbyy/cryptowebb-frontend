@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { Bell, ChevronDown, TrendingUp } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { useDataMetricTimeseries, useDataMetricInfo, type GranularityOption } from '@/features/dataMetrics/api/useDataMetrics';
 import type { TimeseriesDataPoint, DataMetricInfo } from '@/types/metricsData';
 import { MatrixLoader } from '@/components/ui/MatrixLoader';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { ChartSkeleton, Skeleton } from '@/components/ui/Skeleton';
+import { ChartExportButton } from '@/components/ui/ChartExportButton';
+import { ExportFormat } from '@/utils/chartExport';
+import { useResponsive } from '@/hooks/useResponsive';
 
 /**
  * Transforms timeseries data into a format suitable for Highcharts.
@@ -73,15 +79,31 @@ const granularityOptions: { value: GranularityOption; label: string; description
 ];
 
 /**
+ * Technical indicators options
+ */
+const technicalIndicators = [
+  { value: 'sma_7', label: 'SMA (7)', description: '7-period Simple Moving Average' },
+  { value: 'sma_30', label: 'SMA (30)', description: '30-period Simple Moving Average' },
+  { value: 'ema_7', label: 'EMA (7)', description: '7-period Exponential Moving Average' },
+  { value: 'ema_30', label: 'EMA (30)', description: '30-period Exponential Moving Average' },
+];
+
+/**
  * Component to display a chart for a selected data metric.
  * It fetches metric information and timeseries data based on the metricId from the URL.
  */
 const DataMetricChartPage: React.FC = () => {
   // Get the metricId from URL parameters
   const { metricId } = useParams<{ metricId: string }>();
+  const { isMobile, isTablet } = useResponsive();
   
   // State for granularity selection
   const [selectedGranularity, setSelectedGranularity] = useState<GranularityOption>('days');
+  
+  // State for technical indicators
+  const [selectedIndicators, setSelectedIndicators] = useState<string[]>([]);
+  const [indicatorsDropdownOpen, setIndicatorsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch metric information using the custom hook
   const { data: metricInfo, isLoading: isLoadingInfo, error: errorInfo } = useDataMetricInfo(metricId ?? null);
@@ -92,11 +114,102 @@ const DataMetricChartPage: React.FC = () => {
     selectedGranularity
   );
 
+  // Handler for creating alert
+  const handleCreateAlert = () => {
+    if (metricId) {
+      // Navigate to alerts page or open modal - for now just log
+      console.log('Create alert for metric:', metricId);
+      // TODO: Implement navigation to alerts page with pre-filled metric ID
+    }
+  };
+
+  // Handler for toggling technical indicators
+  const handleIndicatorToggle = (indicator: string) => {
+    setSelectedIndicators(prev => 
+      prev.includes(indicator) 
+        ? prev.filter(ind => ind !== indicator)
+        : [...prev, indicator]
+    );
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIndicatorsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handler for chart export
+  const handleChartExport = async (format: ExportFormat) => {
+    // For standalone chart page, we'll implement a direct export
+    // In the future, this could be enhanced to use a chart ref
+    console.log(`Exporting chart as ${format}`);
+    
+    if (format === 'csv' && timeseriesData) {
+      // Simple CSV export for timeseries data
+      const csvContent = [
+        ['Time', 'Value', 'Block Number'].join(','),
+        ...timeseriesData.map(point => [
+          new Date(point.timestamp).toISOString(),
+          point.value,
+          point.blockNumber || ''
+        ].join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${metricInfo?.MetricName || 'metric'}_data.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } else {
+      // For image/PDF exports, we'd need to integrate with Highcharts export
+      throw new Error(`${format} export not yet implemented for this chart type`);
+    }
+  };
+
   // Handle loading states
   if (isLoadingInfo || isLoadingData) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <MatrixLoader />
+      <div className="p-4 md:p-6 h-full text-matrix-green">
+        <Card className="h-full flex flex-col bg-black/70 border border-matrix-green/50 shadow-lg shadow-matrix-green/30">
+          {/* Header skeleton */}
+          <div className="p-3 border-b border-matrix-green/30 space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="text-sm text-matrix-green/80">
+                <Skeleton className="h-4 w-64" />
+              </div>
+              
+              {/* Controls skeleton */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-16" />
+                  <div className="flex gap-1">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton key={i} className="h-6 w-12 rounded" />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-8 w-20 rounded" />
+                </div>
+                <Skeleton className="h-8 w-16 rounded" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Chart area skeleton */}
+          <div className="flex-1 p-2 md:p-4 min-h-0">
+            <ChartSkeleton className="h-full" />
+          </div>
+        </Card>
       </div>
     );
   }
@@ -277,30 +390,108 @@ const DataMetricChartPage: React.FC = () => {
         {/* Header with metric info and controls */}
         {metricInfo && (
           <div className="p-3 border-b border-matrix-green/30 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-sm text-matrix-green/80">
-                <span className="font-semibold">Blockchain:</span> {metricInfo.Blockchain} | 
-                <span className="font-semibold"> Source:</span> {metricInfo.DataSourceType} |
-                <span className="font-semibold"> ID:</span> {metricInfo.MetricID}
+            {/* Metric Info Row */}
+            <div className={`text-sm text-matrix-green/80 ${isMobile ? 'text-xs' : ''}`}>
+              <div className={isMobile ? 'space-y-1' : ''}>
+                <span className="font-semibold">Blockchain:</span> {metricInfo.Blockchain}
+                {!isMobile && ' | '}
+                {isMobile && <br />}
+                <span className="font-semibold">Source:</span> {metricInfo.DataSourceType}
+                {!isMobile && ' | '}
+                {isMobile && <br />}
+                <span className="font-semibold">ID:</span> {metricInfo.MetricID}
               </div>
-              
-              {/* Granularity Selector */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-semibold text-matrix-green/80">
-                  Granularity:
+            </div>
+            
+            {/* Controls Row - Consistent sizing and clean layout */}
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              {/* Left side - Technical Indicators */}
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-matrix-green/80 min-w-max">
+                  Technical Indicators:
                 </label>
-                <select
-                  value={selectedGranularity}
-                  onChange={(e) => setSelectedGranularity(e.target.value as GranularityOption)}
-                  className="bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-1 text-sm focus:outline-none focus:border-matrix-green hover:bg-matrix-green/10 transition-colors"
-                  title="Select data aggregation level"
-                >
-                  {granularityOptions.map((option) => (
-                    <option key={option.value} value={option.value} title={option.description}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIndicatorsDropdownOpen(!indicatorsDropdownOpen)}
+                    className="flex items-center justify-between gap-2 bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 text-sm hover:bg-matrix-green/10 transition-colors min-w-[140px] h-10"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>{selectedIndicators.length === 0 ? 'None' : `${selectedIndicators.length} selected`}</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${indicatorsDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {indicatorsDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 bg-black/90 border border-matrix-green/50 rounded shadow-lg shadow-matrix-green/20 z-50 min-w-[200px]">
+                      {technicalIndicators.map((indicator) => (
+                        <label
+                          key={indicator.value}
+                          className="flex items-center gap-3 p-3 hover:bg-matrix-green/10 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedIndicators.includes(indicator.value)}
+                            onChange={() => handleIndicatorToggle(indicator.value)}
+                            className="w-4 h-4 text-matrix-green bg-black border-matrix-green/50 rounded focus:ring-matrix-green focus:ring-2"
+                          />
+                          <div>
+                            <div className="text-sm text-matrix-green font-medium">{indicator.label}</div>
+                            <div className="text-xs text-matrix-green/60">{indicator.description}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right side - Granularity and Actions */}
+              <div className="flex items-center gap-3 lg:ml-auto">
+                {/* Granularity Selector */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-semibold text-matrix-green/80 min-w-max">
+                    Granularity:
+                  </label>
+                  <select
+                    value={selectedGranularity}
+                    onChange={(e) => setSelectedGranularity(e.target.value as GranularityOption)}
+                    className="bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 text-sm focus:outline-none focus:border-matrix-green hover:bg-matrix-green/10 transition-colors min-w-[100px] h-10"
+                    title="Select data aggregation level"
+                  >
+                    {granularityOptions.map((option) => (
+                      <option key={option.value} value={option.value} title={option.description}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 items-center">
+                  {/* Create Alert Button */}
+                  <button
+                    onClick={handleCreateAlert}
+                    className="bg-matrix-green/10 text-matrix-green border border-matrix-green/50 hover:bg-matrix-green/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
+                    title="Create alert for this metric"
+                  >
+                    <Bell className="h-4 w-4 flex-shrink-0" />
+                    <span className="ml-2 leading-none">Alert</span>
+                  </button>
+
+                  {/* Export Button - Make it identical */}
+                  <button
+                    onClick={() => handleChartExport('csv')} // Export as CSV
+                    className="bg-matrix-green/10 text-matrix-green border border-matrix-green/50 hover:bg-matrix-green/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
+                    title="Export Chart"
+                    disabled={!timeseriesData || timeseriesData.length === 0}
+                  >
+                    <svg className="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="ml-2 leading-none">Export</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
