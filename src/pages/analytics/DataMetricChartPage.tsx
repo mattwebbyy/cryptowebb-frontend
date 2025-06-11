@@ -177,12 +177,12 @@ const DataMetricChartPage: React.FC = () => {
   // Handle loading states
   if (isLoadingInfo || isLoadingData) {
     return (
-      <div className="p-4 md:p-6 h-full text-matrix-green">
-        <Card className="h-full flex flex-col bg-black/70 border border-matrix-green/50 shadow-lg shadow-matrix-green/30">
+      <div className="p-4 md:p-6 h-full text-primary">
+        <Card className="h-full flex flex-col bg-black/70 border border-primary/50 shadow-lg shadow-primary/30">
           {/* Header skeleton */}
-          <div className="p-3 border-b border-matrix-green/30 space-y-3">
+          <div className="p-3 border-b border-primary/30 space-y-3">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-              <div className="text-sm text-matrix-green/80">
+              <div className="text-sm text-primary/80">
                 <Skeleton className="h-4 w-64" />
               </div>
               
@@ -244,8 +244,8 @@ const DataMetricChartPage: React.FC = () => {
                 onClick={() => setSelectedGranularity(option.value)}
                 className={`px-3 py-1 rounded text-sm transition-colors ${
                   selectedGranularity === option.value
-                    ? 'bg-matrix-green text-black'
-                    : 'bg-matrix-green/20 text-matrix-green hover:bg-matrix-green/30'
+                    ? 'bg-primary text-black'
+                    : 'bg-primary/20 text-primary hover:bg-primary/30'
                 }`}
               >
                 {option.label}
@@ -266,7 +266,7 @@ const DataMetricChartPage: React.FC = () => {
   // If metricId is not present
   if (!metricId) {
     return (
-      <div className="p-6 text-matrix-green/70 text-center">
+      <div className="p-6 text-primary/70 text-center">
         <h2 className="text-xl font-bold mb-2">No Metric Selected</h2>
         <p>Please select a metric from the sidebar to view its chart.</p>
       </div>
@@ -279,7 +279,7 @@ const DataMetricChartPage: React.FC = () => {
       backgroundColor: 'transparent',
       style: {
         fontFamily: '"Courier New", Courier, monospace',
-        color: '#00FF00',
+        color: 'var(--color-primary)',
       },
       zooming: {
         type: 'x'
@@ -288,16 +288,16 @@ const DataMetricChartPage: React.FC = () => {
     },
     title: {
       text: metricInfo?.MetricName || `Metric ID: ${metricId}`,
-      style: { color: '#33FF33', fontSize: '1.5em' },
+      style: { color: 'var(--color-primary)', fontSize: '1.5em' },
     },
     subtitle: {
       text: metricInfo?.Description || 'Timeseries data',
-      style: { color: '#33FF33', fontSize: '0.9em' }
+      style: { color: 'var(--color-primary)', fontSize: '0.9em' }
     },
     xAxis: {
       type: 'datetime',
       labels: { 
-        style: { color: '#00FF00' },
+        style: { color: 'var(--color-primary)' },
         formatter: function() {
           // Format the date labels properly
           // Ensure this.value is a number for dateFormat
@@ -312,11 +312,11 @@ const DataMetricChartPage: React.FC = () => {
           }
         }
       },
-      lineColor: '#00FF00',
-      tickColor: '#00FF00',
+      lineColor: 'var(--color-primary)',
+      tickColor: 'var(--color-primary)',
       title: {
         text: 'Time',
-        style: { color: '#00FF00' }
+        style: { color: 'var(--color-primary)' }
       },
       // Add these properties to improve X-axis handling
       dateTimeLabelFormats: {
@@ -331,22 +331,22 @@ const DataMetricChartPage: React.FC = () => {
       }
     },
     yAxis: {
-      title: { text: 'Value', style: { color: '#00FF00' } },
-      labels: { style: { color: '#00FF00' } },
-      gridLineColor: 'rgba(0, 255, 0, 0.2)',
+      title: { text: 'Value', style: { color: 'var(--color-primary)' } },
+      labels: { style: { color: 'var(--color-primary)' } },
+      gridLineColor: 'var(--color-primary-muted)',
     },
     series: transformTimeseriesForHighcharts(timeseriesData, metricInfo?.MetricName),
     credits: { enabled: false },
     legend: {
       enabled: true,
-      itemStyle: { color: '#00FF00' },
-      itemHoverStyle: { color: '#33FF33' },
+      itemStyle: { color: 'var(--color-primary)' },
+      itemHoverStyle: { color: 'var(--color-primary)' },
     },
     tooltip: {
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      style: { color: '#00FF00' },
+      style: { color: 'var(--color-primary)' },
       borderWidth: 1,
-      borderColor: '#00FF00',
+      borderColor: 'var(--color-primary)',
       formatter: function () {
         const originalDataPoint = timeseriesData?.find(dp => {
           let dpTime: number;
@@ -385,15 +385,15 @@ const DataMetricChartPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden text-matrix-green">
+    <div className="h-full flex flex-col overflow-hidden text-primary">
       <div className="flex-1 overflow-auto p-4 md:p-6">
-        <Card className="h-full flex flex-col bg-black/70 border border-matrix-green/50 shadow-lg shadow-matrix-green/30 min-h-[calc(100vh-12rem)]">
+        <Card className="h-full flex flex-col bg-black/70 border border-primary/50 shadow-lg shadow-primary/30 min-h-[calc(100vh-12rem)]">
         
         {/* Header with metric info and controls */}
         {metricInfo && (
-          <div className="p-3 border-b border-matrix-green/30 space-y-3">
+          <div className="p-3 border-b border-primary/30 space-y-3">
             {/* Metric Info Row */}
-            <div className={`text-sm text-matrix-green/80 ${isMobile ? 'text-xs' : ''}`}>
+            <div className={`text-sm text-primary/80 ${isMobile ? 'text-xs' : ''}`}>
               <div className={isMobile ? 'space-y-1' : ''}>
                 <span className="font-semibold">Blockchain:</span> {metricInfo.Blockchain}
                 {!isMobile && ' | '}
@@ -409,37 +409,37 @@ const DataMetricChartPage: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Left side - Technical Indicators */}
               <div className="flex items-center gap-3">
-                <label className="text-sm font-semibold text-matrix-green/80 min-w-max">
+                <label className="text-sm font-semibold text-primary/80 min-w-max">
                   Technical Indicators:
                 </label>
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIndicatorsDropdownOpen(!indicatorsDropdownOpen)}
-                    className="flex items-center justify-between gap-2 bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 pr-3 text-sm hover:bg-matrix-green/10 transition-colors min-w-[140px] h-10"
+                    className="flex items-center justify-between gap-2 bg-black/50 border border-primary/50 text-primary rounded px-3 py-2 pr-3 text-sm hover:bg-primary/10 transition-colors min-w-[140px] h-10"
                   >
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4" />
                       <span>{selectedIndicators.length === 0 ? 'None' : `${selectedIndicators.length} selected`}</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-matrix-green/60 transition-transform ${indicatorsDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-primary/60 transition-transform ${indicatorsDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {indicatorsDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-1 bg-black/90 border border-matrix-green/50 rounded shadow-lg shadow-matrix-green/20 z-50 min-w-[200px]">
+                    <div className="absolute top-full left-0 mt-1 bg-black/90 border border-primary/50 rounded shadow-lg shadow-primary/20 z-50 min-w-[200px]">
                       {technicalIndicators.map((indicator) => (
                         <label
                           key={indicator.value}
-                          className="flex items-center gap-3 p-3 hover:bg-matrix-green/10 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-3 hover:bg-primary/10 cursor-pointer transition-colors"
                         >
                           <input
                             type="checkbox"
                             checked={selectedIndicators.includes(indicator.value)}
                             onChange={() => handleIndicatorToggle(indicator.value)}
-                            className="w-4 h-4 text-matrix-green bg-black border-matrix-green/50 rounded focus:ring-matrix-green focus:ring-2"
+                            className="w-4 h-4 text-primary bg-black border-primary/50 rounded focus:ring-primary focus:ring-2"
                           />
                           <div>
-                            <div className="text-sm text-matrix-green font-medium">{indicator.label}</div>
-                            <div className="text-xs text-matrix-green/60">{indicator.description}</div>
+                            <div className="text-sm text-primary font-medium">{indicator.label}</div>
+                            <div className="text-xs text-primary/60">{indicator.description}</div>
                           </div>
                         </label>
                       ))}
@@ -452,26 +452,26 @@ const DataMetricChartPage: React.FC = () => {
               <div className="flex items-center gap-3 lg:ml-auto">
                 {/* Granularity Selector */}
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-semibold text-matrix-green/80 min-w-max">
+                  <label className="text-sm font-semibold text-primary/80 min-w-max">
                     Granularity:
                   </label>
                   <div className="relative">
                     <select
                       value={selectedGranularity}
                       onChange={(e) => setSelectedGranularity(e.target.value as GranularityOption)}
-                      className="bg-black/50 border border-matrix-green/50 text-matrix-green rounded px-3 py-2 pr-8 text-sm focus:outline-none focus:border-matrix-green hover:bg-matrix-green/10 transition-colors min-w-[100px] h-10 appearance-none cursor-pointer"
+                      className="bg-black/50 border border-primary/50 text-primary rounded px-3 py-2 pr-8 text-sm focus:outline-none focus:border-primary hover:bg-primary/10 transition-colors min-w-[100px] h-10 appearance-none cursor-pointer"
                       title="Select data aggregation level"
                       style={{
                         backgroundImage: 'none'
                       }}
                     >
                       {granularityOptions.map((option) => (
-                        <option key={option.value} value={option.value} title={option.description} className="bg-black text-matrix-green">
+                        <option key={option.value} value={option.value} title={option.description} className="bg-black text-primary">
                           {option.label}
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-matrix-green/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none" />
                   </div>
                 </div>
 
@@ -480,7 +480,7 @@ const DataMetricChartPage: React.FC = () => {
                   {/* Create Alert Button */}
                   <button
                     onClick={handleCreateAlert}
-                    className="bg-matrix-green/10 text-matrix-green border border-matrix-green/50 hover:bg-matrix-green/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
+                    className="bg-primary/10 text-primary border border-primary/50 hover:bg-primary/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
                     title="Create alert for this metric"
                   >
                     <Bell className="h-4 w-4 flex-shrink-0" />
@@ -490,7 +490,7 @@ const DataMetricChartPage: React.FC = () => {
                   {/* Export Button - Make it identical */}
                   <button
                     onClick={() => handleChartExport('csv')} // Export as CSV
-                    className="bg-matrix-green/10 text-matrix-green border border-matrix-green/50 hover:bg-matrix-green/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
+                    className="bg-primary/10 text-primary border border-primary/50 hover:bg-primary/20 h-10 px-3 text-sm font-mono transition-all duration-300 flex items-center justify-center rounded"
                     title="Export Chart"
                     disabled={!timeseriesData || timeseriesData.length === 0}
                   >
@@ -518,11 +518,11 @@ const DataMetricChartPage: React.FC = () => {
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <p className="text-matrix-green/70 text-xl mb-2">
+                <p className="text-primary/70 text-xl mb-2">
                   {isLoadingData ? 'Loading data...' : 'No data available for this metric.'}
                 </p>
                 {!isLoadingData && (
-                  <p className="text-matrix-green/50 text-sm">
+                  <p className="text-primary/50 text-sm">
                     Try selecting a different granularity option above.
                   </p>
                 )}

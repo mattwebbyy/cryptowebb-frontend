@@ -93,7 +93,7 @@ export const LoginForm = () => {
   if (isProcessingOAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-matrix-green text-center">
+        <div className="text-primary text-center">
           <div className="mb-4">Processing Google Authentication...</div>
           {/* You could add a loading spinner here if desired */}
         </div>
@@ -143,15 +143,15 @@ export const LoginForm = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-lg w-full p-8 border border-matrix-green bg-black/30 shadow-lg"
+      className="max-w-lg w-full mx-4 sm:mx-auto p-6 sm:p-8 border border-primary bg-surface/30 shadow-lg rounded-lg"
     >
-      <h2 className="text-3xl mb-8 text-center text-matrix-green font-bold px-16">System Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-2xl sm:text-3xl mb-6 sm:mb-8 text-center text-primary font-bold px-4 sm:px-16">System Login</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div>
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-3 bg-black border border-matrix-green text-matrix-green rounded focus:outline-none focus:ring-2 focus:ring-matrix-green"
+            className="w-full p-3 sm:p-4 bg-surface border border-primary text-primary rounded focus:outline-none focus:ring-2 focus:ring-primary text-base min-h-[44px]"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
@@ -161,37 +161,37 @@ export const LoginForm = () => {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 bg-black border border-matrix-green text-matrix-green rounded focus:outline-none focus:ring-2 focus:ring-matrix-green"
+            className="w-full p-3 sm:p-4 bg-surface border border-primary text-primary rounded focus:outline-none focus:ring-2 focus:ring-primary text-base min-h-[44px]"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
           />
         </div>
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {error && <div className="text-red-500 text-sm p-2 bg-red-900/20 border border-red-500/30 rounded">{error}</div>}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full p-3 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90 transition-colors"
+          className="w-full p-3 sm:p-4 bg-primary text-background font-bold rounded hover:bg-primary-90 transition-colors min-h-[44px] text-base"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Authenticating...' : 'Access System'}
         </motion.button>
       </form>
-      <div className="my-6 text-center text-matrix-green font-semibold">or</div>
+      <div className="my-4 sm:my-6 text-center text-primary font-semibold">or</div>
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={handleGoogleSignIn}
-        className="w-full flex items-center justify-center gap-2 p-3 bg-white text-black font-bold rounded hover:bg-gray-200 transition-colors"
+        className="w-full flex items-center justify-center gap-2 p-3 sm:p-4 bg-white text-black font-bold rounded hover:bg-gray-200 transition-colors min-h-[44px] text-base"
       >
         <FaGoogle size={20} />
         Sign in with Google
       </motion.button>
-      <div className="mt-4 text-center">
+      <div className="mt-4 sm:mt-6 text-center">
         <button
           onClick={() => navigate('/register')}
-          className="text-matrix-green hover:text-matrix-green/80 transition-colors"
+          className="text-primary hover:text-primary-70 transition-colors p-2 min-h-[44px] flex items-center justify-center mx-auto"
         >
           Initialize New Account
         </button>

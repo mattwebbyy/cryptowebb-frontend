@@ -184,7 +184,7 @@ const ReferralsPage: React.FC = () => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
+        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
               <FiPlusCircle className="mr-3 text-primary" />
               Add New Referral Code
@@ -244,7 +244,7 @@ const ReferralsPage: React.FC = () => {
             </form>
             </Card>
 
-        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
+        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
               <FiList className="mr-3 text-primary" />
               Your Referral Codes

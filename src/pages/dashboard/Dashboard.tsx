@@ -209,28 +209,28 @@ const Dashboard = () => {
     <>
       {/* Header Section */}
       <div className="space-y-2">
-        <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Welcome back{profile?.firstName ? `, ${profile.firstName}` : ''}!
         </h1>
-        <p className="text-text-secondary text-lg">
+        <p className="text-text-secondary text-base sm:text-lg">
           Here's your CryptoWebb dashboard overview and account insights.
         </p>
       </div>
 
-      {/* Quick Stats Grid - More Spacing */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* Quick Stats Grid - Mobile Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         {quickStats.map((stat, index) => (
-          <Card key={index} className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
+          <Card key={index} className="p-4 sm:p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <div className="space-y-2 sm:space-y-3 w-full">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg text-primary flex-shrink-0">
                     {stat.icon}
                   </div>
-                  <span className="text-sm font-medium text-text-secondary">{stat.label}</span>
+                  <span className="text-xs sm:text-sm font-medium text-text-secondary">{stat.label}</span>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-text">{stat.value}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-text">{stat.value}</p>
                   {stat.change && (
                     <p className={`text-xs ${
                       stat.changeType === 'positive' ? 'text-success' :
@@ -247,41 +247,41 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Main Content Grid - Better Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10 mt-12">
+      {/* Main Content Grid - Mobile Responsive */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 mt-8 sm:mt-12">
         {/* Profile Card */}
-        <div className="lg:col-span-1">
-          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
+        <div className="xl:col-span-1">
+          <Card className="p-4 sm:p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {profile?.avatarUrl ? (
                       <img
                         src={profile.avatarUrl}
                         alt="Profile"
-                        className="w-16 h-16 rounded-2xl object-cover border-2 border-primary/20"
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-primary/20 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                        <User className="h-8 w-8 text-white" />
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                       </div>
                     )}
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold text-text">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-text truncate">
                         {profile?.firstName} {profile?.lastName}
                       </h3>
-                      <p className="text-text-secondary text-sm">Account Manager</p>
+                      <p className="text-text-secondary text-xs sm:text-sm">Account Manager</p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="h-4 w-4 text-primary" />
-                      <span className="text-text-secondary">{profile?.email}</span>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                      <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                      <span className="text-text-secondary truncate">{profile?.email}</span>
                     </div>
                     
                     {profile?.lastLogin && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Calendar className="h-4 w-4 text-primary" />
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                        <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                         <span className="text-text-secondary">
                           Last login: {new Date(profile.lastLogin).toLocaleDateString()}
                         </span>
@@ -289,14 +289,14 @@ const Dashboard = () => {
                     )}
 
                     {profile?.bio && (
-                      <div className="pt-4 border-t border-border">
-                        <p className="text-sm text-text-secondary">{profile.bio}</p>
+                      <div className="pt-3 sm:pt-4 border-t border-border">
+                        <p className="text-xs sm:text-sm text-text-secondary">{profile.bio}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-4 border-t border-border space-y-3">
-                    <Button variant="outline" className="w-full">
+                  <div className="pt-3 sm:pt-4 border-t border-border">
+                    <Button variant="outline" className="w-full min-h-[44px]">
                       Edit Profile
                     </Button>
                   </div>
@@ -305,56 +305,56 @@ const Dashboard = () => {
             </div>
 
         {/* Quick Actions */}
-        <div className="lg:col-span-2">
-          <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-text">Quick Actions</h3>
+        <div className="xl:col-span-2">
+          <Card className="p-4 sm:p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
+            <div className="space-y-4 sm:space-y-6">
+              <h3 className="text-lg sm:text-xl font-semibold text-text">Quick Actions</h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <Button 
                       variant="outline" 
-                      className="h-24 flex-col gap-3 text-left justify-start p-6 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
+                      className="min-h-[80px] sm:h-24 flex-col gap-2 sm:gap-3 text-left justify-start p-4 sm:p-6 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
                       onClick={() => window.location.href = '/analytics'}
                     >
-                      <TrendingUp className="h-6 w-6 text-primary" />
+                      <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       <div>
-                        <div className="font-medium text-text">View Analytics</div>
+                        <div className="font-medium text-text text-sm sm:text-base">View Analytics</div>
                         <div className="text-xs text-text-secondary">Explore your crypto data</div>
                       </div>
                     </Button>
 
                     <Button 
                       variant="outline" 
-                      className="h-24 flex-col gap-3 text-left justify-start p-6 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
+                      className="min-h-[80px] sm:h-24 flex-col gap-2 sm:gap-3 text-left justify-start p-4 sm:p-6 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
                       onClick={() => window.location.href = '/dashboard/settings'}
                     >
-                      <CreditCard className="h-6 w-6 text-primary" />
+                      <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       <div>
-                        <div className="font-medium text-text">API Settings</div>
+                        <div className="font-medium text-text text-sm sm:text-base">API Settings</div>
                         <div className="text-xs text-text-secondary">Manage your API keys</div>
                       </div>
                     </Button>
 
                     <Button 
                       variant="outline" 
-                      className="h-24 flex-col gap-3 text-left justify-start p-6 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
+                      className="min-h-[80px] sm:h-24 flex-col gap-2 sm:gap-3 text-left justify-start p-4 sm:p-6 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
                       onClick={() => window.location.href = '/analytics/alerts'}
                     >
-                      <Bell className="h-6 w-6 text-primary" />
+                      <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       <div>
-                        <div className="font-medium text-text">Alerts</div>
+                        <div className="font-medium text-text text-sm sm:text-base">Alerts</div>
                         <div className="text-xs text-text-secondary">Manage notifications</div>
                       </div>
                     </Button>
 
                     <Button 
                       variant="outline" 
-                      className="h-24 flex-col gap-3 text-left justify-start p-6 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
+                      className="min-h-[80px] sm:h-24 flex-col gap-2 sm:gap-3 text-left justify-start p-4 sm:p-6 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
                       onClick={() => window.location.href = '/dashboard/referrals'}
                     >
-                      <Activity className="h-6 w-6 text-primary" />
+                      <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       <div>
-                        <div className="font-medium text-text">Referrals</div>
+                        <div className="font-medium text-text text-sm sm:text-base">Referrals</div>
                         <div className="text-xs text-text-secondary">Earn rewards</div>
                       </div>
                     </Button>

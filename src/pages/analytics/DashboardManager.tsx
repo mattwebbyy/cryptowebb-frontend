@@ -38,22 +38,22 @@ const DashboardManager = () => {
       className="p-4 md:p-6"
     >
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-mono text-matrix-green">Manage Dashboards</h1>
+        <h1 className="text-3xl font-mono text-primary">Manage Dashboards</h1>
         <Button
           onClick={() => {
             /* TODO: Open create modal/navigate to create page */ alert(
               "Open 'Create Dashboard' form/modal"
             );
           }}
-          className="bg-matrix-green hover:bg-matrix-green/80 text-black font-mono"
+          className="bg-primary hover:bg-primary/80 text-black font-mono"
         >
           <Plus className="mr-2 h-4 w-4" /> Add New Dashboard
         </Button>
       </div>
 
-      <Card className="bg-black/50 border border-matrix-green/50 p-4 md:p-6">
+      <Card className="bg-black/50 border border-primary/50 p-4 md:p-6">
         {isLoading && (
-          <div className="text-center py-4 text-matrix-green">Loading dashboards...</div>
+          <div className="text-center py-4 text-primary">Loading dashboards...</div>
         )}
         {error && (
           <div className="text-center py-4 text-red-500">
@@ -67,19 +67,19 @@ const DashboardManager = () => {
               dashboards.map((db) => (
                 <div
                   key={db.id}
-                  className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/30 border border-matrix-green/30 rounded hover:border-matrix-green/70 transition-colors"
+                  className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/30 border border-primary/30 rounded hover:border-primary/70 transition-colors"
                 >
                   <div
-                    className="mb-2 md:mb-0 cursor-pointer hover:text-matrix-green/80"
+                    className="mb-2 md:mb-0 cursor-pointer hover:text-primary/80"
                     onClick={() => navigate(`/dashboard/analytics/${db.id}`)}
                   >
                     {' '}
                     {/* TODO: Adjust analytics route if it needs ID */}
                     <div className="flex items-center gap-2 mb-1">
-                      <LayoutDashboard className="w-5 h-5 text-matrix-green" />
-                      <span className="text-lg font-semibold text-matrix-green">{db.name}</span>
+                      <LayoutDashboard className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-semibold text-primary">{db.name}</span>
                     </div>
-                    <span className="text-sm text-matrix-green/70 ml-7">ID: {db.id}</span>
+                    <span className="text-sm text-primary/70 ml-7">ID: {db.id}</span>
                   </div>
                   <div className="flex space-x-2 self-end md:self-center">
                     <Button
@@ -89,7 +89,7 @@ const DashboardManager = () => {
                         e.stopPropagation();
                         /* TODO: Open edit modal */ alert(`Edit ${db.name}`);
                       }}
-                      className="border-matrix-green/50 hover:border-matrix-green hover:bg-matrix-green/10"
+                      className="border-primary/50 hover:border-primary hover:bg-primary/10"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -113,7 +113,7 @@ const DashboardManager = () => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-matrix-green/70">
+              <div className="text-center py-4 text-primary/70">
                 No dashboards created yet.
               </div>
             )}

@@ -55,16 +55,16 @@ export const RegisterForm = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-md w-full p-6 border border-matrix-green bg-black/30"
+      className="max-w-md w-full p-6 border border-primary bg-surface/30"
     >
-      <h2 className="text-2xl mb-6 text-center text-matrix-green">Initialize New Account</h2>
+      <h2 className="text-2xl mb-6 text-center text-primary">Initialize New Account</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <input
               type="text"
               placeholder="First Name"
-              className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
+              className="w-full p-2 bg-surface border border-primary text-primary"
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
             />
@@ -73,7 +73,7 @@ export const RegisterForm = () => {
             <input
               type="text"
               placeholder="Last Name"
-              className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
+              className="w-full p-2 bg-surface border border-primary text-primary"
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
             />
@@ -84,7 +84,7 @@ export const RegisterForm = () => {
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
+            className="w-full p-2 bg-surface border border-primary text-primary"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
@@ -94,7 +94,7 @@ export const RegisterForm = () => {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-2 bg-black border border-matrix-green text-matrix-green"
+            className="w-full p-2 bg-surface border border-primary text-primary"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
@@ -105,7 +105,7 @@ export const RegisterForm = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full p-2 bg-matrix-green text-black font-bold hover:bg-matrix-green/90"
+          className="w-full p-2 bg-primary text-background font-bold hover:bg-primary-90"
           type="submit"
         >
           Initialize System Access
@@ -115,7 +115,7 @@ export const RegisterForm = () => {
       <div className="mt-4 text-center">
         <button
           onClick={() => navigate('/login')}
-          className="text-matrix-green hover:text-matrix-green/80"
+          className="text-primary hover:text-primary-70"
         >
           Return to Login
         </button>

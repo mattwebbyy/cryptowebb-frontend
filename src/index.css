@@ -26,13 +26,13 @@
   --color-primary-90: #33ff33e6;
 }
 
-/* Light theme overrides */
+/* Light theme overrides - Using Teal Colors */
 .theme-light {
   --color-primary: #0d7377;
   --color-secondary: #14a085;
   --color-accent: #40a69f;
-  --color-background: #ffffff;
-  --color-surface: #f8fffe;
+  --color-background: #fafefe;
+  --color-surface: #ffffff;
   --color-text: #1a202c;
   --color-text-secondary: #4a5568;
   --color-border: #e2e8f0;
@@ -63,14 +63,14 @@
 
 /* Minimal variant for light theme */
 .theme-light.variant-minimal {
-  --color-primary: #004455;
-  --color-secondary: #006677;
-  --color-accent: #008899;
+  --color-primary: #0d7377;
+  --color-secondary: #14a085;
+  --color-accent: #40a69f;
   --color-background: #fafafa;
   --color-surface: #ffffff;
   --color-text: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-border: #e0e0e0;
+  --color-text-secondary: #4a5568;
+  --color-border: #e2e8f0;
 }
 
 body {
@@ -255,20 +255,20 @@ html {
 }
 
 .prose-matrix {
-  --tw-prose-body: theme('colors.gray.300');
-  --tw-prose-headings: theme('colors.matrix-green');
-  --tw-prose-links: theme('colors.matrix-green');
-  --tw-prose-bold: theme('colors.white');
-  --tw-prose-counters: theme('colors.matrix-green');
-  --tw-prose-bullets: theme('colors.matrix-green');
-  --tw-prose-hr: theme('colors.matrix-green' / 0.3);
-  --tw-prose-quotes: theme('colors.gray.400');
-  --tw-prose-quote-borders: theme('colors.matrix-green');
-  --tw-prose-captions: theme('colors.gray.400');
-  --tw-prose-code: theme('colors.matrix-green');
-  --tw-prose-pre-code: theme('colors.matrix-green');
-  --tw-prose-pre-bg: theme('colors.black' / 0.5);
-  --tw-prose-pre-border: theme('colors.matrix-green' / 0.3);
+  --tw-prose-body: var(--color-text-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-text);
+  --tw-prose-counters: var(--color-primary);
+  --tw-prose-bullets: var(--color-primary);
+  --tw-prose-hr: var(--color-border);
+  --tw-prose-quotes: var(--color-text-secondary);
+  --tw-prose-quote-borders: var(--color-primary);
+  --tw-prose-captions: var(--color-text-secondary);
+  --tw-prose-code: var(--color-primary);
+  --tw-prose-pre-code: var(--color-primary);
+  --tw-prose-pre-bg: var(--color-surface);
+  --tw-prose-pre-border: var(--color-border);
 }
 
 /* Modern 2025 Utility Classes */
@@ -415,39 +415,39 @@ html {
   .prose h2,
   .prose h3,
   .prose h4 {
-    color: #33ff33;
+    color: var(--color-primary);
     font-family: monospace;
   }
 
   .prose p {
-    color: #e5e7eb;
+    color: var(--color-text-secondary);
     margin-top: 1.25em;
     margin-bottom: 1.25em;
   }
 
   .prose a {
-    color: #33ff33;
+    color: var(--color-primary);
     text-decoration: underline;
     font-weight: 500;
   }
 
   .prose a:hover {
-    color: rgba(51, 255, 51, 0.8);
+    color: var(--color-primary-70);
   }
 
   .prose strong {
-    color: white;
+    color: var(--color-text);
     font-weight: 600;
   }
 
   .prose ul {
-    color: #e5e7eb;
+    color: var(--color-text-secondary);
     list-style-type: disc;
     padding-left: 1.625em;
   }
 
   .prose ol {
-    color: #e5e7eb;
+    color: var(--color-text-secondary);
     list-style-type: decimal;
     padding-left: 1.625em;
   }
@@ -459,24 +459,25 @@ html {
 
   .prose blockquote {
     font-style: italic;
-    color: #9ca3af;
+    color: var(--color-text-secondary);
     border-left-width: 4px;
-    border-left-color: #33ff33;
+    border-left-color: var(--color-primary);
     padding-left: 1em;
     margin: 1.5em 0;
   }
 
   .prose code {
-    color: #33ff33;
-    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--color-primary);
+    background-color: var(--color-surface);
     padding: 0.2em 0.4em;
     border-radius: 0.25em;
     font-family: monospace;
+    border: 1px solid var(--color-border);
   }
 
   .prose pre {
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(51, 255, 51, 0.3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.5em;
     padding: 1em;
     overflow-x: auto;
@@ -486,16 +487,17 @@ html {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    color: #33ff33;
+    border: none;
+    color: var(--color-primary);
   }
 
   .prose img {
     border-radius: 0.5em;
-    border: 1px solid rgba(51, 255, 51, 0.3);
+    border: 1px solid var(--color-border);
   }
 
   .prose hr {
-    border-color: rgba(51, 255, 51, 0.3);
+    border-color: var(--color-border);
     margin: 2em 0;
   }
 }

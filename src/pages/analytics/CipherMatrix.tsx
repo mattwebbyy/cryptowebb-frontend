@@ -1,6 +1,7 @@
 // src/pages/analytics/CipherMatrix.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useResponsive } from '@/hooks/useResponsive';
 import {
   Search,
   Filter,
@@ -489,23 +490,26 @@ const CipherMatrix = () => {
     setSortConfig(null);
   };
 
+  // Use responsive hook for mobile optimization
+  const { isMobile } = useResponsive();
+
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-matrix-green/30">
-        <h2 className="text-xl font-mono text-matrix-green mb-4">
+      <div className="p-4 border-b border-primary/30">
+        <h2 className="text-lg md:text-xl font-mono text-primary mb-4">
           Cipher Matrix: Token Surveillance System
         </h2>
 
         {/* Search and basic filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-matrix-green/50" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-primary/50" />
             <input
               type="text"
               placeholder="Search by name, symbol, or address..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none focus:ring-1 focus:ring-matrix-green/50"
+              className="w-full pl-10 pr-4 py-3 md:py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </div>
 
@@ -516,7 +520,7 @@ const CipherMatrix = () => {
                 if (e.target.value === '') setFilterVerified(null);
                 else setFilterVerified(e.target.value === 'verified');
               }}
-              className="px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+              className="px-3 py-3 md:py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none min-h-[44px]"
             >
               <option value="">All Tokens</option>
               <option value="verified">Verified Only</option>
@@ -528,7 +532,7 @@ const CipherMatrix = () => {
               onChange={(e) => {
                 setFilterRisk((e.target.value as 'low' | 'medium' | 'high' | null) || null);
               }}
-              className="px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+              className="px-3 py-3 md:py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none min-h-[44px]"
             >
               <option value="">All Risk Levels</option>
               <option value="low">Low Risk</option>
@@ -538,7 +542,7 @@ const CipherMatrix = () => {
 
             <button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="px-3 py-2 flex items-center gap-1 bg-black/50 border border-matrix-green/40 rounded text-matrix-green hover:bg-matrix-green/10"
+              className="px-3 py-3 md:py-2 flex items-center gap-1 bg-black/50 border border-primary/40 rounded text-primary hover:bg-primary/10 min-h-[44px]"
             >
               <Sliders size={14} />
               <span>Advanced</span>
@@ -555,16 +559,16 @@ const CipherMatrix = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 border border-matrix-green/30 rounded-lg bg-black/30 mb-4">
+              <div className="p-4 border border-primary/30 rounded-lg bg-black/30 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">Chain</label>
+                    <label className="block text-primary/80 mb-1 text-sm">Chain</label>
                     <select
                       value={filterChain || 'all'}
                       onChange={(e) =>
                         setFilterChain(e.target.value === 'all' ? null : e.target.value)
                       }
-                      className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none"
                     >
                       <option value="all">All Chains</option>
                       <option value="Ethereum">Ethereum</option>
@@ -575,7 +579,7 @@ const CipherMatrix = () => {
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">Audit Status</label>
+                    <label className="block text-primary/80 mb-1 text-sm">Audit Status</label>
                     <select
                       value={
                         filterAudited === null ? 'all' : filterAudited ? 'audited' : 'unaudited'
@@ -584,7 +588,7 @@ const CipherMatrix = () => {
                         if (e.target.value === 'all') setFilterAudited(null);
                         else setFilterAudited(e.target.value === 'audited');
                       }}
-                      className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none"
                     >
                       <option value="all">All Tokens</option>
                       <option value="audited">Audited Only</option>
@@ -593,14 +597,14 @@ const CipherMatrix = () => {
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">Team Identity</label>
+                    <label className="block text-primary/80 mb-1 text-sm">Team Identity</label>
                     <select
                       value={filterDoxxed === null ? 'all' : filterDoxxed ? 'doxxed' : 'anon'}
                       onChange={(e) => {
                         if (e.target.value === 'all') setFilterDoxxed(null);
                         else setFilterDoxxed(e.target.value === 'doxxed');
                       }}
-                      className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none"
                     >
                       <option value="all">All Teams</option>
                       <option value="doxxed">Doxxed Teams Only</option>
@@ -609,14 +613,14 @@ const CipherMatrix = () => {
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">Min. Holders</label>
+                    <label className="block text-primary/80 mb-1 text-sm">Min. Holders</label>
                     <select
                       value={filterMinHolders === null ? 'all' : filterMinHolders.toString()}
                       onChange={(e) => {
                         if (e.target.value === 'all') setFilterMinHolders(null);
                         else setFilterMinHolders(parseInt(e.target.value));
                       }}
-                      className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none"
                     >
                       <option value="all">Any Number</option>
                       <option value="100">100+</option>
@@ -627,7 +631,7 @@ const CipherMatrix = () => {
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green/80 mb-1 text-sm">
+                    <label className="block text-primary/80 mb-1 text-sm">
                       Min. Liquidity
                     </label>
                     <select
@@ -636,7 +640,7 @@ const CipherMatrix = () => {
                         if (e.target.value === 'all') setFilterMinLiquidity(null);
                         else setFilterMinLiquidity(parseInt(e.target.value));
                       }}
-                      className="w-full px-3 py-2 bg-black/50 border border-matrix-green/40 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-primary/40 rounded text-primary focus:border-primary focus:outline-none"
                     >
                       <option value="all">Any Amount</option>
                       <option value="10000">$10K+</option>
@@ -649,7 +653,7 @@ const CipherMatrix = () => {
                   <div className="flex items-end">
                     <button
                       onClick={resetFilters}
-                      className="w-full px-3 py-2 bg-matrix-green/10 hover:bg-matrix-green/20 border border-matrix-green/40 rounded text-matrix-green"
+                      className="w-full px-3 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/40 rounded text-primary"
                     >
                       Reset All Filters
                     </button>
@@ -661,15 +665,150 @@ const CipherMatrix = () => {
         </AnimatePresence>
       </div>
 
-      {/* Token table */}
+      {/* Token table - Mobile Responsive */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full">
-          <thead className="sticky top-0 bg-black/90 backdrop-blur-sm border-b border-matrix-green/30">
+        {isMobile ? (
+          /* Mobile Card View */
+          <div className="p-4 space-y-4">
+            {sortedTokens.length > 0 ? (
+              sortedTokens.map((token) => (
+                <motion.div
+                  key={token.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-black/50 border border-primary/20 rounded-lg p-4 space-y-3"
+                >
+                  {/* Token Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-2">
+                      {token.verified ? (
+                        <Shield size={16} className="text-green-400" />
+                      ) : (
+                        <AlertTriangle size={16} className="text-yellow-400" />
+                      )}
+                      <div>
+                        <div className="font-semibold text-primary text-lg">{token.name}</div>
+                        <div className="text-sm text-primary/70 flex items-center gap-2">
+                          <span>{token.symbol}</span>
+                          <span className="text-xs px-2 py-1 rounded bg-primary/10">
+                            {token.chainName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedToken(token);
+                        setIsTokenDetailOpen(true);
+                      }}
+                      className="p-2 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+                    >
+                      <Eye size={16} className="text-primary" />
+                    </button>
+                  </div>
+
+                  {/* Price and Change */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-primary/60 uppercase tracking-wide">Price</div>
+                      <div className="text-lg font-mono text-primary">
+                        ${token.price.toFixed(6)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-primary/60 uppercase tracking-wide">24h Change</div>
+                      <div className={`text-lg font-mono flex items-center ${
+                        token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {token.priceChange24h >= 0 ? (
+                          <TrendingUp size={16} className="mr-1" />
+                        ) : (
+                          <TrendingDown size={16} className="mr-1" />
+                        )}
+                        {token.priceChange24h.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Market Cap and Holders */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-primary/60 uppercase tracking-wide">Market Cap</div>
+                      <div className="text-sm font-mono text-primary">
+                        ${token.marketCap.toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-primary/60 uppercase tracking-wide">Holders</div>
+                      <div className="text-sm font-mono text-primary">
+                        {token.holders.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Risk Score and Status Badges */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {token.auditStatus?.isAudited && (
+                        <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-400 flex items-center gap-1">
+                          <Shield size={10} />
+                          Audited
+                        </span>
+                      )}
+                      {token.team?.isDoxxed ? (
+                        <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-400 flex items-center gap-1">
+                          <Unlock size={10} />
+                          Doxxed
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 rounded bg-yellow-500/10 text-yellow-400 flex items-center gap-1">
+                          <Lock size={10} />
+                          Anon
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-primary/60">
+                      Risk: <span className={`font-medium ${
+                        token.riskScore >= 80 ? 'text-red-400' :
+                        token.riskScore >= 60 ? 'text-yellow-400' :
+                        token.riskScore >= 40 ? 'text-blue-400' : 'text-green-400'
+                      }`}>
+                        {token.riskScore >= 80 ? 'HIGH' :
+                         token.riskScore >= 60 ? 'MEDIUM' :
+                         token.riskScore >= 40 ? 'LOW' : 'MINIMAL'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="text-xs text-primary/50 font-mono">
+                    {token.address.substring(0, 10)}...{token.address.substring(token.address.length - 8)}
+                    <button
+                      onClick={() => navigator.clipboard.writeText(token.address)}
+                      className="ml-2 hover:text-primary"
+                      title="Copy address"
+                    >
+                      📋
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center text-primary/60 py-12">
+                <AlertTriangle size={48} className="mx-auto mb-4 opacity-50" />
+                <p>No tokens found matching your criteria</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Desktop Table View */
+          <table className="w-full">
+          <thead className="sticky top-0 bg-black/90 backdrop-blur-sm border-b border-primary/30">
             <tr>
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('name')}
-                  className="flex items-center text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center text-primary/80 hover:text-primary"
                 >
                   Token <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -677,7 +816,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => handleSort('price')}
-                  className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-end text-primary/80 hover:text-primary"
                 >
                   Price <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -685,7 +824,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => handleSort('priceChange24h')}
-                  className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-end text-primary/80 hover:text-primary"
                 >
                   24h <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -693,7 +832,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => handleSort('marketCap')}
-                  className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-end text-primary/80 hover:text-primary"
                 >
                   Market Cap <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -701,7 +840,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => handleSort('holders')}
-                  className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-end text-primary/80 hover:text-primary"
                 >
                   Holders <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -709,7 +848,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-center">
                 <button
                   onClick={() => handleSort('riskScore')}
-                  className="flex items-center justify-center text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-center text-primary/80 hover:text-primary"
                 >
                   Risk Level <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -717,7 +856,7 @@ const CipherMatrix = () => {
               <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => handleSort('launchDate')}
-                  className="flex items-center justify-end text-matrix-green/80 hover:text-matrix-green"
+                  className="flex items-center justify-end text-primary/80 hover:text-primary"
                 >
                   Launch Date <ArrowUpDown size={14} className="ml-1" />
                 </button>
@@ -732,7 +871,7 @@ const CipherMatrix = () => {
                   key={token.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="border-b border-matrix-green/10 hover:bg-matrix-green/5"
+                  className="border-b border-primary/10 hover:bg-primary/5"
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center">
@@ -750,10 +889,10 @@ const CipherMatrix = () => {
                         />
                       )}
                       <div>
-                        <div className="font-semibold text-matrix-green">{token.name}</div>
-                        <div className="text-sm text-matrix-green/70 flex items-center gap-1">
+                        <div className="font-semibold text-primary">{token.name}</div>
+                        <div className="text-sm text-primary/70 flex items-center gap-1">
                           <span>{token.symbol}</span>
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-matrix-green/10">
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10">
                             {token.chainName}
                           </span>
 
@@ -780,12 +919,12 @@ const CipherMatrix = () => {
                         </div>
 
                         {/* Short address display */}
-                        <div className="text-xs text-matrix-green/50 mt-1">
+                        <div className="text-xs text-primary/50 mt-1">
                           {token.address.substring(0, 6)}...
                           {token.address.substring(token.address.length - 4)}
                           <button
                             onClick={() => navigator.clipboard.writeText(token.address)}
-                            className="ml-1 hover:text-matrix-green"
+                            className="ml-1 hover:text-primary"
                             title="Copy address"
                           >
                             📋
@@ -848,9 +987,9 @@ const CipherMatrix = () => {
                       </span>
 
                       {/* Tooltip that shows on hover */}
-                      <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-60 p-2 bg-black border border-matrix-green rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                      <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-60 p-2 bg-black border border-primary rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                         <div className="text-sm">
-                          <div className="font-semibold mb-1 text-matrix-green">Risk Factors:</div>
+                          <div className="font-semibold mb-1 text-primary">Risk Factors:</div>
                           {token.riskFactors && token.riskFactors.length > 0 ? (
                             <ul className="list-disc pl-4 space-y-0.5 text-xs">
                               {token.riskFactors.map((factor, idx) => (
@@ -862,7 +1001,7 @@ const CipherMatrix = () => {
                           )}
 
                           {token.lockupPeriod && (
-                            <div className="mt-1.5 pt-1.5 border-t border-matrix-green/20">
+                            <div className="mt-1.5 pt-1.5 border-t border-primary/20">
                               <div className="text-xs flex gap-1 items-center">
                                 <Lock size={10} />
                                 <span>
@@ -880,12 +1019,12 @@ const CipherMatrix = () => {
                   {/* Enhanced Launch Date column with "New" badge for recent tokens */}
                   <td className="px-4 py-3 text-right">
                     <div>
-                      <div className="text-matrix-green/70">
+                      <div className="text-primary/70">
                         {new Date(token.launchDate).toLocaleDateString()}
                       </div>
                       {Date.now() - new Date(token.launchDate).getTime() <
                         1000 * 60 * 60 * 24 * 2 && (
-                        <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs bg-matrix-green text-black">
+                        <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs bg-primary text-black">
                           <Zap size={10} className="mr-0.5" />
                           New
                         </span>
@@ -900,18 +1039,18 @@ const CipherMatrix = () => {
                         onClick={() =>
                           window.open(`https://etherscan.io/token/${token.address}`, '_blank')
                         }
-                        className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
+                        className="p-1.5 rounded-full bg-black/50 border border-primary/30 hover:bg-primary/20 hover:border-primary/60"
                         title="View on Blockchain Explorer"
                       >
-                        <ExternalLink size={14} className="text-matrix-green" />
+                        <ExternalLink size={14} className="text-primary" />
                       </button>
 
                       <button
                         onClick={() => showTokenDetails(token.id)}
-                        className="p-1.5 rounded-full bg-black/50 border border-matrix-green/30 hover:bg-matrix-green/20 hover:border-matrix-green/60"
+                        className="p-1.5 rounded-full bg-black/50 border border-primary/30 hover:bg-primary/20 hover:border-primary/60"
                         title="View Details"
                       >
-                        <Eye size={14} className="text-matrix-green" />
+                        <Eye size={14} className="text-primary" />
                       </button>
                     </div>
                   </td>
@@ -919,17 +1058,18 @@ const CipherMatrix = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-matrix-green/50">
+                <td colSpan={8} className="px-4 py-8 text-center text-primary/50">
                   No tokens match your search criteria
                 </td>
               </tr>
             )}
           </tbody>
-        </table>
+          </table>
+        )}
       </div>
 
       {/* Footer with stats */}
-      <div className="p-3 border-t border-matrix-green/30 text-sm text-matrix-green/60 flex justify-between">
+      <div className="p-3 border-t border-primary/30 text-sm text-primary/60 flex justify-between">
         <div>Displaying {sortedTokens.length} tokens</div>
         <div>Last updated: {new Date().toLocaleTimeString()}</div>
       </div>

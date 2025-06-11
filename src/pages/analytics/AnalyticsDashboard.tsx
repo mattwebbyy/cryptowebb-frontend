@@ -7,6 +7,7 @@ import DashboardEditorModal from '@/components/analytics/DashboardEditorModal';
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
 import { debounce } from 'lodash';
+import { useResponsive } from '@/hooks/useResponsive';
 
 // WidthProvider wraps RGL to automatically provide width
 const ReactGridLayout = WidthProvider(RGL);
@@ -32,6 +33,7 @@ interface GridItemDimensions {
 }
 
 const AnalyticsDashboard = () => {
+  const { isMobile, isTablet } = useResponsive();
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   // Layout state stores the grid configuration (x, y, w, h, etc.)
   const [layout, setLayout] = useState<DashboardLayoutItem[]>([]);
@@ -124,10 +126,11 @@ const AnalyticsDashboard = () => {
 
   // Function to initialize layout with potentially missing grid properties (x, y, w, h)
   const createInitialLayout = useCallback((items: DashboardLayoutItem[]): DashboardLayoutItem[] => {
-    const cols = 12; // Match the `cols` prop of ReactGridLayout
-    const defaultWidth = 4; // Default width in grid units
-    const defaultHeight = 4; // Default height in grid units (adjust based on rowHeight)
-    const itemsPerRow = Math.floor(cols / defaultWidth); // e.g., 12 / 4 = 3
+    // Responsive grid configuration
+    const cols = isMobile ? 1 : isTablet ? 2 : 12; // 1 column on mobile, 2 on tablet, 12 on desktop
+    const defaultWidth = isMobile ? 1 : isTablet ? 1 : 4; // Full width on mobile/tablet
+    const defaultHeight = isMobile ? 6 : isTablet ? 5 : 4; // Taller on mobile for better visibility
+    const itemsPerRow = Math.floor(cols / defaultWidth);
 
     return items.map((item, index) => {
       // Ensure every item has a unique 'i'
@@ -146,7 +149,7 @@ const AnalyticsDashboard = () => {
         static: item.static === true ? true : false,
       };
     });
-  }, []); // No dependencies needed for this pure function
+  }, [isMobile, isTablet]); // Re-run when screen size changes
 
   // Handler for when RGL reports a layout change (drag, resize)
   const onLayoutChange = (newRglLayout: Layout[]) => {
@@ -318,32 +321,34 @@ const AnalyticsDashboard = () => {
       {/* Black Background matching chart opacity */}
       <div className="absolute inset-0 bg-black/70"></div>
       
-      {/* Modern Header */}
-      <div className="relative z-10 flex justify-between items-center p-6 border-b border-border/30 flex-shrink-0 glass-morphism">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate pr-4" title={dashboard?.name}>
+      {/* Modern Header - Mobile Responsive */}
+      <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 md:p-6 border-b border-border/30 flex-shrink-0 glass-morphism gap-4">
+        <div className="space-y-1 flex-1 min-w-0">
+          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate pr-2" title={dashboard?.name}>
             {dashboard?.name || 'Analytics Dashboard'}
           </h2>
-          <p className="text-sm text-text-secondary">
+          <p className="text-xs md:text-sm text-text-secondary line-clamp-1">
             {dashboard?.description || 'Create and customize your analytics dashboard'}
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 w-full sm:w-auto">
           {!isEmptyState && dashboard && (
             <button
               onClick={handleEditCurrentDashboard}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium glass-morphism border border-border/30 rounded-xl hover:border-primary/50 text-text-secondary hover:text-primary transition-all duration-300 hover:shadow-modern"
+              className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium glass-morphism border border-border/30 rounded-xl hover:border-primary/50 text-text-secondary hover:text-primary transition-all duration-300 hover:shadow-modern flex-1 sm:flex-none justify-center"
             >
-              <Settings size={16} />
-              <span>Edit Dashboard</span>
+              <Settings size={isMobile ? 14 : 16} />
+              <span className={isMobile ? 'hidden' : 'block'}>Edit Dashboard</span>
+              {isMobile && <span>Edit</span>}
             </button>
           )}
           <button
             onClick={handleCreateNewDashboard}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/15 text-primary transition-all duration-300 shadow-modern"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/15 text-primary transition-all duration-300 shadow-modern flex-1 sm:flex-none justify-center"
           >
-            <Plus size={16} />
-            <span>New Dashboard</span>
+            <Plus size={isMobile ? 14 : 16} />
+            <span className={isMobile ? 'hidden' : 'block'}>New Dashboard</span>
+            {isMobile && <span>New</span>}
           </button>
         </div>
       </div>
@@ -351,16 +356,16 @@ const AnalyticsDashboard = () => {
       {/* Modern Grid Container */}
       <div className="relative z-10 flex-1 overflow-hidden">
         {isEmptyState ? (
-          <div className="h-full flex flex-col items-center justify-center p-8">
-            {/* Modern Empty State */}
-            <div className="text-center max-w-md space-y-6">
-              <div className="w-24 h-24 glass-morphism rounded-3xl flex items-center justify-center mx-auto border border-primary/20 shadow-modern">
-                <BarChart3 className="h-12 w-12 text-primary" />
+          <div className="h-full flex flex-col items-center justify-center p-4 md:p-8">
+            {/* Modern Empty State - Mobile Optimized */}
+            <div className="text-center max-w-md w-full space-y-4 md:space-y-6">
+              <div className={`${isMobile ? 'w-16 h-16' : 'w-24 h-24'} glass-morphism rounded-3xl flex items-center justify-center mx-auto border border-primary/20 shadow-modern`}>
+                <BarChart3 className={`${isMobile ? 'h-8 w-8' : 'h-12 w-12'} text-primary`} />
               </div>
               
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-text">Create Your First Dashboard</h3>
-                <p className="text-text-secondary leading-relaxed">
+              <div className="space-y-2 md:space-y-3">
+                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-text`}>Create Your First Dashboard</h3>
+                <p className={`text-text-secondary leading-relaxed ${isMobile ? 'text-sm' : 'text-base'}`}>
                   Build powerful analytics dashboards with customizable widgets and real-time data visualization.
                 </p>
               </div>
@@ -368,13 +373,13 @@ const AnalyticsDashboard = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleCreateNewDashboard}
-                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 mx-auto"
+                  className={`flex items-center gap-2 md:gap-3 ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 mx-auto w-full sm:w-auto justify-center`}
                 >
-                  <Plus size={20} />
+                  <Plus size={isMobile ? 18 : 20} />
                   <span>Create New Dashboard</span>
                 </button>
                 
-                <p className="text-xs text-text-secondary">
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-text-secondary`}>
                   Start with pre-built templates or create from scratch
                 </p>
               </div>
@@ -382,7 +387,7 @@ const AnalyticsDashboard = () => {
           </div>
         ) : (
           // This container's size determines the width RGL receives via WidthProvider
-          <div ref={gridContainerRef} className="h-full w-full p-4 overflow-auto">
+          <div ref={gridContainerRef} className={`h-full w-full ${isMobile ? 'p-2' : 'p-4'} overflow-auto`}>
             <style>{`
                             /* Ensure RGL styles are loaded. These are additions/overrides */
                             .react-grid-layout {
@@ -460,23 +465,23 @@ const AnalyticsDashboard = () => {
               // Let WidthProvider manage width. Ensure gridContainerRef has w-full.
               className="layout"
               layout={layout} // Current layout state
-              cols={12} // Grid columns
-              rowHeight={50} // Height of one 'h' unit in pixels
-              isDraggable={true} // Allow dragging globally
-              isResizable={true} // Allow resizing globally
+              cols={isMobile ? 1 : isTablet ? 2 : 12} // Responsive grid columns
+              rowHeight={isMobile ? 40 : 50} // Smaller row height on mobile
+              isDraggable={!isMobile} // Disable dragging on mobile for better UX
+              isResizable={!isMobile} // Disable resizing on mobile for better UX
               onLayoutChange={onLayoutChange} // Callback when layout changes
               onResizeStop={handleResizeStop} // Callback when resize finishes
               onDragStop={handleDragStop} // Callback when drag finishes
               useCSSTransforms={true} // Better performance generally
-              compactType={null} // **IMPORTANT**: Allows free horizontal placement
-              preventCollision={false} // Allow items to overlap if dragged/resized over each other
+              compactType={isMobile ? 'vertical' : null} // Compact vertically on mobile
+              preventCollision={isMobile} // Prevent collisions on mobile
               // **IMPORTANT**: Defines the available resize handles. 'se' = bottom-right corner (diagonal resize)
-              resizeHandles={['se']}
-              margin={[15, 15]} // Margin between grid items [horizontal, vertical]
-              containerPadding={[5, 5]} // Padding inside the grid container [horizontal, vertical]
+              resizeHandles={isMobile ? [] : ['se']} // No resize handles on mobile
+              margin={isMobile ? [8, 8] : [15, 15]} // Smaller margins on mobile
+              containerPadding={isMobile ? [4, 4] : [5, 5]} // Smaller padding on mobile
               measureBeforeMount={false} // Usually false is fine
-              // Key forces remount if dashboard ID changes, useful for full reset
-              key={dashboard?.id || 'empty-dashboard-layout'}
+              // Key forces remount if dashboard ID changes or responsive state changes
+              key={`${dashboard?.id || 'empty-dashboard-layout'}-${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'}`}
             >
               {layout.map((item) => {
                 // Get the latest calculated dimensions for this item

@@ -1,7 +1,8 @@
 // src/pages/dashboard/DashboardLayout.tsx
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3 } from 'lucide-react';
+import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3, Menu, X, CreditCard } from 'lucide-react';
+import { useState } from 'react';
 
 interface NavItem {
   path: string;
@@ -77,6 +78,7 @@ const fetchAPIUsageData = async (): Promise<APIUsageData> => {
 
 const DashboardLayout = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const { data: subscriptionData } = useQuery<SubscriptionData>({
     queryKey: ['subscription'],
@@ -87,6 +89,11 @@ const DashboardLayout = () => {
     queryKey: ['apiUsage'],
     queryFn: fetchAPIUsageData,
   });
+
+  // Close mobile menu when route changes
+  const handleNavClick = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   const navItems: NavItem[] = [
     {
@@ -121,49 +128,142 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Matrix Glass Background */}
-      <div className="absolute inset-0 bg-black/70"></div>
-      <div className="absolute inset-0 backdrop-blur-lg bg-matrix-green/[0.02]"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-matrix-green/5 via-transparent to-matrix-green/5"></div>
+      {/* Subtle Background */}
+      <div className="absolute inset-0 bg-background"></div>
       
-      {/* Header - Fixed Width */}
-      <header className="relative z-10 bg-matrix-green/10 backdrop-blur-md border-b border-matrix-green/20 px-6 py-4">
+      {/* Header - Professional Styling */}
+      <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  CryptoWebb
-                </h1>
-                <p className="text-sm text-text-secondary">User Dashboard</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                CryptoWebb
+              </h1>
+              <p className="text-xs md:text-sm text-text-secondary">User Dashboard</p>
             </div>
           </div>
           
-          <nav className="hidden md:flex items-center gap-2">
-            <NavLink
-              to="/analytics"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200 rounded-lg hover:bg-primary/5"
+          <div className="flex items-center gap-2">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-2">
+              <NavLink
+                to="/analytics"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200 rounded-lg hover:bg-primary/5"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Analytics Platform
+                <ChevronRight className="h-4 w-4" />
+              </NavLink>
+            </nav>
+            
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-text hover:bg-primary/20 transition-colors"
+              aria-label="Toggle menu"
             >
-              <BarChart3 className="h-4 w-4" />
-              Analytics Platform
-              <ChevronRight className="h-4 w-4" />
-            </NavLink>
-          </nav>
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
+        
+        {/* Mobile Dropdown Menu - Improved Styling */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-surface/98 backdrop-blur-md border-b border-border shadow-xl z-[80]">
+            <nav className="p-6 space-y-3">
+              {/* Dashboard Navigation Section */}
+              <div className="space-y-1">
+                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 px-4">
+                  Dashboard
+                </h4>
+                {navItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    onClick={handleNavClick}
+                    className={({ isActive }) =>
+                      `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 min-h-[48px] ${
+                        isActive
+                          ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
+                          : 'text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1'
+                      }`
+                    }
+                  >
+                    <div className="text-current flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <span className="font-medium">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+              
+              {/* Platform Navigation Section */}
+              <div className="space-y-1 pt-4 border-t border-border">
+                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 px-4">
+                  Platform
+                </h4>
+                
+                {/* Analytics Platform */}
+                <NavLink
+                  to="/analytics"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
+                >
+                  <BarChart3 className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">Analytics Platform</span>
+                </NavLink>
+                
+                {/* Home */}
+                <NavLink
+                  to="/"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
+                >
+                  <Home className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">Home</span>
+                </NavLink>
+                
+                {/* Pricing */}
+                <NavLink
+                  to="/pricing"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
+                >
+                  <CreditCard className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">Pricing</span>
+                </NavLink>
+                
+                {/* About */}
+                <NavLink
+                  to="/about"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
+                >
+                  <User className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">About</span>
+                </NavLink>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <div className="flex">
-        {/* Matrix Sidebar */}
-        <aside className="relative z-10 w-72 bg-matrix-green/[0.08] backdrop-blur-md border-r border-matrix-green/20 min-h-[calc(100vh-80px)]">
+        {/* Professional Sidebar - Hidden on Mobile */}
+        <aside className="hidden md:block relative z-10 w-64 bg-surface/95 backdrop-blur-sm border-r border-border min-h-[calc(100vh-80px)] shadow-sm">
           <div className="p-6">
             {/* Navigation Section */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-text-secondary/60 uppercase tracking-wider mb-4">
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
                   Account Management
                 </h3>
                 <nav className="space-y-2">
@@ -174,7 +274,7 @@ const DashboardLayout = () => {
                       end={item.end}
                       className={getNavLinkClass}
                     >
-                      <div className={`transition-transform duration-200 group-hover:scale-110 ${
+                      <div className={`transition-transform duration-200 ${
                         location.pathname === item.path ? 'text-primary' : 'text-text-secondary'
                       }`}>
                         {item.icon}
@@ -190,16 +290,16 @@ const DashboardLayout = () => {
                 </nav>
               </div>
 
-              {/* Quick Stats or Additional Info */}
-              <div className="pt-6 border-t border-matrix-green/20">
-                <h3 className="text-sm font-semibold text-text-secondary/60 uppercase tracking-wider mb-4">
+              {/* Quick Stats */}
+              <div className="pt-6 border-t border-border">
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
                   Quick Access
                 </h3>
                 <div className="space-y-3">
-                  <div className="p-4 bg-matrix-green/10 backdrop-blur-md rounded-xl border border-matrix-green/30 shadow-lg shadow-matrix-green/20">
+                  <div className="p-4 bg-surface border border-border rounded-lg shadow-sm">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-text">Subscription</span>
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
                         {subscriptionData?.tier || 'Free'}
                       </span>
                     </div>
@@ -211,16 +311,16 @@ const DashboardLayout = () => {
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-matrix-green/10 backdrop-blur-md rounded-xl border border-matrix-green/30 shadow-lg shadow-matrix-green/20">
+                  <div className="p-4 bg-surface border border-border rounded-lg shadow-sm">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-text">API Usage</span>
-                      <span className="text-xs text-success font-medium">
+                      <span className="text-xs text-primary font-medium">
                         {apiUsageData?.current.toLocaleString() || '0'}/{apiUsageData?.limit.toLocaleString() || '1k'}
                       </span>
                     </div>
-                    <div className="w-full bg-border/50 rounded-full h-2">
+                    <div className="w-full bg-border rounded-full h-2">
                       <div 
-                        className="bg-success h-2 rounded-full transition-all duration-300"
+                        className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ width: `${Math.min(apiUsageData?.percentage || 0, 100)}%` }}
                       ></div>
                     </div>
@@ -231,11 +331,11 @@ const DashboardLayout = () => {
           </div>
         </aside>
 
-        {/* Main Content - Contained but consistent */}
+        {/* Main Content - Full Width */}
         <main className="relative z-10 flex-1 min-h-[calc(100vh-80px)] overflow-y-auto">
-          <div className="p-6 lg:p-8">
+          <div className="p-4 md:p-6 lg:p-8">
             {/* FIXED WIDTH CONTAINER - ALWAYS EXACTLY THE SAME */}
-            <div className="w-[1000px] mx-auto space-y-8">
+            <div className="w-[1000px] mx-auto bg-surface/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
               <Outlet />
             </div>
           </div>

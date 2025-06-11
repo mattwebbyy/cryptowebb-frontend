@@ -116,21 +116,23 @@ const AnalyticsLayout: React.FC = () => {
         {/* Mobile backdrop overlay */}
         {isMobile && sidebarOpen && (
           <div 
-            className="fixed inset-0 bg-background/50 z-40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-[50] backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar"
           />
         )}
 
         {/* Animated Sidebar with slide-out panels */}
-        <div className={`${isMobile ? 'fixed left-0 top-0 h-full z-50' : 'relative'}`}>
-          <AnalyticsSidebar 
-            isOpen={sidebarOpen} 
-            onMetricSelect={handleMetricSelect}
-            isMobile={isMobile}
-            onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-          />
-        </div>
+        <AnalyticsSidebar 
+          isOpen={sidebarOpen} 
+          onMetricSelect={(metricId) => {
+            handleMetricSelect(metricId);
+            // Auto-close sidebar on mobile after selection
+            if (isMobile) setSidebarOpen(false);
+          }}
+          isMobile={isMobile}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+        />
 
         {/* Main Content Area */}
         <main 

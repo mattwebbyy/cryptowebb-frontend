@@ -98,25 +98,25 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-black border border-matrix-green/70 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-black border border-primary/70 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="p-4 border-b border-matrix-green/30 flex justify-between items-center">
-          <h2 className="text-xl font-mono text-matrix-green">
+        <div className="p-4 border-b border-primary/30 flex justify-between items-center">
+          <h2 className="text-xl font-mono text-primary">
             {isEditing ? 'Edit Dashboard' : 'Create New Dashboard'}
           </h2>
-          <button onClick={onClose} className="text-matrix-green/70 hover:text-matrix-green">
+          <button onClick={onClose} className="text-primary/70 hover:text-primary">
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-matrix-green/30">
+        <div className="flex border-b border-primary/30">
           <button
             className={`px-4 py-2 font-mono ${
               activeTab === 'charts'
-                ? 'text-matrix-green border-b-2 border-matrix-green'
-                : 'text-matrix-green/60 hover:text-matrix-green'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-primary/60 hover:text-primary'
             }`}
             onClick={() => setActiveTab('charts')}
           >
@@ -125,8 +125,8 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
           <button
             className={`px-4 py-2 font-mono ${
               activeTab === 'settings'
-                ? 'text-matrix-green border-b-2 border-matrix-green'
-                : 'text-matrix-green/60 hover:text-matrix-green'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-primary/60 hover:text-primary'
             }`}
             onClick={() => setActiveTab('settings')}
           >
@@ -145,26 +145,26 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                 exit={{ opacity: 0 }}
               >
                 <div className="mb-6">
-                  <h3 className="text-lg text-matrix-green mb-2">Add Charts</h3>
+                  <h3 className="text-lg text-primary mb-2">Add Charts</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {chartTypes.map((chart) => (
                       <button
                         key={chart.id}
                         onClick={() => addChart(chart.id)}
-                        className="p-3 border border-matrix-green/30 rounded bg-black/50 hover:bg-matrix-green/10 hover:border-matrix-green/60 flex items-center gap-2"
+                        className="p-3 border border-primary/30 rounded bg-black/50 hover:bg-primary/10 hover:border-primary/60 flex items-center gap-2"
                       >
-                        <chart.icon className="h-5 w-5 text-matrix-green" />
-                        <span className="text-matrix-green">{chart.name}</span>
+                        <chart.icon className="h-5 w-5 text-primary" />
+                        <span className="text-primary">{chart.name}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg text-matrix-green mb-2">Selected Charts</h3>
+                  <h3 className="text-lg text-primary mb-2">Selected Charts</h3>
                   {selectedCharts.length === 0 ? (
-                    <div className="p-6 text-center border border-dashed border-matrix-green/30 rounded">
-                      <p className="text-matrix-green/60">
+                    <div className="p-6 text-center border border-dashed border-primary/30 rounded">
+                      <p className="text-primary/60">
                         No charts added yet. Add charts from above.
                       </p>
                     </div>
@@ -173,20 +173,20 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                       {selectedCharts.map((chart) => (
                         <div
                           key={chart.i}
-                          className="p-3 border border-matrix-green/30 rounded bg-black/50 flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
+                          className="p-3 border border-primary/30 rounded bg-black/50 flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
                         >
                           <div className="flex items-center gap-2 flex-1">
                             {/* Icon based on chart type */}
                             {chartTypes.find((c) => c.id === chart.chartType)?.icon &&
                               React.createElement(
                                 chartTypes.find((c) => c.id === chart.chartType)?.icon as any,
-                                { className: 'h-5 w-5 text-matrix-green' }
+                                { className: 'h-5 w-5 text-primary' }
                               )}
                             <input
                               type="text"
                               value={chart.title}
                               onChange={(e) => updateChartTitle(chart.i, e.target.value)}
-                              className="bg-transparent border-b border-matrix-green/30 focus:border-matrix-green focus:outline-none px-1 py-0.5 text-matrix-green flex-1"
+                              className="bg-transparent border-b border-primary/30 focus:border-primary focus:outline-none px-1 py-0.5 text-primary flex-1"
                             />
                           </div>
 
@@ -196,9 +196,9 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                                 type="checkbox"
                                 checked={chart.isLive}
                                 onChange={() => toggleLiveData(chart.i)}
-                                className="rounded border-matrix-green/50 bg-black/50 text-matrix-green focus:ring-matrix-green"
+                                className="rounded border-primary/50 bg-black/50 text-primary focus:ring-primary"
                               />
-                              <span className="text-matrix-green/70">Live Data</span>
+                              <span className="text-primary/70">Live Data</span>
                             </label>
 
                             <button
@@ -224,24 +224,24 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
               >
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-matrix-green mb-1">Dashboard Name</label>
+                    <label className="block text-primary mb-1">Dashboard Name</label>
                     <input
                       type="text"
                       value={dashboardName}
                       onChange={(e) => setDashboardName(e.target.value)}
                       placeholder="Enter dashboard name"
-                      className="w-full p-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green focus:border-matrix-green focus:outline-none"
+                      className="w-full p-2 bg-black/50 border border-primary/50 rounded text-primary focus:border-primary focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-matrix-green mb-1">Description (Optional)</label>
+                    <label className="block text-primary mb-1">Description (Optional)</label>
                     <textarea
                       value={dashboardDesc}
                       onChange={(e) => setDashboardDesc(e.target.value)}
                       placeholder="Enter dashboard description"
                       rows={4}
-                      className="w-full p-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green focus:border-matrix-green focus:outline-none resize-none"
+                      className="w-full p-2 bg-black/50 border border-primary/50 rounded text-primary focus:border-primary focus:outline-none resize-none"
                     ></textarea>
                   </div>
 
@@ -253,17 +253,17 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-matrix-green/30 flex justify-end gap-3">
+        <div className="p-4 border-t border-primary/30 flex justify-end gap-3">
           <Button
             onClick={onClose}
             variant="outline"
-            className="border-matrix-green/50 text-matrix-green hover:bg-matrix-green/10"
+            className="border-primary/50 text-primary hover:bg-primary/10"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-matrix-green text-black hover:bg-matrix-green/80"
+            className="bg-primary text-black hover:bg-primary/80"
           >
             {isEditing ? 'Update Dashboard' : 'Create Dashboard'}
           </Button>

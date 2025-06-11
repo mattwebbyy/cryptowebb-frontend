@@ -299,38 +299,67 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
           animation: false, // Disable animation for better sizing
           styledMode: false,
           spacing: [5, 5, 5, 5], // Minimal spacing to maximize chart area
+          // Touch-friendly zoom and pan
+          zoomType: chartType === 'line' ? 'x' : undefined,
+          panKey: 'shift',
+          // Touch event support
+          events: {
+            // Better touch handling
+          },
           // Don't set explicit dimensions here - we'll control them via setSize
         },
         title: { text: undefined }, // Handle title outside of Highcharts
         series: series,
         xAxis: {
           type: 'datetime',
-          labels: { style: { color: 'rgba(51, 255, 51, 0.7)' } },
-          lineColor: 'rgba(51, 255, 51, 0.3)',
-          tickColor: 'rgba(51, 255, 51, 0.3)',
+          labels: { style: { color: 'var(--color-text-secondary)' } },
+          lineColor: 'var(--color-border)',
+          tickColor: 'var(--color-border)',
         },
         yAxis: {
           title: { text: '' },
-          gridLineColor: 'rgba(51, 255, 51, 0.1)',
-          labels: { style: { color: 'rgba(51, 255, 51, 0.7)' } },
+          gridLineColor: 'var(--color-border)',
+          labels: { style: { color: 'var(--color-text-secondary)' } },
         },
         plotOptions: {
           series: {
             animation: false, // Disable animation for better resizing
             marker: {
               enabled: chartType === 'line',
-              radius: 3,
+              radius: 4, // Slightly larger for touch devices
               symbol: 'circle',
+              states: {
+                hover: {
+                  radiusPlus: 2, // Bigger hover state for touch
+                },
+              },
             },
+            // Touch-friendly interactions
+            stickyTracking: true,
+            trackByArea: true,
+            point: {
+              events: {
+                // Add touch event handling
+                click: function() {
+                  // Handle point selection on touch devices
+                }
+              }
+            }
           },
           ...(chartType === 'pie' && {
             pie: {
               allowPointSelect: true,
               cursor: 'pointer',
+              size: '80%', // Make pie charts more touch-friendly
               dataLabels: {
                 enabled: true,
                 format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                style: { color: 'rgba(51, 255, 51, 0.9)' },
+                style: { 
+                  color: 'var(--color-text)',
+                  fontSize: '12px', // Readable on mobile
+                  textOutline: '1px contrast'
+                },
+                distance: 15, // Better spacing for touch
               },
             },
           }),
@@ -338,17 +367,55 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
         credits: { enabled: false },
         legend: {
           enabled: series.length > 1,
-          itemStyle: { color: 'rgba(51, 255, 51, 0.8)' },
+          itemStyle: { color: 'var(--color-text)' },
         },
-        // Responsive rules for extreme sizing cases
+        // Responsive rules for mobile and small screens
         responsive: {
           rules: [
+            {
+              condition: { maxWidth: 400 },
+              chartOptions: {
+                legend: { 
+                  enabled: false,
+                },
+                xAxis: { 
+                  labels: { 
+                    style: { fontSize: '10px' },
+                    rotation: -45,
+                  },
+                },
+                yAxis: { 
+                  labels: { 
+                    style: { fontSize: '10px' },
+                  },
+                  title: { text: '' },
+                },
+                plotOptions: {
+                  series: {
+                    marker: {
+                      radius: 3, // Smaller markers on mobile
+                    },
+                  },
+                  pie: {
+                    dataLabels: {
+                      style: { fontSize: '10px' },
+                      distance: 10,
+                    },
+                  },
+                },
+              },
+            },
             {
               condition: { maxWidth: 200 },
               chartOptions: {
                 legend: { enabled: false },
                 yAxis: { labels: { enabled: false } },
                 xAxis: { labels: { enabled: false } },
+                plotOptions: {
+                  pie: {
+                    dataLabels: { enabled: false },
+                  },
+                },
               },
             },
           ],

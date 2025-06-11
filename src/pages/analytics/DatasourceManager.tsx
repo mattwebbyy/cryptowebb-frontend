@@ -36,20 +36,20 @@ const DatasourceManager = () => {
       className="p-4 md:p-6"
     >
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-mono text-matrix-green">Manage Datasources</h1>
+        <h1 className="text-3xl font-mono text-primary">Manage Datasources</h1>
         <Button
           onClick={() => {
             /* TODO: Open create modal/form */ alert("Open 'Create Datasource' form/modal");
           }}
-          className="bg-matrix-green hover:bg-matrix-green/80 text-black font-mono"
+          className="bg-primary hover:bg-primary/80 text-black font-mono"
         >
           <Plus className="mr-2 h-4 w-4" /> Add New Datasource
         </Button>
       </div>
 
-      <Card className="bg-black/50 border border-matrix-green/50 p-4 md:p-6">
+      <Card className="bg-black/50 border border-primary/50 p-4 md:p-6">
         {isLoading && (
-          <div className="text-center py-4 text-matrix-green">Loading datasources...</div>
+          <div className="text-center py-4 text-primary">Loading datasources...</div>
         )}
         {error && (
           <div className="text-center py-4 text-red-500">
@@ -63,14 +63,14 @@ const DatasourceManager = () => {
               datasources.map((ds) => (
                 <div
                   key={ds.id}
-                  className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/30 border border-matrix-green/30 rounded hover:border-matrix-green/70 transition-colors"
+                  className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-black/30 border border-primary/30 rounded hover:border-primary/70 transition-colors"
                 >
                   <div className="mb-2 md:mb-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Database className="w-5 h-5 text-matrix-green" />
-                      <span className="text-lg font-semibold text-matrix-green">{ds.name}</span>
+                      <Database className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-semibold text-primary">{ds.name}</span>
                     </div>
-                    <span className="text-sm text-matrix-green/70 ml-7 capitalize">{ds.type}</span>
+                    <span className="text-sm text-primary/70 ml-7 capitalize">{ds.type}</span>
                     {/* Maybe show non-sensitive options like host/db from ds.options */}
                     {/* {ds.options?.host && <span className="text-xs text-gray-500 ml-2">({ds.options.host})</span>} */}
                   </div>
@@ -81,7 +81,7 @@ const DatasourceManager = () => {
                       onClick={() => {
                         /* TODO: Open edit modal */ alert(`Edit ${ds.name}`);
                       }}
-                      className="border-matrix-green/50 hover:border-matrix-green hover:bg-matrix-green/10"
+                      className="border-primary/50 hover:border-primary hover:bg-primary/10"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -102,7 +102,7 @@ const DatasourceManager = () => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-matrix-green/70">
+              <div className="text-center py-4 text-primary/70">
                 No datasources configured yet.
               </div>
             )}

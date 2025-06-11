@@ -62,11 +62,14 @@ const Modal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-black border-2 border-matrix-green rounded-xl p-6 max-w-2xl w-full m-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-black/90 backdrop-blur-md border-2 border-matrix-green rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-matrix-green">{title}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-matrix-green">
+          <h2 className="text-lg sm:text-xl font-semibold text-matrix-green">{title}</h2>
+          <button 
+            onClick={onClose} 
+            className="text-gray-500 hover:text-matrix-green p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
             <FaTimes />
           </button>
         </div>
@@ -547,17 +550,17 @@ const PricingPage: React.FC = () => {
 
   return (
     <div className="relative w-full min-h-screen text-matrix-green">
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-xl">Scale your capabilities with our flexible pricing</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4">Choose Your Plan</h1>
+          <p className="text-lg sm:text-xl">Scale your capabilities with our flexible pricing</p>
 
           {currentSubscription && (
-            <div className="mt-4 flex justify-center gap-4">
+            <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => setShowHistory(true)}
-                className="px-4 py-2 bg-matrix-green/20 text-matrix-green rounded hover:bg-matrix-green/30"
+                className="px-4 py-3 bg-matrix-green/20 text-matrix-green rounded hover:bg-matrix-green/30 min-h-[44px] flex items-center justify-center"
               >
                 <FaHistory className="inline mr-2" />
                 Subscription History
@@ -565,7 +568,7 @@ const PricingPage: React.FC = () => {
               {!currentSubscription.cancelAtPeriodEnd && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="px-4 py-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30"
+                  className="px-4 py-3 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30 min-h-[44px] flex items-center justify-center"
                 >
                   <FaTimes className="inline mr-2" />
                   Cancel Subscription
@@ -576,7 +579,7 @@ const PricingPage: React.FC = () => {
         </div>
 
         {/* Plan Selection Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 sm:mb-12">
           {Object.entries(STRIPE_CONFIG.plans).map(([tier, plan]) => {
             const Icon = planIcons[tier as PlanTier];
             const isCurrentSub = currentSubscription?.tier === tier;
@@ -611,27 +614,27 @@ const PricingPage: React.FC = () => {
                   </>
                 )}
                 <div className="flex-grow">
-                  <div className="text-center mb-8">
-                    <Icon className="w-12 h-12 mx-auto mb-4 text-matrix-green" />
-                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                    <div className="text-3xl font-bold mb-4">
+                  <div className="text-center mb-6 sm:mb-8">
+                    <Icon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-matrix-green" />
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2">{plan.name}</h3>
+                    <div className="text-2xl sm:text-3xl font-bold mb-4">
                       ${getPricePerMonth(plan.basePrice, billingCycle)}
-                      <span className="text-lg font-normal">/month</span>
+                      <span className="text-base sm:text-lg font-normal">/month</span>
                     </div>
                   </div>
 
-                  <ul className="space-y-4 mb-8">
+                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <FaCheck className="w-5 h-5 text-matrix-green mr-2" />
-                        <span>{feature}</span>
+                      <li key={index} className="flex items-start">
+                        <FaCheck className="w-4 h-4 sm:w-5 sm:h-5 text-matrix-green mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="mt-auto">
                   <button
-                    className={`w-full py-3 rounded-lg font-semibold ${
+                    className={`w-full py-3 rounded-lg font-semibold min-h-[44px] text-sm sm:text-base ${
                       isCurrentSub
                         ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
                         : selectedTier === tier
@@ -661,9 +664,9 @@ const PricingPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto mb-12"
+            className="max-w-3xl mx-auto mb-8 sm:mb-12"
           >
-            <div className="bg-black/30 border-2 border-matrix-green rounded-xl p-8 space-y-8">
+            <div className="bg-black/30 backdrop-blur-md border-2 border-matrix-green rounded-xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
               {/* Billing Cycle Selection */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold mb-4">Billing Cycle</h3>
@@ -699,13 +702,13 @@ const PricingPage: React.FC = () => {
               {/* Account Creation (if not logged in) */}
               {!user && (
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Create Account</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">Create Account</h3>
                   <input
                     type="email"
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 bg-black rounded border border-gray-700 text-matrix-green focus:border-matrix-green focus:ring-1 focus:ring-matrix-green"
+                    className="w-full p-3 sm:p-4 bg-black rounded border border-gray-700 text-matrix-green focus:border-matrix-green focus:ring-1 focus:ring-matrix-green text-base min-h-[44px]"
                   />
                 </div>
               )}

@@ -110,18 +110,18 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
     }`;
   
   const getMetricButtonClass = (metricId: number) =>
-    `w-full flex items-center p-3 rounded-lg text-left transition-all duration-200 ease-in-out group
+    `w-full flex items-center ${isMobile ? 'p-4 min-h-[48px]' : 'p-3'} rounded-lg text-left transition-all duration-200 ease-in-out group
      ${activeMetricIdFromParams === String(metricId)
       ? 'bg-primary/25 text-primary font-semibold shadow-sm shadow-primary/50'
       : 'text-text-secondary hover:bg-primary/15 hover:text-primary'
     }`;
 
   const getCategoryButtonClass = () =>
-    `w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200 ease-in-out group
+    `w-full flex items-center justify-between ${isMobile ? 'p-4 min-h-[48px]' : 'p-3'} rounded-lg text-left transition-all duration-200 ease-in-out group
      text-text-secondary hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50`;
 
   const getBackButtonClass = () =>
-    `w-full flex items-center p-3 rounded-lg text-left transition-all duration-200 ease-in-out group mb-4
+    `w-full flex items-center ${isMobile ? 'p-4 min-h-[48px]' : 'p-3'} rounded-lg text-left transition-all duration-200 ease-in-out group mb-4
      text-text-secondary hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50
      border border-border hover:border-primary/50`;
 
@@ -139,7 +139,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
         <div className="mb-6">
           <button
             onClick={onOpenCommandPalette}
-            className="w-full flex items-center gap-3 p-3 bg-primary/5 border border-border rounded-lg hover:bg-primary/10 transition-all duration-200 text-text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className={`w-full flex items-center gap-3 ${isMobile ? 'p-4 min-h-[48px]' : 'p-3'} bg-primary/5 border border-border rounded-lg hover:bg-primary/10 transition-all duration-200 text-text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50`}
             title="Open command palette"
           >
             <Command size={20} className="flex-shrink-0" />
@@ -307,12 +307,12 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   return (
     <aside
       className={`
-        ${isOpen ? (isMobile ? 'w-80' : 'w-64') + ' opacity-100' : 'w-0 opacity-0'} 
-        bg-surface/90 border-r border-border backdrop-blur-sm
+        ${isOpen ? (isMobile ? 'w-full max-w-sm' : 'w-64') + ' opacity-100' : 'w-0 opacity-0'} 
+        bg-surface/98 border-r border-border backdrop-blur-md
         transition-all duration-300 ease-in-out
         overflow-hidden flex flex-col flex-shrink-0 
         shadow-lg shadow-primary/10 h-full
-        ${isMobile ? 'border-border' : ''}
+        ${isMobile ? 'fixed left-0 top-0 z-[60] border-r-0 shadow-2xl' : 'relative'}
       `}
     >
       <div className={getContentClass()}>

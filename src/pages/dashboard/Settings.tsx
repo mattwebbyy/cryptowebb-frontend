@@ -238,7 +238,7 @@ const Settings = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Generate New Key Section */}
-        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
+        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <h3 className="text-2xl font-bold text-text mb-8">Generate New API Key</h3>
 
             <form onSubmit={handleGenerate} className="space-y-8">
@@ -331,12 +331,12 @@ const Settings = () => {
             </Card>
 
             {/* Existing API Keys Section */}
-        <Card className="p-6 bg-matrix-green/[0.08] backdrop-blur-md border border-matrix-green/30 hover:bg-matrix-green/[0.12] transition-all duration-300 shadow-lg shadow-matrix-green/20">
+        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <h3 className="text-2xl font-bold text-text mb-8">Active API Keys</h3>
 
           {/* Loading State */}
           {isLoading && (
-            <div className="text-matrix-green text-center py-4">Loading API keys...</div>
+            <div className="text-primary text-center py-4">Loading API keys...</div>
           )}
 
           {/* Fetch Error State */}
@@ -348,7 +348,7 @@ const Settings = () => {
 
           {/* Empty State (after loading, no error) */}
           {!isLoading && !fetchError && (!keys || keys.length === 0) && (
-            <div className="text-matrix-green/70 text-center py-4">No active API keys found.</div>
+            <div className="text-primary/70 text-center py-4">No active API keys found.</div>
           )}
 
           {/* Revoke Error State */}
@@ -362,7 +362,7 @@ const Settings = () => {
           {!isLoading && !fetchError && keys && keys.length > 0 && (
             <div
               className="space-y-4 max-h-[400px] overflow-y-auto pr-2
-                           scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-matrix-green/50"
+                           scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-primary/50"
             >
               {keys.map((key) => (
                 <div

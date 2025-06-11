@@ -158,26 +158,26 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="bg-black border border-matrix-green rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-lg shadow-matrix-green/20"
+        className="bg-black border border-primary rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-lg shadow-primary/20"
       >
         {/* Header */}
-        <div className="p-4 border-b border-matrix-green/30 flex justify-between items-center flex-shrink-0">
+        <div className="p-4 border-b border-primary/30 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-3">
             {token.verified ? (
               <Shield className="text-green-400" size={20} aria-label="Verified Token" />
             ) : (
               <AlertTriangle className="text-yellow-400" size={20} aria-label="Unverified Token" />
             )}
-            <h2 className="text-xl font-mono text-matrix-green flex items-center gap-2">
-              {token.name} <span className="text-matrix-green/70 text-base">({token.symbol})</span>
+            <h2 className="text-xl font-mono text-primary flex items-center gap-2">
+              {token.name} <span className="text-primary/70 text-base">({token.symbol})</span>
             </h2>
-            <span className="text-xs px-2 py-1 rounded bg-matrix-green/10 text-matrix-green/80">
+            <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary/80">
               {token.chainName}
             </span>
           </div>
           <button
             onClick={onClose}
-            className="text-matrix-green/70 hover:text-matrix-green transition-colors"
+            className="text-primary/70 hover:text-primary transition-colors"
             aria-label="Close modal"
           >
             <X size={24} />
@@ -185,21 +185,21 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-matrix-green/50 scrollbar-track-black/30">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-black/30"
           {/* Price and Chart Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Price Info */}
-            <div className="bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">Price Information</h3>
+            <div className="bg-black/30 border border-primary/30 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-primary mb-4">Price Information</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Current Price:</span>
-                  <span className="text-matrix-green font-mono font-bold">
+                  <span className="text-primary/70">Current Price:</span>
+                  <span className="text-primary font-mono font-bold">
                     {formatPrice(token.price)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">24h Change:</span>
+                  <span className="text-primary/70">24h Change:</span>
                   <span
                     className={`font-mono font-bold flex items-center gap-1 ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
                   >
@@ -213,34 +213,34 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Market Cap:</span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary/70">Market Cap:</span>
+                  <span className="text-primary font-mono">
                     {formatCurrency(token.marketCap)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Liquidity:</span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary/70">Liquidity:</span>
+                  <span className="text-primary font-mono">
                     {formatCurrency(token.liquidity)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Holders:</span>
-                  <span className="text-matrix-green font-mono">{formatNumber(token.holders)}</span>
+                  <span className="text-primary/70">Holders:</span>
+                  <span className="text-primary font-mono">{formatNumber(token.holders)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Launch Date:</span>
-                  <span className="text-matrix-green">
+                  <span className="text-primary/70">Launch Date:</span>
+                  <span className="text-primary">
                     {new Date(token.launchDate).toLocaleDateString()}
                   </span>
                 </div>
                 {/* --- FIX 1: Added opening <a> tag --- */}
-                <div className="pt-2 mt-2 border-t border-matrix-green/20">
+                <div className="pt-2 mt-2 border-t border-primary/20">
                   <a
                     href={getExplorerUrl(token.address, token.chainName)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-matrix-green hover:underline text-sm transition-colors"
+                    className="flex items-center gap-1 text-primary hover:underline text-sm transition-colors"
                   >
                     <ExternalLink size={12} />
                     <span>View on {token.chainName} Explorer</span>
@@ -251,8 +251,8 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             </div>
 
             {/* Price Chart */}
-            <div className="md:col-span-2 bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">
+            <div className="md:col-span-2 bg-black/30 border border-primary/30 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-primary mb-4">
                 Price History (7d - Placeholder)
               </h3>
               <div className="h-40">
@@ -269,7 +269,7 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                     <SparklinesSpots size={3} style={{ fill: '#0f0' }} />
                   </Sparklines>
                 ) : (
-                  <div className="h-full flex items-center justify-center text-matrix-green/50">
+                  <div className="h-full flex items-center justify-center text-primary/50">
                     No price history data available
                   </div>
                 )}
@@ -280,24 +280,24 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
           {/* Token Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Supply Information */}
-            <div className="bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">Supply Information</h3>
+            <div className="bg-black/30 border border-primary/30 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-primary mb-4">Supply Information</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Total Supply:</span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary/70">Total Supply:</span>
+                  <span className="text-primary font-mono">
                     {formatNumber(token.totalSupply)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Circulating Supply:</span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary/70">Circulating Supply:</span>
+                  <span className="text-primary font-mono">
                     {formatNumber(token.circulatingSupply)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Circulation Ratio:</span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary/70">Circulation Ratio:</span>
+                  <span className="text-primary font-mono">
                     {token.totalSupply > 0
                       ? ((token.circulatingSupply / token.totalSupply) * 100).toFixed(2)
                       : '0.00'}
@@ -308,27 +308,27 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                 {token.lockupPeriod !== undefined &&
                   token.lockupPercentage !== undefined && ( // Check both exist
                     <>
-                      <div className="border-t border-matrix-green/20 my-2 pt-2">
-                        <div className="flex items-center gap-1 text-matrix-green mb-2">
+                      <div className="border-t border-primary/20 my-2 pt-2">
+                        <div className="flex items-center gap-1 text-primary mb-2">
                           <Lock size={14} />
                           <span className="font-semibold">Token Lockup</span>
                         </div>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-matrix-green/70">Locked Tokens:</span>
-                            <span className="text-matrix-green font-mono">
+                            <span className="text-primary/70">Locked Tokens:</span>
+                            <span className="text-primary font-mono">
                               {token.lockupPercentage}%
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-matrix-green/70">Lock Duration:</span>
-                            <span className="text-matrix-green font-mono">
+                            <span className="text-primary/70">Lock Duration:</span>
+                            <span className="text-primary font-mono">
                               {token.lockupPeriod} days
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-matrix-green/70">Unlock Date:</span>
-                            <span className="text-matrix-green font-mono">
+                            <span className="text-primary/70">Unlock Date:</span>
+                            <span className="text-primary font-mono">
                               {calculateUnlockDate(token.launchDate, token.lockupPeriod)}
                             </span>
                           </div>
@@ -340,15 +340,15 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             </div>
 
             {/* Team & Project Information */}
-            <div className="bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">Team & Audit</h3>
+            <div className="bg-black/30 border border-primary/30 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-primary mb-4">Team & Audit</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Team Name:</span>
-                  <span className="text-matrix-green">{token.team.name || 'N/A'}</span>
+                  <span className="text-primary/70">Team Name:</span>
+                  <span className="text-primary">{token.team.name || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Identity Status:</span>
+                  <span className="text-primary/70">Identity Status:</span>
                   <span
                     className={`${token.team.isDoxxed ? 'text-green-400' : 'text-yellow-400'} flex items-center gap-1`}
                   >
@@ -366,7 +366,7 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-matrix-green/70">Prior Projects:</span>
+                  <span className="text-primary/70">Prior Projects:</span>
                   <span
                     className={`${token.team.hasPriorProjects ? 'text-yellow-400' : 'text-green-400'}`}
                   >
@@ -376,8 +376,8 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   </span>
                 </div>
 
-                <div className="border-t border-matrix-green/20 my-2 pt-2">
-                  <div className="flex items-center gap-1 text-matrix-green mb-2">
+                <div className="border-t border-primary/20 my-2 pt-2">
+                  <div className="flex items-center gap-1 text-primary mb-2">
                     <Shield size={14} />
                     <span className="font-semibold">Security Audit</span>
                   </div>
@@ -385,20 +385,20 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   {token.auditStatus.isAudited ? (
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-matrix-green/70">Audit Status:</span>
+                        <span className="text-primary/70">Audit Status:</span>
                         <span className="text-green-400">Audited</span>
                       </div>
                       {token.auditStatus.auditCompany && (
                         <div className="flex justify-between">
-                          <span className="text-matrix-green/70">Audit Company:</span>
-                          <span className="text-matrix-green">
+                          <span className="text-primary/70">Audit Company:</span>
+                          <span className="text-primary">
                             {token.auditStatus.auditCompany}
                           </span>
                         </div>
                       )}
                       {token.auditStatus.score !== undefined && (
                         <div className="flex justify-between">
-                          <span className="text-matrix-green/70">Audit Score:</span>
+                          <span className="text-primary/70">Audit Score:</span>
                           <span
                             className={`${token.auditStatus.score > 70 ? 'text-green-400' : token.auditStatus.score > 40 ? 'text-yellow-400' : 'text-red-400'}`}
                           >
@@ -413,7 +413,7 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                             href={token.auditStatus.auditUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-matrix-green hover:underline text-sm transition-colors"
+                            className="flex items-center gap-1 text-primary hover:underline text-sm transition-colors"
                           >
                             <FileText size={12} />
                             <span>View Audit Report</span>
@@ -433,65 +433,65 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
             </div>
 
             {/* Social & Community Metrics */}
-            <div className="bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-matrix-green mb-4">Community Metrics</h3>
+            <div className="bg-black/30 border border-primary/30 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-primary mb-4">Community Metrics</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-matrix-green/70 flex items-center gap-1">
+                  <span className="text-primary/70 flex items-center gap-1">
                     <Twitter size={14} />
                     <span>Twitter:</span>
                   </span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary font-mono">
                     {formatNumber(token.socialMetrics.twitterFollowers)} followers
                   </span>
                 </div>
                 <div className="flex justify-between">
                   {/* Assuming Discord Icon isn't directly available in lucide, using Users */}
-                  <span className="text-matrix-green/70 flex items-center gap-1">
+                  <span className="text-primary/70 flex items-center gap-1">
                     <Users size={14} /> Discord:
                   </span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary font-mono">
                     {formatNumber(token.socialMetrics.discordMembers)} members
                   </span>
                 </div>
                 <div className="flex justify-between">
                   {/* Assuming Telegram Icon isn't directly available in lucide, using Users */}
-                  <span className="text-matrix-green/70 flex items-center gap-1">
+                  <span className="text-primary/70 flex items-center gap-1">
                     <Users size={14} /> Telegram:
                   </span>
-                  <span className="text-matrix-green font-mono">
+                  <span className="text-primary font-mono">
                     {formatNumber(token.socialMetrics.telegramMembers)} members
                   </span>
                 </div>
 
                 {token.socialMetrics.githubStats && (
-                  <div className="border-t border-matrix-green/20 my-2 pt-2">
-                    <div className="flex items-center gap-1 text-matrix-green mb-2">
+                  <div className="border-t border-primary/20 my-2 pt-2">
+                    <div className="flex items-center gap-1 text-primary mb-2">
                       <GitHub size={14} />
                       <span className="font-semibold">GitHub Activity</span>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-matrix-green/70">Stars:</span>
-                        <span className="text-matrix-green font-mono">
+                        <span className="text-primary/70">Stars:</span>
+                        <span className="text-primary font-mono">
                           {formatNumber(token.socialMetrics.githubStats.stars)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-matrix-green/70">Forks:</span>
-                        <span className="text-matrix-green font-mono">
+                        <span className="text-primary/70">Forks:</span>
+                        <span className="text-primary font-mono">
                           {formatNumber(token.socialMetrics.githubStats.forks)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-matrix-green/70">Contributors:</span>
-                        <span className="text-matrix-green font-mono">
+                        <span className="text-primary/70">Contributors:</span>
+                        <span className="text-primary font-mono">
                           {formatNumber(token.socialMetrics.githubStats.contributors)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-matrix-green/70">Commits (all time):</span>
-                        <span className="text-matrix-green font-mono">
+                        <span className="text-primary/70">Commits (all time):</span>
+                        <span className="text-primary font-mono">
                           {formatNumber(token.socialMetrics.githubStats.commits)}
                         </span>
                       </div>
@@ -503,8 +503,8 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
           </div>
 
           {/* Risk Assessment Section */}
-          <div className="bg-black/30 border border-matrix-green/30 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-matrix-green mb-4">Risk Assessment</h3>
+          <div className="bg-black/30 border border-primary/30 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-primary mb-4">Risk Assessment</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -518,18 +518,18 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                     <div className={`font-bold text-lg ${getRiskColor(token.riskScore)}`}>
                       {getRiskText(token.riskScore)}
                     </div>
-                    <div className="text-sm text-matrix-green/70">Overall Risk Score (0-100)</div>
+                    <div className="text-sm text-primary/70">Overall Risk Score (0-100)</div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium text-matrix-green">Identified Risk Factors:</h4>
+                  <h4 className="font-medium text-primary">Identified Risk Factors:</h4>
                   {token.riskFactors && token.riskFactors.length > 0 ? (
                     <ul className="space-y-1 pl-1">
                       {token.riskFactors.map((factor, idx) => (
                         <li key={idx} className="flex items-start gap-2">
                           <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0 mt-1" />
-                          <span className="text-matrix-green/90 text-sm">{factor}</span>
+                          <span className="text-primary/90 text-sm">{factor}</span>
                         </li>
                       ))}
                     </ul>
@@ -546,17 +546,17 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
 
               {/* Risk Breakdown Bars - Simplified example */}
               <div className="space-y-4">
-                <h4 className="font-medium text-matrix-green">Risk Breakdown (Illustrative):</h4>
+                <h4 className="font-medium text-primary">Risk Breakdown (Illustrative):</h4>
                 <div className="space-y-3">
                   {/* Team Risk */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm text-matrix-green/70">Team Risk (Anon/Doxxed)</span>
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">Team Risk (Anon/Doxxed)</span>
+                      <span className="text-sm text-primary/70">
                         {token.team.isDoxxed ? 'Low' : 'Medium'}
                       </span>
                     </div>
-                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-primary/20">
                       <div
                         className={`h-full ${token.team.isDoxxed ? 'bg-green-400' : 'bg-yellow-400'}`}
                         style={{ width: token.team.isDoxxed ? '30%' : '60%' }}
@@ -567,10 +567,10 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   {/* Code Security Risk */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">
                         Code Security (Audit Status)
                       </span>
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">
                         {token.auditStatus.isAudited
                           ? token.auditStatus.score !== undefined && token.auditStatus.score < 50
                             ? 'Medium'
@@ -578,7 +578,7 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                           : 'High'}
                       </span>
                     </div>
-                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-primary/20">
                       <div
                         className={`h-full ${token.auditStatus.isAudited ? (token.auditStatus.score !== undefined && token.auditStatus.score < 50 ? 'bg-yellow-400' : 'bg-green-400') : 'bg-red-400'}`}
                         style={{
@@ -595,13 +595,13 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   {/* Tokenomics Risk */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm text-matrix-green/70">Tokenomics (Lockup)</span>
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">Tokenomics (Lockup)</span>
+                      <span className="text-sm text-primary/70">
                         {token.lockupPeriod && token.lockupPeriod > 30 ? 'Low' : 'Medium'}{' '}
                         {/* Simplified */}
                       </span>
                     </div>
-                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-primary/20">
                       <div
                         className={`h-full ${token.lockupPeriod && token.lockupPeriod > 30 ? 'bg-green-400' : 'bg-yellow-400'}`}
                         style={{
@@ -614,10 +614,10 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                   {/* Market Volatility Risk */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">
                         Market Volatility (24h Change)
                       </span>
-                      <span className="text-sm text-matrix-green/70">
+                      <span className="text-sm text-primary/70">
                         {Math.abs(token.priceChange24h) > 25
                           ? 'High'
                           : Math.abs(token.priceChange24h) > 10
@@ -625,7 +625,7 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
                             : 'Low'}
                       </span>
                     </div>
-                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-matrix-green/20">
+                    <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-primary/20">
                       <div
                         className={`h-full ${Math.abs(token.priceChange24h) > 25 ? 'bg-red-400' : Math.abs(token.priceChange24h) > 10 ? 'bg-yellow-400' : 'bg-green-400'}`}
                         style={{
@@ -646,13 +646,13 @@ const TokenDetailModal: React.FC<TokenDetailModalProps> = ({ isOpen, onClose, to
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-matrix-green/30 flex justify-between items-center flex-shrink-0">
-          <div className="text-sm text-matrix-green/60 overflow-hidden text-ellipsis whitespace-nowrap pr-4">
+        <div className="p-4 border-t border-primary/30 flex justify-between items-center flex-shrink-0">
+          <div className="text-sm text-primary/60 overflow-hidden text-ellipsis whitespace-nowrap pr-4">
             Token address: <span className="font-mono">{token.address}</span>
           </div>
           <button
             onClick={() => navigator.clipboard.writeText(token.address)}
-            className="px-3 py-1 bg-matrix-green/10 border border-matrix-green/30 rounded text-matrix-green text-sm hover:bg-matrix-green/20 transition-colors flex-shrink-0"
+            className="px-3 py-1 bg-primary/10 border border-primary/30 rounded text-primary text-sm hover:bg-primary/20 transition-colors flex-shrink-0"
           >
             Copy Address
           </button>

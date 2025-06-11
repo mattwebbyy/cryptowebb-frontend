@@ -205,30 +205,30 @@ function getThemeStyles(theme: ThemeConfig): Record<string, string> {
     },
     light: {
       matrix: {
-        primary: '#006600',      // Dark green
-        secondary: '#008800',    // Medium green
-        accent: '#00aa00',       // Bright green
-        background: '#f8fff8',   // Very light green
+        primary: '#0d7377',      // Teal
+        secondary: '#14a085',    // Medium teal
+        accent: '#40a69f',       // Light teal
+        background: '#fafefe',   // Very light teal-tinted white
         surface: '#ffffff',      // Pure white
-        text: '#003300',         // Very dark green
-        textSecondary: '#006600', // Dark green
-        border: '#cceecc',       // Light green border
-        error: '#cc0000',        // Dark red
-        warning: '#cc6600',      // Dark orange
-        success: '#006600',      // Dark green
+        text: '#1a202c',         // Dark gray
+        textSecondary: '#4a5568', // Medium gray
+        border: '#e2e8f0',       // Light gray border
+        error: '#e53e3e',        // Red
+        warning: '#dd6b20',      // Orange
+        success: '#38a169',      // Green
       },
       minimal: {
-        primary: '#004455',      // Dark teal
-        secondary: '#006677',    // Medium teal
-        accent: '#008899',       // Bright teal
+        primary: '#0d7377',      // Teal
+        secondary: '#14a085',    // Medium teal
+        accent: '#40a69f',       // Light teal
         background: '#fafafa',   // Light gray
         surface: '#ffffff',      // Pure white
         text: '#1a1a1a',         // Dark gray
-        textSecondary: '#666666', // Medium gray
-        border: '#e0e0e0',       // Light border
-        error: '#cc0000',        // Dark red
-        warning: '#cc6600',      // Dark orange
-        success: '#004455',      // Dark teal
+        textSecondary: '#4a5568', // Medium gray
+        border: '#e2e8f0',       // Light border
+        error: '#e53e3e',        // Red
+        warning: '#dd6b20',      // Orange
+        success: '#38a169',      // Green
       },
     },
   };

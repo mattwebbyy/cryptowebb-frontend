@@ -4,11 +4,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Legacy support
+        // Legacy support - keep for dark mode
         'matrix-green': '#33ff33',
         matrix: {
           green: '#33ff33',
           dark: '#001400',
+        },
+        // Teal colors for light mode
+        teal: {
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
         },
         // Dynamic theme colors using CSS variables
         primary: 'var(--color-primary)',
@@ -55,20 +68,20 @@ export default {
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.gray[300]'),
-            '--tw-prose-headings': theme('colors.matrix-green'),
-            '--tw-prose-links': theme('colors.matrix-green'),
-            '--tw-prose-bold': theme('colors.white'),
-            '--tw-prose-counters': theme('colors.matrix-green'),
-            '--tw-prose-bullets': theme('colors.matrix-green'),
-            '--tw-prose-hr': theme('colors.matrix-green'),
-            '--tw-prose-quotes': theme('colors.gray[400]'),
-            '--tw-prose-quote-borders': theme('colors.matrix-green'),
-            '--tw-prose-captions': theme('colors.gray[400]'),
-            '--tw-prose-code': theme('colors.matrix-green'),
-            '--tw-prose-pre-code': theme('colors.matrix-green'),
-            '--tw-prose-pre-bg': 'rgba(0, 0, 0, 0.5)',
-            '--tw-prose-pre-border': theme('colors.matrix-green'),
+            '--tw-prose-body': 'var(--color-text-secondary)',
+            '--tw-prose-headings': 'var(--color-primary)',
+            '--tw-prose-links': 'var(--color-primary)',
+            '--tw-prose-bold': 'var(--color-text)',
+            '--tw-prose-counters': 'var(--color-primary)',
+            '--tw-prose-bullets': 'var(--color-primary)',
+            '--tw-prose-hr': 'var(--color-border)',
+            '--tw-prose-quotes': 'var(--color-text-secondary)',
+            '--tw-prose-quote-borders': 'var(--color-primary)',
+            '--tw-prose-captions': 'var(--color-text-secondary)',
+            '--tw-prose-code': 'var(--color-primary)',
+            '--tw-prose-pre-code': 'var(--color-primary)',
+            '--tw-prose-pre-bg': 'var(--color-surface)',
+            '--tw-prose-pre-border': 'var(--color-border)',
           },
         },
       }),

@@ -32,17 +32,22 @@ export const Header = () => {
     return <div className="fixed top-0 w-full z-50 backdrop-blur-sm h-20" />;
   }
 
-  // Add base nav links
-  const navLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
-
-  // Add authenticated-only links
-  if (isAuthenticated) {
-    navLinks.push('dashboard');
-    navLinks.push('analytics'); // Add analytics link for authenticated users
-  }
+  // Organize navigation links properly
+  const baseNavLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
+  const authenticatedLinks = ['dashboard', 'analytics'];
+  
+  // All navigation links for desktop
+  const allNavLinks = isAuthenticated 
+    ? [...baseNavLinks, ...authenticatedLinks] 
+    : baseNavLinks;
+    
+  // Debug logging
+  console.log('Header: isAuthenticated =', isAuthenticated);
+  console.log('Header: authenticatedLinks =', authenticatedLinks);
+  console.log('Header: allNavLinks =', allNavLinks);
 
   return (
-    <header className="fixed top-0 w-full z-50 backdrop-blur-sm">
+    <header className="fixed top-0 w-full z-[60] backdrop-blur-sm">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -54,7 +59,7 @@ export const Header = () => {
           <div className="hidden md:flex items-center gap-6">
             {/* Navigation Links */}
             <div className="flex gap-6">
-              {navLinks.map((path) => (
+              {allNavLinks.map((path) => (
                 <motion.div key={path} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to={`/${path}`}
@@ -124,58 +129,85 @@ export const Header = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="md:hidden absolute top-full left-0 right-0 z-[70]"
             >
-              <div className="py-4 space-y-4 bg-black/90 mt-4 border border-matrix-green rounded-lg p-4">
+              <div className="py-4 space-y-2 bg-black/98 mt-4 border border-matrix-green rounded-lg p-4 backdrop-blur-md shadow-2xl mx-4 max-h-[calc(100vh-120px)] overflow-y-auto pb-8">
                 {/* Theme Toggle for Mobile */}
-                <div className="flex justify-center pb-2 border-b border-matrix-green/30">
+                <div className="flex justify-center pb-3 border-b border-matrix-green/30">
                   <ThemeToggle variant="simple" size="md" showLabel={true} />
                 </div>
                 
-                {navLinks.map((path) => (
-                  <Link
-                    key={path}
-                    to={`/${path}`}
-                    className={`block text-matrix-green/70 hover:text-matrix-green transition-colors duration-200 p-2 capitalize ${
-                      location.pathname === `/${path}` ? 'text-matrix-green font-semibold bg-matrix-green/10' : ''
-                    } ${path === 'analytics' ? 'flex items-center gap-2' : ''}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {path === 'analytics' && <LayoutDashboard size={16} />}
-                    {path}
-                  </Link>
-                ))}
+                {/* Base Navigation */}
+                <div className="space-y-1">
+                  <h4 className="text-xs font-semibold text-matrix-green/60 uppercase tracking-wider mb-2 px-3">
+                    Platform
+                  </h4>
+                  {baseNavLinks.map((path) => (
+                    <Link
+                      key={path}
+                      to={`/${path}`}
+                      className={`block text-matrix-green/70 hover:text-matrix-green transition-colors duration-200 p-3 capitalize rounded-lg min-h-[44px] flex items-center ${
+                        location.pathname === `/${path}` ? 'text-matrix-green font-semibold bg-matrix-green/20' : 'hover:bg-matrix-green/10'
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {path}
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Authenticated Navigation */}
+                {isAuthenticated && (
+                  <div className="space-y-1 pt-3 border-t border-matrix-green/30">
+                    <h4 className="text-xs font-semibold text-matrix-green uppercase tracking-wider mb-2 px-3 bg-matrix-green/10 rounded py-1">
+                      User Area ({authenticatedLinks.length} items)
+                    </h4>
+                    {authenticatedLinks.map((path) => (
+                      <Link
+                        key={path}
+                        to={`/${path}`}
+                        className={`block text-matrix-green hover:text-matrix-green transition-colors duration-200 p-3 capitalize rounded-lg min-h-[44px] flex items-center gap-2 border border-matrix-green/20 ${
+                          location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`) ? 'text-matrix-green font-semibold bg-matrix-green/20 border-matrix-green/40' : 'hover:bg-matrix-green/15 hover:border-matrix-green/30'
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <LayoutDashboard size={18} className="text-matrix-green" />
+                        <span className="font-medium">{path}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
                 {!isAuthenticated ? (
-                  <div className="space-y-2 pt-2 border-t border-matrix-green/30">
+                  <div className="space-y-2 pt-3 border-t border-matrix-green/30">
                     <Link
                       to="/login"
-                      className="block text-sm px-4 py-2 border border-matrix-green bg-black/50 hover:bg-matrix-green/20 transition-all duration-300"
+                      className="block text-sm px-4 py-3 border border-matrix-green bg-black/50 hover:bg-matrix-green/20 transition-all duration-300 rounded-lg text-center min-h-[44px] flex items-center justify-center"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       INITIALIZE
                     </Link>
                     <Link
                       to="/register"
-                      className="block text-sm px-4 py-2 border border-matrix-green/50 hover:border-matrix-green bg-black/30 hover:bg-matrix-green/10 transition-all duration-300"
+                      className="block text-sm px-4 py-3 border border-matrix-green/50 hover:border-matrix-green bg-black/30 hover:bg-matrix-green/10 transition-all duration-300 rounded-lg text-center min-h-[44px] flex items-center justify-center"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       REQUEST ACCESS
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-2 pt-2 border-t border-matrix-green/30">
-                    <span className="block text-white px-4">
+                  <div className="space-y-2 pt-3 border-t border-matrix-green/30">
+                    <div className="px-4 py-2 text-white text-sm bg-matrix-green/10 rounded-lg">
                       Hello, {user?.firstName || user?.email}
-                    </span>
+                    </div>
                     <button
                       onClick={() => {
                         logout();
                         setIsMenuOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-matrix-green hover:bg-matrix-green/20 transition-all duration-300"
+                      className="w-full text-left px-4 py-3 text-matrix-green hover:bg-matrix-green/20 transition-all duration-300 rounded-lg min-h-[44px] flex items-center"
                     >
                       Logout
                     </button>
