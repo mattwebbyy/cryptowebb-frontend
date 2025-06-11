@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card'; // Use your existing Card component
 import { TypeAnimation } from 'react-type-animation';
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Shiba ASCII Art Component
 const ShibaAsciiArt = () => {
@@ -46,7 +47,7 @@ const ShibaAsciiArt = () => {
   return (
     <motion.pre
       variants={itemVariants} // Use variants from parent
-      className="text-xs font-mono text-matrix-green/90 overflow-x-auto whitespace-pre leading-tight mb-6 bg-black/20 p-3 rounded border border-matrix-green/30 shadow-inner shadow-matrix-green/10 text-center"
+      className={`text-xs font-mono ${theme.mode === 'light' ? 'text-teal-600/90' : 'text-matrix-green/90'} overflow-x-auto whitespace-pre leading-tight mb-6 ${theme.mode === 'light' ? 'bg-teal-600/10' : 'bg-black/20'} p-3 rounded border ${theme.mode === 'light' ? 'border-teal-600/30' : 'border-matrix-green/30'} shadow-inner ${theme.mode === 'light' ? 'shadow-teal-600/10' : 'shadow-matrix-green/10'} text-center`}
     >
       {art}
     </motion.pre>
@@ -87,6 +88,35 @@ const itemVariants = {
 };
 
 const About = () => {
+  const { theme } = useTheme();
+  
+  // Color classes based on theme - always use teal in light mode
+  const getColorClasses = () => {
+    if (theme.mode === 'light') {
+      return {
+        primary: 'text-teal-600',
+        primaryBg: 'bg-teal-600',
+        primaryBorder: 'border-teal-600',
+        text: 'text-teal-600',
+        textSecondary: 'text-teal-600/70',
+        surface: 'bg-white/90 border-teal-600',
+        shadow: 'shadow-teal-600/20'
+      };
+    } else {
+      return {
+        primary: 'text-matrix-green',
+        primaryBg: 'bg-matrix-green',
+        primaryBorder: 'border-matrix-green',
+        text: 'text-matrix-green',
+        textSecondary: 'text-matrix-green/70',
+        surface: 'bg-black/80 border-matrix-green',
+        shadow: 'shadow-matrix-green/20'
+      };
+    }
+  };
+
+  const colorClasses = getColorClasses();
+  
   // Define the full sequence of text for height calculation and animation
   const fullTextSequence = [
     "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.",
@@ -123,11 +153,11 @@ const About = () => {
         animate="visible"
         className="w-full max-w-4xl"
       >
-        <Card className="bg-black/80 border-2 border-matrix-green shadow-lg shadow-matrix-green/20 text-matrix-green font-mono backdrop-blur-sm p-6 md:p-8 overflow-hidden">
+        <Card className={`${colorClasses.surface} border-2 shadow-lg ${colorClasses.shadow} ${colorClasses.text} font-mono backdrop-blur-sm p-6 md:p-8 overflow-hidden`}>
           {/* Title */}
           <motion.h1
             variants={itemVariants}
-            className="text-3xl md:text-4xl font-bold tracking-wider text-center border-b border-matrix-green/30 pb-4 mb-6"
+            className={`text-3xl md:text-4xl font-bold tracking-wider text-center border-b ${theme.mode === 'light' ? 'border-teal-600/30' : 'border-matrix-green/30'} pb-4 mb-6`}
           >
             ABOUT THE SYSTEM
           </motion.h1>
@@ -142,7 +172,7 @@ const About = () => {
             // Tailwind classes like min-h-[200px] or min-h-[16rem] can work.
             // Or use inline style for precise pixel values.
             // We'll use an arbitrary class here, adjust the value based on final text height.
-            className="space-y-4 text-matrix-green/90 leading-relaxed text-sm md:text-base min-h-[180px] md:min-h-[150px]" // Example min-height
+            className={`space-y-4 ${colorClasses.textSecondary} leading-relaxed text-sm md:text-base min-h-[180px] md:min-h-[150px]`} // Example min-height
           >
             {/* Hidden text block to establish the full height needed */}
             <p className="invisible h-0 overflow-hidden whitespace-pre-line" aria-hidden="true">
@@ -166,7 +196,7 @@ const About = () => {
           {/* Footer line */}
           <motion.p
             variants={itemVariants}
-            className="text-matrix-green/60 text-xs md:text-sm border-t border-matrix-green/30 pt-4 mt-8"
+            className={`${theme.mode === 'light' ? 'text-teal-600/60' : 'text-matrix-green/60'} text-xs md:text-sm border-t ${theme.mode === 'light' ? 'border-teal-600/30' : 'border-matrix-green/30'} pt-4 mt-8`}
           >
             // System Version: 3.14.1-GAMMA // Secure Connection Established // END_OF_TRANSMISSION
           </motion.p>

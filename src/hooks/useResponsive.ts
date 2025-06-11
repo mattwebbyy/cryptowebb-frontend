@@ -1,22 +1,24 @@
 // src/hooks/useResponsive.ts
 import { useState, useEffect } from 'react';
+import { BREAKPOINTS } from '../config/responsive';
 
 interface BreakpointConfig {
-  xs: number;    // 0px
-  sm: number;    // 640px
-  md: number;    // 768px
-  lg: number;    // 1024px
-  xl: number;    // 1280px
-  '2xl': number; // 1536px
+  xs: number;    // 0px (mobile)
+  sm: number;    // 640px (tablet)
+  md: number;    // 768px (laptop)
+  lg: number;    // 1024px (desktop)
+  xl: number;    // 1280px (large desktop)
+  '2xl': number; // 1536px (ultra-wide)
 }
 
+// Aligned with our responsive configuration
 const defaultBreakpoints: BreakpointConfig = {
-  xs: 0,
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  '2xl': 1536,
+  xs: BREAKPOINTS.mobile.min,
+  sm: BREAKPOINTS.tablet.min,
+  md: BREAKPOINTS.laptop.min,
+  lg: BREAKPOINTS.desktop.min,
+  xl: BREAKPOINTS.xl.min,
+  '2xl': BREAKPOINTS.xxl.min,
 };
 
 export type BreakpointKey = keyof BreakpointConfig;

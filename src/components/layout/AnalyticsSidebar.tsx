@@ -125,6 +125,9 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
      text-text-secondary hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50
      border border-border hover:border-primary/50`;
 
+  const getMobileNavClass = () =>
+    `flex items-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50`;
+
   // Animation classes
   const getContentClass = () =>
     `flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-surface/30 space-y-6 p-4
@@ -312,14 +315,140 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
         transition-all duration-300 ease-in-out
         overflow-hidden flex flex-col flex-shrink-0 
         shadow-lg shadow-primary/10 h-full
-        ${isMobile ? 'fixed left-0 top-0 z-[60] border-r-0 shadow-2xl' : 'relative'}
+        ${isMobile ? 'fixed left-0 top-0 z-[60] border-r-0 shadow-2xl h-screen max-h-screen' : 'relative'}
       `}
     >
-      <div className={getContentClass()}>
-        {currentView === 'main' 
-          ? renderMainContent() 
-          : renderCategoryContent(currentView)
-        }
+      <div className={isMobile ? 'flex-1 bg-black/[0.98] p-0 overflow-hidden flex flex-col' : getContentClass()}>
+        {isMobile ? (
+          // Mobile compact layout
+          <div className="p-3 space-y-3 flex-1 flex flex-col overflow-hidden">
+            {/* Command Palette - Mobile */}
+            {onOpenCommandPalette && (
+              <div className="text-center">
+                <button
+                  onClick={onOpenCommandPalette}
+                  className="w-full py-2 px-3 bg-primary/10 border border-primary/30 rounded-md hover:bg-primary/15 transition-all duration-200 text-primary text-xs font-medium min-h-[40px] flex items-center justify-center gap-2"
+                  title="Open command palette"
+                >
+                  <Command size={12} />
+                  <span>Search (⌘K)</span>
+                </button>
+              </div>
+            )}
+
+            {/* Analytics Overview - Compact Grid */}
+            <div>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
+                Analytics
+              </h3>
+              <div className="grid grid-cols-2 gap-1.5">
+                <NavLink to="/analytics" end className={`${getMobileNavClass()} justify-center`}>
+                  <LayoutDashboard size={12} />
+                  <span>Dashboards</span>
+                </NavLink>
+                <NavLink to="/analytics/datasources" className={`${getMobileNavClass()} justify-center`}>
+                  <Database size={12} />
+                  <span>Sources</span>
+                </NavLink>
+                <NavLink to="/analytics/cipher-matrix" className={`${getMobileNavClass()} justify-center`}>
+                  <Eye size={12} />
+                  <span>Cipher</span>
+                </NavLink>
+                <NavLink to="/analytics/live-crypto" className={`${getMobileNavClass()} justify-center`}>
+                  <Zap size={12} />
+                  <span>Live</span>
+                </NavLink>
+                <NavLink to="/analytics/alerts" className={`${getMobileNavClass()} justify-center`}>
+                  <Bell size={12} />
+                  <span>Alerts</span>
+                </NavLink>
+                <NavLink to="/analytics/manage" className={`${getMobileNavClass()} justify-center`}>
+                  <Settings size={12} />
+                  <span>Manage</span>
+                </NavLink>
+              </div>
+            </div>
+
+            {/* Data Metrics - Show All Categories */}
+            {Object.keys(categorizedMetrics).length > 0 && (
+              <div className="pt-2 border-t border-primary/30">
+                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
+                  Metrics ({Object.keys(categorizedMetrics).length})
+                </h3>
+                <div className="grid grid-cols-2 gap-1.5 max-h-[200px] overflow-y-auto">
+                  {Object.entries(categorizedMetrics).map(([category, metrics]) => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        switchToCategory(category);
+                        // Auto-close sidebar on mobile after selection
+                        if (isMobile && onMetricSelect) {
+                          // Note: We don't have a close function here, but the parent will handle it
+                        }
+                      }}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50"
+                      title={`${category} - ${Array.isArray(metrics) ? metrics.length : 0} metrics`}
+                    >
+                      <BarChart4 size={12} />
+                      <span className="truncate">{category.length > 8 ? category.slice(0, 8) + '...' : category}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Individual Metrics - Show when category is selected */}
+            {currentView !== 'main' && isMobile && (
+              <div className="pt-2 border-t border-primary/30 flex-1 flex flex-col overflow-hidden">
+                <button
+                  onClick={() => setCurrentView('main')}
+                  className="w-full py-2 px-3 mb-2 bg-primary/10 border border-primary/30 rounded-md hover:bg-primary/15 transition-all duration-200 text-primary text-xs font-medium min-h-[40px] flex items-center justify-center gap-2 flex-shrink-0"
+                >
+                  <ArrowLeft size={12} />
+                  <span>Back to Categories</span>
+                </button>
+                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center flex-shrink-0">
+                  {currentView} Metrics ({categorizedMetrics[currentView]?.length || 0})
+                </h3>
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-surface/30">
+                  <div className="grid grid-cols-1 gap-1.5 pb-4">
+                    {categorizedMetrics[currentView]?.map((metric, index) => (
+                      <button
+                        key={metric.MetricID}
+                        onClick={() => {
+                          handleMetricSelect(metric.MetricID);
+                        }}
+                        className="flex items-start gap-2 py-3 px-3 rounded-md transition-all duration-200 min-h-[48px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50 text-left active:scale-95"
+                        title={metric.Description}
+                        style={{
+                          animationDelay: `${index * 50}ms`,
+                        }}
+                      >
+                        <BarChart4 size={14} className="mt-0.5 flex-shrink-0 text-primary/60" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm leading-tight mb-1">{metric.MetricName}</div>
+                          <div className="text-xs text-text-secondary/60 leading-tight">
+                            {metric.DataSourceType} • {metric.Blockchain}
+                          </div>
+                          {metric.Description && (
+                            <div className="text-xs text-text-secondary/50 mt-1 line-clamp-2">
+                              {metric.Description}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Desktop layout
+          currentView === 'main' 
+            ? renderMainContent() 
+            : renderCategoryContent(currentView)
+        )}
       </div>
     </aside>
   );

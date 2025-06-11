@@ -13,6 +13,7 @@ import { AnalyticsErrorBoundary } from '@/components/ErrorBoundary';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useKeyboardShortcuts, getModifierKey } from '@/hooks/useKeyboardShortcuts';
 import { CommandPalette } from '@/components/ui/CommandPalette';
+import { useTheme } from '@/contexts/ThemeContext';
 
 /**
  * Layout component for the analytics section.
@@ -20,6 +21,7 @@ import { CommandPalette } from '@/components/ui/CommandPalette';
  */
 const AnalyticsLayout: React.FC = () => {
   const { isMobile, isTablet, isTouchDevice } = useResponsive();
+  const { theme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile); // Start closed on mobile
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { metricId } = useParams<{ metricId: string }>();
@@ -79,9 +81,9 @@ const AnalyticsLayout: React.FC = () => {
 
   return (
     <AnalyticsErrorBoundary>
-      <div className="h-screen w-full flex flex-col overflow-hidden text-text font-mono relative" style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
-        {/* Black Background with same opacity as charts */}
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+      <div className={`h-screen w-full flex flex-col overflow-hidden text-text font-mono relative pt-20 ${theme.mode === 'light' ? 'bg-gray-50' : ''}`} style={theme.mode === 'dark' ? {backgroundColor: 'rgba(0, 0, 0, 0.7)'} : {}}>
+        {/* Theme-aware Background */}
+        {theme.mode === 'dark' && <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>}
         
         {/* Header Bar */}
       <header className="relative z-10 glass-morphism border-b border-border/30 p-3 flex items-center justify-between flex-shrink-0 shadow-modern">

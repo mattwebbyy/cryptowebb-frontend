@@ -14,7 +14,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <StripeProvider>
-            <div className="app-container">
+            <div className="app-container w-full overflow-x-hidden">
               <MatrixRain />
               <Layout>
                 <Routes />

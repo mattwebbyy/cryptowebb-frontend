@@ -3,6 +3,7 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3, Menu, X, CreditCard } from 'lucide-react';
 import { useState } from 'react';
+import React from 'react';
 
 interface NavItem {
   path: string;
@@ -127,13 +128,13 @@ const DashboardLayout = () => {
     }`;
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative pt-20 ">
       {/* Subtle Background */}
-      <div className="absolute inset-0 bg-background"></div>
       
       {/* Header - Professional Styling */}
-      <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
+      <div className='bg-white dark:bg-black'>
+      <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm bg-b">
+        <div className="flex items-center justify-between bg-ba">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-white" />
@@ -174,82 +175,85 @@ const DashboardLayout = () => {
           </div>
         </div>
         
-        {/* Mobile Dropdown Menu - Improved Styling */}
+        {/* Mobile Dropdown Menu - Compact No-Scroll Design */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-surface/98 backdrop-blur-md border-b border-border shadow-xl z-[80]">
-            <nav className="p-6 space-y-3">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/[0.98] backdrop-blur-md border-b border-border shadow-xl z-[80] mt-2 mx-4 rounded-lg border border-primary/50">
+            <nav className="p-3 space-y-3">
               {/* Dashboard Navigation Section */}
-              <div className="space-y-1">
-                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 px-4">
+              <div>
+                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
                   Dashboard
                 </h4>
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    end={item.end}
-                    onClick={handleNavClick}
-                    className={({ isActive }) =>
-                      `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 min-h-[48px] ${
-                        isActive
-                          ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
-                          : 'text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1'
-                      }`
-                    }
-                  >
-                    <div className="text-current flex-shrink-0">
-                      {item.icon}
-                    </div>
-                    <span className="font-medium">{item.label}</span>
-                  </NavLink>
-                ))}
+                <div className="grid grid-cols-2 gap-1.5">
+                  {navItems.map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      end={item.end}
+                      onClick={handleNavClick}
+                      className={({ isActive }) =>
+                        `flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border  ${
+                          isActive
+                            ? 'bg-primary/25 text-primary border-primary/60'
+                            : 'text-text-secondary hover:text-primary hover:bg-primary/15 border-primary/30 hover:border-primary/50'
+                        }`
+                      }
+                    >
+                      <div className="text-current flex-shrink-0">
+                        {React.cloneElement(item.icon as React.ReactElement, { size: 12 })}
+                      </div>
+                      <span className="font-medium">{item.label}</span>
+                    </NavLink>
+                  ))}
+                </div>
               </div>
               
               {/* Platform Navigation Section */}
-              <div className="space-y-1 pt-4 border-t border-border">
-                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 px-4">
+              <div className="pt-2 border-t border-primary/40">
+                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
                   Platform
                 </h4>
-                
-                {/* Analytics Platform */}
-                <NavLink
-                  to="/analytics"
-                  onClick={handleNavClick}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
-                >
-                  <BarChart3 className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">Analytics Platform</span>
-                </NavLink>
-                
-                {/* Home */}
-                <NavLink
-                  to="/"
-                  onClick={handleNavClick}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
-                >
-                  <Home className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">Home</span>
-                </NavLink>
-                
-                {/* Pricing */}
-                <NavLink
-                  to="/pricing"
-                  onClick={handleNavClick}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
-                >
-                  <CreditCard className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">Pricing</span>
-                </NavLink>
-                
-                {/* About */}
-                <NavLink
-                  to="/about"
-                  onClick={handleNavClick}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/5 hover:translate-x-1 transition-all duration-200 min-h-[48px]"
-                >
-                  <User className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">About</span>
-                </NavLink>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {/* Analytics Platform */}
+                  <NavLink
+                    to="/analytics"
+                    onClick={handleNavClick}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                  >
+                    <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                    <span className="font-medium">Analytics</span>
+                  </NavLink>
+                  
+                  {/* Home */}
+                  <NavLink
+                    to="/"
+                    onClick={handleNavClick}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                  >
+                    <Home className="h-3 w-3 flex-shrink-0" />
+                    <span className="font-medium">Home</span>
+                  </NavLink>
+                  
+                  {/* Pricing */}
+                  <NavLink
+                    to="/pricing"
+                    onClick={handleNavClick}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                  >
+                    <CreditCard className="h-3 w-3 flex-shrink-0" />
+                    <span className="font-medium">Pricing</span>
+                  </NavLink>
+                  
+                  {/* About */}
+                  <NavLink
+                    to="/about"
+                    onClick={handleNavClick}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                  >
+                    <User className="h-3 w-3 flex-shrink-0" />
+                    <span className="font-medium">About</span>
+                  </NavLink>
+                </div>
               </div>
             </nav>
           </div>
@@ -331,16 +335,17 @@ const DashboardLayout = () => {
           </div>
         </aside>
 
-        {/* Main Content - Full Width */}
+        {/* Main Content - Full Width Bento Layout */}
         <main className="relative z-10 flex-1 min-h-[calc(100vh-80px)] overflow-y-auto">
-          <div className="p-4 md:p-6 lg:p-8">
-            {/* FIXED WIDTH CONTAINER - ALWAYS EXACTLY THE SAME */}
-            <div className="w-[1000px] mx-auto bg-surface/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
+          <div className="p-4 md:p-6 lg:p-8 h-full">
+            {/* FULL WIDTH CONTAINER for Bento Grid - No fixed width constraints */}
+            <div className="w-full h-full bg-surface/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-4 md:p-6 lg:p-8">
               <Outlet />
             </div>
           </div>
         </main>
       </div>
+    </div>
     </div>
   );
 };

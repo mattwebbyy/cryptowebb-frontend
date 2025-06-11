@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { STRIPE_CONFIG, calculatePrice, getPricePerMonth } from '../config/stripe';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
 import { format } from 'date-fns';
 
 type BillingCycle = 'monthly' | 'six_months' | 'yearly';
@@ -58,17 +59,18 @@ const Modal: React.FC<{
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-}> = ({ isOpen, onClose, title, children }) => {
+  colorClasses: any;
+}> = ({ isOpen, onClose, title, children, colorClasses }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-black/90 backdrop-blur-md border-2 border-matrix-green rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className={`${colorClasses.modalBg} backdrop-blur-md border-2 ${colorClasses.modalBorder} rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-matrix-green">{title}</h2>
+          <h2 className={`text-lg sm:text-xl font-semibold ${colorClasses.primary}`}>{title}</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-matrix-green p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className={`${colorClasses.textSecondary} ${colorClasses.primaryHover} ${colorClasses.primary} p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors`}
           >
             <FaTimes />
           </button>
@@ -81,6 +83,7 @@ const Modal: React.FC<{
 
 const PricingPage: React.FC = () => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const stripe = useStripe();
   const elements = useElements();
   const [selectedTier, setSelectedTier] = useState<PlanTier | null>(null);
@@ -97,6 +100,43 @@ const PricingPage: React.FC = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+
+  // Color classes based on theme
+  const getColorClasses = () => {
+    if (theme.mode === 'light') {
+      return {
+        primary: 'text-teal-600',
+        primaryBg: 'bg-teal-600',
+        primaryBorder: 'border-teal-600',
+        primaryHover: 'hover:bg-teal-600/20',
+        primaryLight: 'bg-teal-600/20',
+        text: 'text-gray-800',
+        textSecondary: 'text-gray-600',
+        surface: 'bg-white/10 backdrop-blur-md border border-teal-600/20',
+        border: 'border-gray-200',
+        modalBg: 'bg-white/95',
+        modalBorder: 'border-teal-600',
+        background: ''
+      };
+    } else {
+      return {
+        primary: 'text-matrix-green',
+        primaryBg: 'bg-matrix-green',
+        primaryBorder: 'border-matrix-green',
+        primaryHover: 'hover:bg-matrix-green/20',
+        primaryLight: 'bg-matrix-green/20',
+        text: 'text-matrix-green',
+        textSecondary: 'text-gray-300',
+        surface: 'bg-black/40 backdrop-blur-md border border-matrix-green/20',
+        border: 'border-gray-700',
+        modalBg: 'bg-black/90',
+        modalBorder: 'border-matrix-green',
+        background: 'text-matrix-green'
+      };
+    }
+  };
+
+  const colorClasses = getColorClasses();
 
   const determineTier = (priceId: string): PlanTier | null => {
     const id = priceId.toLowerCase();
@@ -549,18 +589,18 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen text-matrix-green">
+    <div className={`relative w-full min-h-screen ${colorClasses.text}`}>
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-lg sm:text-xl">Scale your capabilities with our flexible pricing</p>
+          <h1 className={`text-3xl sm:text-4xl font-bold mb-4 ${colorClasses.text}`}>Choose Your Plan</h1>
+          <p className={`text-lg sm:text-xl ${colorClasses.textSecondary}`}>Scale your capabilities with our flexible pricing</p>
 
           {currentSubscription && (
             <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => setShowHistory(true)}
-                className="px-4 py-3 bg-matrix-green/20 text-matrix-green rounded hover:bg-matrix-green/30 min-h-[44px] flex items-center justify-center"
+                className={`px-4 py-3 ${colorClasses.primaryLight} ${colorClasses.primary} rounded ${colorClasses.primaryHover} min-h-[44px] flex items-center justify-center transition-colors`}
               >
                 <FaHistory className="inline mr-2" />
                 Subscription History
@@ -568,7 +608,7 @@ const PricingPage: React.FC = () => {
               {!currentSubscription.cancelAtPeriodEnd && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="px-4 py-3 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30 min-h-[44px] flex items-center justify-center"
+                  className="px-4 py-3 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30 min-h-[44px] flex items-center justify-center transition-colors"
                 >
                   <FaTimes className="inline mr-2" />
                   Cancel Subscription
@@ -590,15 +630,15 @@ const PricingPage: React.FC = () => {
                 key={tier}
                 whileHover={{ scale: isCurrentSub ? 1 : 1.01 }}
                 className={`relative rounded-xl border-2 ${
-                  isCurrentSub ? 'cursor-default border-matrix-green/50' : 'cursor-pointer'
-                } ${plan.popular ? 'border-matrix-green' : 'border-gray-700'} ${
-                  selectedTier === tier ? 'border-matrix-green bg-matrix-green/10' : ''
-                } ${isCurrentSub ? 'border-matrix-green/50' : ''} bg-black p-6 shadow-xl flex flex-col`}
+                  isCurrentSub ? `cursor-default ${colorClasses.primaryBorder}/50` : 'cursor-pointer'
+                } ${plan.popular ? colorClasses.primaryBorder : colorClasses.border} ${
+                  selectedTier === tier ? `${colorClasses.primaryBorder} ${colorClasses.primaryLight}` : ''
+                } ${isCurrentSub ? `${colorClasses.primaryBorder}/50` : ''} ${colorClasses.surface} p-6 shadow-xl flex flex-col`}
                 onClick={() => handleSelectPlan(tier as PlanTier)}
               >
                 {isCurrentSub && (
                   <>
-                    <div className="absolute top-4 right-4 px-2 py-1 bg-matrix-green text-black text-sm rounded-full">
+                    <div className={`absolute top-4 right-4 px-2 py-1 ${colorClasses.primaryBg} ${theme.mode === 'light' ? 'text-white' : 'text-black'} text-sm rounded-full`}>
                       Current Plan
                     </div>
                     {currentSubscription.cancelAtPeriodEnd && (
@@ -607,7 +647,7 @@ const PricingPage: React.FC = () => {
                       </div>
                     )}
                     {daysRemaining && (
-                      <div className="absolute top-20 right-4 px-2 py-1 text-matrix-green text-xs">
+                      <div className={`absolute top-20 right-4 px-2 py-1 ${colorClasses.primary} text-xs`}>
                         {daysRemaining} days remaining
                       </div>
                     )}
@@ -615,31 +655,31 @@ const PricingPage: React.FC = () => {
                 )}
                 <div className="flex-grow">
                   <div className="text-center mb-6 sm:mb-8">
-                    <Icon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-matrix-green" />
-                    <h3 className="text-xl sm:text-2xl font-bold mb-2">{plan.name}</h3>
-                    <div className="text-2xl sm:text-3xl font-bold mb-4">
+                    <Icon className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${colorClasses.primary}`} />
+                    <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${colorClasses.text}`}>{plan.name}</h3>
+                    <div className={`text-2xl sm:text-3xl font-bold mb-4 ${colorClasses.text}`}>
                       ${getPricePerMonth(plan.basePrice, billingCycle)}
-                      <span className="text-base sm:text-lg font-normal">/month</span>
+                      <span className={`text-base sm:text-lg font-normal ${colorClasses.textSecondary}`}>/month</span>
                     </div>
                   </div>
 
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start">
-                        <FaCheck className="w-4 h-4 sm:w-5 sm:h-5 text-matrix-green mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{feature}</span>
+                        <FaCheck className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClasses.primary} mr-2 mt-0.5 flex-shrink-0`} />
+                        <span className={`text-sm sm:text-base ${colorClasses.textSecondary}`}>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="mt-auto">
                   <button
-                    className={`w-full py-3 rounded-lg font-semibold min-h-[44px] text-sm sm:text-base ${
+                    className={`w-full py-3 rounded-lg font-semibold min-h-[44px] text-sm sm:text-base transition-colors ${
                       isCurrentSub
-                        ? 'bg-gray-700 text-gray-300 cursor-not-allowed'
+                        ? `bg-gray-700 ${colorClasses.textSecondary} cursor-not-allowed`
                         : selectedTier === tier
-                          ? 'bg-matrix-green text-black'
-                          : 'border border-matrix-green text-matrix-green hover:bg-matrix-green/10'
+                          ? `${colorClasses.primaryBg} ${theme.mode === 'light' ? 'text-white' : 'text-black'}`
+                          : `border ${colorClasses.primaryBorder} ${colorClasses.primary} ${colorClasses.primaryHover}`
                     }`}
                     disabled={isCurrentSub}
                   >
@@ -666,7 +706,7 @@ const PricingPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl mx-auto mb-8 sm:mb-12"
           >
-            <div className="bg-black/30 backdrop-blur-md border-2 border-matrix-green rounded-xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+            <div className={`${theme.mode === 'light' ? 'bg-white/10 border-teal-600/30' : 'bg-black/30 border-matrix-green'} backdrop-blur-md border-2 rounded-xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8`}>
               {/* Billing Cycle Selection */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold mb-4">Billing Cycle</h3>
@@ -804,6 +844,7 @@ const PricingPage: React.FC = () => {
           isOpen={showCancelModal}
           onClose={() => setShowCancelModal(false)}
           title="Cancel Subscription"
+          colorClasses={colorClasses}
         >
           <div className="space-y-4">
             <p className="text-gray-300">
@@ -832,6 +873,7 @@ const PricingPage: React.FC = () => {
           isOpen={showChangeModal}
           onClose={() => setShowChangeModal(false)}
           title={`${isDowngrade(selectedTier as PlanTier) ? 'Downgrade' : 'Upgrade'} Plan`}
+          colorClasses={colorClasses}
         >
           <div className="space-y-6">
             <p className="text-gray-300">
@@ -944,6 +986,7 @@ const PricingPage: React.FC = () => {
           isOpen={showHistory}
           onClose={() => setShowHistory(false)}
           title="Subscription History"
+          colorClasses={colorClasses}
         >
           <div className="space-y-4 max-h-96 ">
             {subscriptionHistory.length === 0 ? (

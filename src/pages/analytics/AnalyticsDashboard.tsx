@@ -8,6 +8,7 @@ import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
 import { debounce } from 'lodash';
 import { useResponsive } from '@/hooks/useResponsive';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // WidthProvider wraps RGL to automatically provide width
 const ReactGridLayout = WidthProvider(RGL);
@@ -34,6 +35,7 @@ interface GridItemDimensions {
 
 const AnalyticsDashboard = () => {
   const { isMobile, isTablet } = useResponsive();
+  const { theme } = useTheme();
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   // Layout state stores the grid configuration (x, y, w, h, etc.)
   const [layout, setLayout] = useState<DashboardLayoutItem[]>([]);
@@ -317,9 +319,9 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <div className="h-full flex flex-col text-text relative" style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
-      {/* Black Background matching chart opacity */}
-      <div className="absolute inset-0 bg-black/70"></div>
+    <div className={`h-full flex flex-col text-text relative ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/70'}`}>
+      {/* Background overlay with theme awareness */}
+      <div className={`absolute inset-0 ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/70'}`}></div>
       
       {/* Modern Header - Mobile Responsive */}
       <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 md:p-6 border-b border-border/30 flex-shrink-0 glass-morphism gap-4">
