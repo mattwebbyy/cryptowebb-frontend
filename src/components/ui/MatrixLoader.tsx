@@ -15,7 +15,7 @@ export const MatrixLoader = () => {
   return (
     // Added pt-20 (adjust this value based on your navbar height)
     // Kept high z-index
-    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[9999] pt-40">
+    <div className="fixed inset-0 bg-white/95 dark:bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center z-[9999] pt-40">
       {' '}
       {/* <-- Added pt-20 (adjust as needed) */}
       <motion.div
@@ -24,16 +24,16 @@ export const MatrixLoader = () => {
         className="text-center"
       >
         <h2
-          className="text-2xl mb-4 font-mono text-matrix-green"
-          style={{ textShadow: '0 0 10px #33ff33' }}
+          className="text-2xl mb-4 font-mono text-teal-600 dark:text-matrix-green"
+          style={{ textShadow: '0 0 10px currentColor' }}
         >
           INITIALIZING SYSTEM
           <span className="inline-block w-16 text-left">{dots}</span>
         </h2>
 
-        <div className="w-64 h-2 bg-matrix-dark border border-matrix-green relative">
+        <div className="w-64 h-2 bg-gray-200 dark:bg-gray-800 border border-teal-600 dark:border-matrix-green relative">
           <motion.div
-            className="absolute top-0 left-0 h-full bg-matrix-green/50"
+            className="absolute top-0 left-0 h-full bg-teal-600/50 dark:bg-matrix-green/50"
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
             transition={{
@@ -44,7 +44,7 @@ export const MatrixLoader = () => {
           />
         </div>
 
-        <div className="mt-4 font-mono text-sm text-matrix-green/70 max-w-md">
+        <div className="mt-4 font-mono text-sm text-teal-600/70 dark:text-matrix-green/70 max-w-md">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
