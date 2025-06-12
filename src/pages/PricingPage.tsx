@@ -14,7 +14,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { STRIPE_CONFIG, calculatePrice, getPricePerMonth } from '../config/stripe';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../contexts/ThemeContext';
 import { format } from 'date-fns';
 
 type BillingCycle = 'monthly' | 'six_months' | 'yearly';
@@ -59,18 +58,17 @@ const Modal: React.FC<{
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  colorClasses: any;
-}> = ({ isOpen, onClose, title, children, colorClasses }) => {
+}> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className={`${colorClasses.modalBg} backdrop-blur-md border-2 ${colorClasses.modalBorder} rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+      <div className="bg-white/95 dark:bg-black/90 backdrop-blur-md border-2 border-teal-600 dark:border-matrix-green rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-lg sm:text-xl font-semibold ${colorClasses.primary}`}>{title}</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-teal-600 dark:text-matrix-green">{title}</h2>
           <button 
             onClick={onClose} 
-            className={`${colorClasses.textSecondary} ${colorClasses.primaryHover} ${colorClasses.primary} p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors`}
+            className="text-gray-600 dark:text-gray-300 hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 text-teal-600 dark:text-matrix-green p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors"
           >
             <FaTimes />
           </button>
@@ -83,7 +81,6 @@ const Modal: React.FC<{
 
 const PricingPage: React.FC = () => {
   const { user } = useAuth();
-  const { theme } = useTheme();
   const stripe = useStripe();
   const elements = useElements();
   const [selectedTier, setSelectedTier] = useState<PlanTier | null>(null);
@@ -101,42 +98,7 @@ const PricingPage: React.FC = () => {
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
 
-  // Color classes based on theme
-  const getColorClasses = () => {
-    if (theme.mode === 'light') {
-      return {
-        primary: 'text-teal-600',
-        primaryBg: 'bg-teal-600',
-        primaryBorder: 'border-teal-600',
-        primaryHover: 'hover:bg-teal-600/20',
-        primaryLight: 'bg-teal-600/20',
-        text: 'text-gray-800',
-        textSecondary: 'text-gray-600',
-        surface: 'bg-white/10 backdrop-blur-md border border-teal-600/20',
-        border: 'border-gray-200',
-        modalBg: 'bg-white/95',
-        modalBorder: 'border-teal-600',
-        background: ''
-      };
-    } else {
-      return {
-        primary: 'text-matrix-green',
-        primaryBg: 'bg-matrix-green',
-        primaryBorder: 'border-matrix-green',
-        primaryHover: 'hover:bg-matrix-green/20',
-        primaryLight: 'bg-matrix-green/20',
-        text: 'text-matrix-green',
-        textSecondary: 'text-gray-300',
-        surface: 'bg-black/40 backdrop-blur-md border border-matrix-green/20',
-        border: 'border-gray-700',
-        modalBg: 'bg-black/90',
-        modalBorder: 'border-matrix-green',
-        background: 'text-matrix-green'
-      };
-    }
-  };
-
-  const colorClasses = getColorClasses();
+  // Using Tailwind's dark: modifier instead of custom theme logic
 
   const determineTier = (priceId: string): PlanTier | null => {
     const id = priceId.toLowerCase();
@@ -589,18 +551,18 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className={`relative w-full min-h-screen ${colorClasses.text}`}>
+    <div className="relative w-full min-h-screen text-gray-800 dark:text-matrix-green">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className={`text-3xl sm:text-4xl font-bold mb-4 ${colorClasses.text}`}>Choose Your Plan</h1>
-          <p className={`text-lg sm:text-xl ${colorClasses.textSecondary}`}>Scale your capabilities with our flexible pricing</p>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-800 dark:text-matrix-green">Choose Your Plan</h1>
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">Scale your capabilities with our flexible pricing</p>
 
           {currentSubscription && (
             <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => setShowHistory(true)}
-                className={`px-4 py-3 ${colorClasses.primaryLight} ${colorClasses.primary} rounded ${colorClasses.primaryHover} min-h-[44px] flex items-center justify-center transition-colors`}
+                className="px-4 py-3 bg-teal-600/20 dark:bg-matrix-green/20 text-teal-600 dark:text-matrix-green rounded hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 min-h-[44px] flex items-center justify-center transition-colors"
               >
                 <FaHistory className="inline mr-2" />
                 Subscription History
@@ -630,15 +592,15 @@ const PricingPage: React.FC = () => {
                 key={tier}
                 whileHover={{ scale: isCurrentSub ? 1 : 1.01 }}
                 className={`relative rounded-xl border-2 ${
-                  isCurrentSub ? `cursor-default ${colorClasses.primaryBorder}/50` : 'cursor-pointer'
-                } ${plan.popular ? colorClasses.primaryBorder : colorClasses.border} ${
-                  selectedTier === tier ? `${colorClasses.primaryBorder} ${colorClasses.primaryLight}` : ''
-                } ${isCurrentSub ? `${colorClasses.primaryBorder}/50` : ''} ${colorClasses.surface} p-6 shadow-xl flex flex-col`}
+                  isCurrentSub ? 'cursor-default border-teal-600/50 dark:border-matrix-green/50' : 'cursor-pointer'
+                } ${plan.popular ? 'border-teal-600 dark:border-matrix-green' : 'border-gray-200 dark:border-gray-700'} ${
+                  selectedTier === tier ? 'border-teal-600 dark:border-matrix-green bg-teal-600/20 dark:bg-matrix-green/20' : ''
+                } ${isCurrentSub ? 'border-teal-600/50 dark:border-matrix-green/50' : ''} bg-white/10 dark:bg-black/40 backdrop-blur-md border border-teal-600/20 dark:border-matrix-green/20 p-6 shadow-xl flex flex-col`}
                 onClick={() => handleSelectPlan(tier as PlanTier)}
               >
                 {isCurrentSub && (
                   <>
-                    <div className={`absolute top-4 right-4 px-2 py-1 ${colorClasses.primaryBg} ${theme.mode === 'light' ? 'text-white' : 'text-black'} text-sm rounded-full`}>
+                    <div className="absolute top-4 right-4 px-2 py-1 bg-teal-600 dark:bg-matrix-green text-white dark:text-black text-sm rounded-full">
                       Current Plan
                     </div>
                     {currentSubscription.cancelAtPeriodEnd && (
@@ -647,7 +609,7 @@ const PricingPage: React.FC = () => {
                       </div>
                     )}
                     {daysRemaining && (
-                      <div className={`absolute top-20 right-4 px-2 py-1 ${colorClasses.primary} text-xs`}>
+                      <div className="absolute top-20 right-4 px-2 py-1 text-teal-600 dark:text-matrix-green text-xs">
                         {daysRemaining} days remaining
                       </div>
                     )}
@@ -655,19 +617,19 @@ const PricingPage: React.FC = () => {
                 )}
                 <div className="flex-grow">
                   <div className="text-center mb-6 sm:mb-8">
-                    <Icon className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${colorClasses.primary}`} />
-                    <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${colorClasses.text}`}>{plan.name}</h3>
-                    <div className={`text-2xl sm:text-3xl font-bold mb-4 ${colorClasses.text}`}>
+                    <Icon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-teal-600 dark:text-matrix-green" />
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-800 dark:text-matrix-green">{plan.name}</h3>
+                    <div className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800 dark:text-matrix-green">
                       ${getPricePerMonth(plan.basePrice, billingCycle)}
-                      <span className={`text-base sm:text-lg font-normal ${colorClasses.textSecondary}`}>/month</span>
+                      <span className="text-base sm:text-lg font-normal text-gray-600 dark:text-gray-300">/month</span>
                     </div>
                   </div>
 
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start">
-                        <FaCheck className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClasses.primary} mr-2 mt-0.5 flex-shrink-0`} />
-                        <span className={`text-sm sm:text-base ${colorClasses.textSecondary}`}>{feature}</span>
+                        <FaCheck className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-matrix-green mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-gray-600 dark:text-gray-300">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -676,10 +638,10 @@ const PricingPage: React.FC = () => {
                   <button
                     className={`w-full py-3 rounded-lg font-semibold min-h-[44px] text-sm sm:text-base transition-colors ${
                       isCurrentSub
-                        ? `bg-gray-700 ${colorClasses.textSecondary} cursor-not-allowed`
+                        ? 'bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed'
                         : selectedTier === tier
-                          ? `${colorClasses.primaryBg} ${theme.mode === 'light' ? 'text-white' : 'text-black'}`
-                          : `border ${colorClasses.primaryBorder} ${colorClasses.primary} ${colorClasses.primaryHover}`
+                          ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                          : 'border border-teal-600 dark:border-matrix-green text-teal-600 dark:text-matrix-green hover:bg-teal-600/20 dark:hover:bg-matrix-green/20'
                     }`}
                     disabled={isCurrentSub}
                   >
@@ -706,7 +668,7 @@ const PricingPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl mx-auto mb-8 sm:mb-12"
           >
-            <div className={`${theme.mode === 'light' ? 'bg-white/10 border-teal-600/30' : 'bg-black/30 border-matrix-green'} backdrop-blur-md border-2 rounded-xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8`}>
+            <div className="bg-white/10 dark:bg-black/30 border-teal-600/30 dark:border-matrix-green backdrop-blur-md border-2 rounded-xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
               {/* Billing Cycle Selection */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold mb-4">Billing Cycle</h3>
@@ -714,7 +676,7 @@ const PricingPage: React.FC = () => {
                   {['monthly', 'six_months', 'yearly'].map((cycle) => (
                     <label
                       key={cycle}
-                      className="flex items-center justify-between p-3 border border-gray-700 rounded cursor-pointer hover:border-matrix-green"
+                      className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded cursor-pointer hover:border-teal-600 dark:hover:border-matrix-green"
                     >
                       <div className="flex items-center">
                         <input
@@ -748,7 +710,7 @@ const PricingPage: React.FC = () => {
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 sm:p-4 bg-black rounded border border-gray-700 text-matrix-green focus:border-matrix-green focus:ring-1 focus:ring-matrix-green text-base min-h-[44px]"
+                    className="w-full p-3 sm:p-4 bg-white dark:bg-black rounded border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-matrix-green focus:border-teal-600 dark:focus:border-matrix-green focus:ring-1 focus:ring-teal-600 dark:focus:ring-matrix-green text-base min-h-[44px]"
                   />
                 </div>
               )}
@@ -756,7 +718,7 @@ const PricingPage: React.FC = () => {
               {/* Payment Method */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Payment Method</h3>
-                <div className="p-4 border border-gray-700 rounded">
+                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded">
                   <CardElement
                     options={{
                       style: {
@@ -777,7 +739,7 @@ const PricingPage: React.FC = () => {
               {!showPromoInput ? (
                 <button
                   onClick={() => setShowPromoInput(true)}
-                  className="text-matrix-green hover:text-matrix-green/80"
+                  className="text-teal-600 dark:text-matrix-green hover:text-teal-600/80 dark:hover:text-matrix-green/80"
                 >
                   Apply promo code
                 </button>
@@ -788,9 +750,9 @@ const PricingPage: React.FC = () => {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter promo code"
-                    className="flex-1 p-2 bg-black border border-gray-700 rounded text-matrix-green"
+                    className="flex-1 p-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded text-gray-800 dark:text-matrix-green"
                   />
-                  <button className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90">
+                  <button className="px-4 py-2 bg-teal-600 dark:bg-matrix-green text-white dark:text-black rounded hover:bg-teal-600/90 dark:hover:bg-matrix-green/90">
                     Apply
                   </button>
                 </div>
@@ -824,7 +786,7 @@ const PricingPage: React.FC = () => {
                 disabled={isProcessing || !stripe}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full p-3 bg-matrix-green text-black font-bold rounded hover:bg-matrix-green/90 transition-colors disabled:opacity-50"
+                className="w-full p-3 bg-teal-600 dark:bg-matrix-green text-white dark:text-black font-bold rounded hover:bg-teal-600/90 dark:hover:bg-matrix-green/90 transition-colors disabled:opacity-50"
               >
                 {isProcessing ? 'Processing...' : 'Subscribe Now'}
               </motion.button>
@@ -844,17 +806,16 @@ const PricingPage: React.FC = () => {
           isOpen={showCancelModal}
           onClose={() => setShowCancelModal(false)}
           title="Cancel Subscription"
-          colorClasses={colorClasses}
         >
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300">
               Are you sure you want to cancel your subscription? Your subscription will remain
               active until the end of your current billing period.
             </p>
             <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
+                className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Keep Subscription
               </button>
@@ -873,10 +834,9 @@ const PricingPage: React.FC = () => {
           isOpen={showChangeModal}
           onClose={() => setShowChangeModal(false)}
           title={`${isDowngrade(selectedTier as PlanTier) ? 'Downgrade' : 'Upgrade'} Plan`}
-          colorClasses={colorClasses}
         >
           <div className="space-y-6">
-            <p className="text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300">
               {isDowngrade(selectedTier as PlanTier)
                 ? 'Are you sure you want to downgrade your plan? You may lose access to some features.'
                 : 'Upgrade your plan to access more features and higher limits.'}
@@ -884,12 +844,12 @@ const PricingPage: React.FC = () => {
 
             {/* Billing Cycle Selection */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-matrix-green">Billing Cycle</h3>
+              <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green">Billing Cycle</h3>
               <div className="space-y-3">
                 {['monthly', 'six_months', 'yearly'].map((cycle) => (
                   <label
                     key={cycle}
-                    className="flex items-center justify-between p-3 border border-gray-700 rounded cursor-pointer hover:border-matrix-green"
+                    className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded cursor-pointer hover:border-teal-600 dark:hover:border-matrix-green"
                   >
                     <div className="flex items-center">
                       <input
@@ -906,7 +866,7 @@ const PricingPage: React.FC = () => {
                             : 'Yearly'}
                       </span>
                     </div>
-                    <span className="text-matrix-green">
+                    <span className="text-teal-600 dark:text-matrix-green">
                       ${getPricePerMonth(selectedPlan?.basePrice || 0, cycle as BillingCycle)}/mo
                     </span>
                   </label>
@@ -918,7 +878,7 @@ const PricingPage: React.FC = () => {
             {!showPromoInput ? (
               <button
                 onClick={() => setShowPromoInput(true)}
-                className="text-matrix-green hover:text-matrix-green/80"
+                className="text-teal-600 dark:text-matrix-green hover:text-teal-600/80 dark:hover:text-matrix-green/80"
               >
                 Apply promo code
               </button>
@@ -929,16 +889,16 @@ const PricingPage: React.FC = () => {
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   placeholder="Enter promo code"
-                  className="flex-1 p-2 bg-black border border-gray-700 rounded text-matrix-green"
+                  className="flex-1 p-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded text-gray-800 dark:text-matrix-green"
                 />
-                <button className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90">
+                <button className="px-4 py-2 bg-teal-600 dark:bg-matrix-green text-white dark:text-black rounded hover:bg-teal-600/90 dark:hover:bg-matrix-green/90">
                   Apply
                 </button>
               </div>
             )}
 
             {/* Summary */}
-            <div className="border-t border-gray-700 pt-4 space-y-3">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
               <div className="flex justify-between text-lg">
                 <span>New Plan Summary</span>
               </div>
@@ -967,14 +927,14 @@ const PricingPage: React.FC = () => {
             <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => setShowChangeModal(false)}
-                className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-800"
+                className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleChangePlan}
                 disabled={isChangingPlan}
-                className="px-4 py-2 bg-matrix-green text-black rounded hover:bg-matrix-green/90 disabled:opacity-50"
+                className="px-4 py-2 bg-teal-600 dark:bg-matrix-green text-white dark:text-black rounded hover:bg-teal-600/90 dark:hover:bg-matrix-green/90 disabled:opacity-50"
               >
                 {isChangingPlan ? 'Processing...' : 'Confirm Change'}
               </button>
@@ -986,17 +946,16 @@ const PricingPage: React.FC = () => {
           isOpen={showHistory}
           onClose={() => setShowHistory(false)}
           title="Subscription History"
-          colorClasses={colorClasses}
         >
           <div className="space-y-4 max-h-96 ">
             {subscriptionHistory.length === 0 ? (
               <p className="text-gray-400">No subscription history available.</p>
             ) : (
               subscriptionHistory.map((sub) => (
-                <div key={sub.id} className="border border-gray-700 rounded-lg p-4 space-y-2">
+                <div key={sub.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between">
                     <span className="font-semibold">{sub.tier.toUpperCase()} Plan</span>
-                    <span className="text-matrix-green">${sub.amount}</span>
+                    <span className="text-teal-600 dark:text-matrix-green">${sub.amount}</span>
                   </div>
                   <div className="text-sm text-gray-400">
                     <div>Start: {format(new Date(sub.startDate), 'PPP')}</div>

@@ -13,7 +13,6 @@ import { AnalyticsErrorBoundary } from '@/components/ErrorBoundary';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useKeyboardShortcuts, getModifierKey } from '@/hooks/useKeyboardShortcuts';
 import { CommandPalette } from '@/components/ui/CommandPalette';
-import { useTheme } from '@/contexts/ThemeContext';
 
 /**
  * Layout component for the analytics section.
@@ -21,7 +20,7 @@ import { useTheme } from '@/contexts/ThemeContext';
  */
 const AnalyticsLayout: React.FC = () => {
   const { isMobile, isTablet, isTouchDevice } = useResponsive();
-  const { theme } = useTheme();
+  // Using Tailwind's dark: modifier instead of custom theme logic
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile); // Start closed on mobile
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { metricId } = useParams<{ metricId: string }>();
@@ -70,8 +69,8 @@ const AnalyticsLayout: React.FC = () => {
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center p-2 rounded-md whitespace-nowrap transition-all duration-200 ease-in-out transform hover:scale-105
      ${isActive
-      ? 'bg-primary/20 text-primary font-semibold shadow-sm shadow-primary/50'
-      : 'text-text-secondary hover:bg-primary/10 hover:text-primary'
+      ? 'bg-teal-600/20 dark:bg-matrix-green/20 text-teal-600 dark:text-matrix-green font-semibold shadow-sm shadow-teal-600/50 dark:shadow-matrix-green/50'
+      : 'text-gray-600 dark:text-gray-300 hover:bg-teal-600/10 dark:hover:bg-matrix-green/10 hover:text-teal-600 dark:hover:text-matrix-green'
     }`;
 
   const handleMetricSelect = (metricId: number) => {
@@ -81,18 +80,18 @@ const AnalyticsLayout: React.FC = () => {
 
   return (
     <AnalyticsErrorBoundary>
-      <div className={`h-screen w-full flex flex-col overflow-hidden text-text font-mono relative pt-20 ${theme.mode === 'light' ? 'bg-gray-50' : ''}`} style={theme.mode === 'dark' ? {backgroundColor: 'rgba(0, 0, 0, 0.7)'} : {}}>
-        {/* Theme-aware Background */}
-        {theme.mode === 'dark' && <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>}
+      <div className="h-screen w-full flex flex-col overflow-hidden text-gray-800 dark:text-matrix-green font-mono relative pt-20 bg-gray-50 dark:bg-black/70">
+        {/* Background overlay */}
+        <div className="absolute inset-0 bg-transparent dark:bg-black/70 backdrop-blur-sm"></div>
         
         {/* Header Bar */}
-      <header className="relative z-10 glass-morphism border-b border-border/30 p-3 flex items-center justify-between flex-shrink-0 shadow-modern">
+      <header className="relative z-10 glass-morphism border-b border-teal-600/30 dark:border-matrix-green/30 p-3 flex items-center justify-between flex-shrink-0 shadow-modern">
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
             className={`
-              p-2 rounded-md text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 ease-in-out transform hover:scale-110
-              ${sidebarOpen ? 'hover:bg-primary/20' : 'hover:bg-primary/15'}
+              p-2 rounded-md text-teal-600 dark:text-matrix-green focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green transition-all duration-200 ease-in-out transform hover:scale-110
+              ${sidebarOpen ? 'hover:bg-teal-600/20 dark:hover:bg-matrix-green/20' : 'hover:bg-teal-600/15 dark:hover:bg-matrix-green/15'}
             `}
             aria-label="Toggle sidebar"
           >
@@ -100,8 +99,8 @@ const AnalyticsLayout: React.FC = () => {
               {sidebarOpen ? <ChevronLeft size={22} /> : <Menu size={22} />}
             </div>
           </button>
-          <h1 className="ml-3 text-xl font-bold tracking-wider transition-all duration-300 hover:text-primary">
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="ml-3 text-xl font-bold tracking-wider transition-all duration-300 hover:text-teal-600 dark:hover:text-matrix-green">
+            <span className="bg-gradient-to-r from-teal-600 to-teal-800 dark:from-matrix-green dark:to-green-300 bg-clip-text text-transparent">
               ANALYTICS PLATFORM
             </span>
           </h1>
@@ -144,7 +143,7 @@ const AnalyticsLayout: React.FC = () => {
           `}
         >
           {/* Breadcrumb Navigation */}
-          <div className="glass-morphism border-b border-border/30 flex-shrink-0">
+          <div className="glass-morphism border-b border-teal-600/30 dark:border-matrix-green/30 flex-shrink-0">
             <div className="px-4 py-3">
               <AnalyticsBreadcrumb 
                 metricName={metricInfo?.MetricName}

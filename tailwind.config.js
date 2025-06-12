@@ -1,16 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
-        // Legacy support - keep for dark mode
+        // Matrix theme colors for dark mode
         'matrix-green': '#33ff33',
+        'matrix-dark': '#001400',
         matrix: {
           green: '#33ff33',
           dark: '#001400',
+          dim: '#22aa22',
         },
-        // Teal colors for light mode
+        // Teal colors for light mode (keep existing teal palette)
         teal: {
           50: '#f0fdfa',
           100: '#ccfbf1',

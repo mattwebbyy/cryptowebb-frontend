@@ -1,7 +1,6 @@
 // src/pages/Projects.tsx
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface Project {
   id: number;
@@ -28,28 +27,7 @@ const projects: Project[] = [
 ];
 
 const Projects = () => {
-  const { theme } = useTheme();
-  
-  // Color classes based on theme - always use teal in light mode
-  const getColorClasses = () => {
-    if (theme.mode === 'light') {
-      return {
-        primary: 'text-teal-600',
-        textSecondary: 'text-teal-600/80',
-        border: 'border-teal-600/50',
-        text: 'text-teal-600'
-      };
-    } else {
-      return {
-        primary: 'text-matrix-green',
-        textSecondary: 'text-matrix-green/80',
-        border: 'border-matrix-green/50',
-        text: 'text-matrix-green'
-      };
-    }
-  };
-
-  const colorClasses = getColorClasses();
+  // Using Tailwind's dark: modifier instead of custom theme logic
 
   return (
     <div className="min-h-screen pt-20 px-4 pb-12">
@@ -59,7 +37,7 @@ const Projects = () => {
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto"
       >
-        <h1 className={`text-4xl mb-8 text-center ${colorClasses.primary}`}>PROJECTS</h1>
+        <h1 className="text-4xl mb-8 text-center text-teal-600 dark:text-matrix-green">PROJECTS</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {projects.map((project) => (
             <motion.div
@@ -69,13 +47,13 @@ const Projects = () => {
               transition={{ delay: project.id * 0.2 }}
             >
               <Card className="h-full">
-                <h2 className={`text-2xl mb-4 ${colorClasses.primary}`}>{project.title}</h2>
-                <p className={`mb-4 ${colorClasses.textSecondary}`}>{project.description}</p>
+                <h2 className="text-2xl mb-4 text-teal-600 dark:text-matrix-green">{project.title}</h2>
+                <p className="mb-4 text-teal-600/80 dark:text-matrix-green/80">{project.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className={`px-3 py-1 text-sm border ${colorClasses.border} rounded-sm ${colorClasses.textSecondary}`}
+                      className="px-3 py-1 text-sm border border-teal-600/50 dark:border-matrix-green/50 rounded-sm text-teal-600/80 dark:text-matrix-green/80"
                     >
                       {tag}
                     </span>

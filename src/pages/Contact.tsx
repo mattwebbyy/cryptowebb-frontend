@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useTheme } from '@/contexts/ThemeContext';
-
 interface ContactFormData {
   name: string;
   email: string;
@@ -19,32 +17,7 @@ interface ApiResponse {
 }
 
 const Contact = () => {
-  const { theme } = useTheme();
-  
-  // Color classes based on theme - always use teal in light mode
-  const getColorClasses = () => {
-    if (theme.mode === 'light') {
-      return {
-        primary: 'text-teal-600',
-        primaryBg: 'bg-teal-600',
-        primaryBorder: 'border-teal-600',
-        primaryFocus: 'focus:ring-teal-600',
-        surface: 'bg-white/90 border-teal-600',
-        input: 'bg-white/70 border-teal-600'
-      };
-    } else {
-      return {
-        primary: 'text-matrix-green',
-        primaryBg: 'bg-matrix-green',
-        primaryBorder: 'border-matrix-green',
-        primaryFocus: 'focus:ring-matrix-green',
-        surface: 'bg-black/90 border-matrix-green',
-        input: 'bg-black/50 border-matrix-green'
-      };
-    }
-  };
-
-  const colorClasses = getColorClasses();
+  // Using Tailwind's dark: modifier instead of custom theme logic
 
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
@@ -112,14 +85,14 @@ const Contact = () => {
         transition={{ duration: 0.5 }}
         className="max-w-2xl mx-auto"
       >
-        <Card className={`p-8 px-24 ${colorClasses.surface}`}>
-          <h1 className={`text-4xl mb-8 text-center ${colorClasses.primary} font-mono`}>CONTACT</h1>
+        <Card className="p-8 px-24 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
+          <h1 className="text-4xl mb-8 text-center text-teal-600 dark:text-matrix-green font-mono">CONTACT</h1>
 
           {status === 'error' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 p-4 border border-red-500 text-red-500 bg-black/50 font-mono"
+              className="mb-6 p-4 border border-red-500 text-red-500 bg-red-500/10 dark:bg-black/50 font-mono"
             >
               {errorMessage}
             </motion.div>
@@ -127,14 +100,14 @@ const Contact = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className={`block mb-2 ${colorClasses.primary} font-mono`}>
+              <label htmlFor="name" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
                 Name
               </label>
               <input
                 type="text"
                 id="name"
                 name="name"
-                className={`w-full ${colorClasses.input} p-2 focus:outline-none focus:ring-2 ${colorClasses.primaryFocus} ${colorClasses.primary} font-mono`}
+                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -144,14 +117,14 @@ const Contact = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className={`block mb-2 ${colorClasses.primary} font-mono`}>
+              <label htmlFor="email" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
                 Email
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                className={`w-full ${colorClasses.input} p-2 focus:outline-none focus:ring-2 ${colorClasses.primaryFocus} ${colorClasses.primary} font-mono`}
+                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -161,14 +134,14 @@ const Contact = () => {
             </div>
 
             <div>
-              <label htmlFor="subject" className={`block mb-2 ${colorClasses.primary} font-mono`}>
+              <label htmlFor="subject" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
                 Subject
               </label>
               <input
                 type="text"
                 id="subject"
                 name="subject"
-                className={`w-full ${colorClasses.input} p-2 focus:outline-none focus:ring-2 ${colorClasses.primaryFocus} ${colorClasses.primary} font-mono`}
+                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
                 value={formData.subject}
                 onChange={handleChange}
                 required
@@ -178,14 +151,14 @@ const Contact = () => {
             </div>
 
             <div>
-              <label htmlFor="message" className={`block mb-2 ${colorClasses.primary} font-mono`}>
+              <label htmlFor="message" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
                 Message
               </label>
               <textarea
                 id="message"
                 name="message"
                 rows={5}
-                className={`w-full ${colorClasses.input} p-2 focus:outline-none focus:ring-2 ${colorClasses.primaryFocus} ${colorClasses.primary} font-mono resize-none`}
+                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono resize-none"
                 value={formData.message}
                 onChange={handleChange}
                 required
@@ -197,7 +170,7 @@ const Contact = () => {
             <Button
               type="submit"
               disabled={status === 'submitting'}
-              className={`w-full ${colorClasses.primaryBg} ${theme.mode === 'light' ? 'hover:bg-teal-600/80 text-white' : 'hover:bg-matrix-green/80 text-black'} font-mono transition-colors duration-200`}
+              className="w-full bg-teal-600 dark:bg-matrix-green hover:bg-teal-600/80 dark:hover:bg-matrix-green/80 text-white dark:text-black font-mono transition-colors duration-200"
             >
               {status === 'submitting' ? 'SENDING...' : 'SEND MESSAGE'}
             </Button>
@@ -206,7 +179,7 @@ const Contact = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`mt-4 p-4 border ${colorClasses.primaryBorder} ${colorClasses.primary} ${theme.mode === 'light' ? 'bg-teal-600/10' : 'bg-black/50'} font-mono text-center`}
+                className="mt-4 p-4 border border-teal-600 dark:border-matrix-green text-teal-600 dark:text-matrix-green bg-teal-600/10 dark:bg-black/50 font-mono text-center"
               >
                 <p>Message sent successfully!</p>
                 <p className="text-sm mt-2">We'll get back to you soon.</p>

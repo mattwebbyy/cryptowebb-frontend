@@ -8,12 +8,9 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { RESPONSIVE_CLASSES } from '@/config/responsive';
-import { useTheme } from '@/contexts/ThemeContext';
-
 export const Header = () => {
   const location = useLocation();
   const { isAuthenticated, user, logout, isLoading } = useAuth();
-  const { theme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -44,42 +41,14 @@ export const Header = () => {
     ? [...baseNavLinks, ...authenticatedLinks] 
     : baseNavLinks;
 
-  // Color classes based on theme - always use teal in light mode
-  const getColorClasses = () => {
-    if (theme.mode === 'light') {
-      return {
-        logo: 'text-teal-600',
-        navLink: 'text-teal-500/70 hover:text-teal-600 font-semibold',
-        navLinkActive: 'text-teal-600 font-bold',
-        button: 'text-teal-600',
-        buttonBorder: 'border-teal-600',
-        buttonHover: 'hover:bg-teal-600/20',
-        mobileButton: 'border-teal-600/30 text-teal-600 hover:text-teal-700 hover:bg-teal-600/15 hover:border-teal-600/50',
-        mobileButtonActive: 'text-teal-700 bg-teal-600/25 border-teal-600/60'
-      };
-    } else {
-      // Default matrix-green theme for dark mode
-      return {
-        logo: 'text-matrix-green',
-        navLink: 'text-matrix-green/70 hover:text-matrix-green',
-        navLinkActive: 'text-matrix-green font-semibold',
-        button: 'text-matrix-green',
-        buttonBorder: 'border-matrix-green',
-        buttonHover: 'hover:bg-matrix-green/20',
-        mobileButton: 'border-matrix-green/30 text-matrix-green/90 hover:text-matrix-green hover:bg-matrix-green/15 hover:border-matrix-green/50',
-        mobileButtonActive: 'text-matrix-green bg-matrix-green/25 border-matrix-green/60'
-      };
-    }
-  };
-
-  const colorClasses = getColorClasses();
+  // Using Tailwind's dark: modifier instead of custom logic
 
   return (
     <header className="fixed top-0 w-full z-[60] backdrop-blur-sm">
       <nav className="container mx-auto px-4 py-4 max-w-full">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className={`${colorClasses.logo} text-xl font-bold`}>
+          <Link to="/" className="text-teal-600 dark:text-matrix-green text-xl font-bold">
             Cryptowebb
           </Link>
 
@@ -91,7 +60,10 @@ export const Header = () => {
                 <motion.div key={path} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to={`/${path}`}
-                    className={`${location.pathname === `/${path}` ? colorClasses.navLinkActive : colorClasses.navLink} transition-colors duration-200 capitalize ${path === 'analytics' ? 'flex items-center gap-1' : ''}`}
+                    className={`${location.pathname === `/${path}` 
+                      ? 'text-teal-600 dark:text-matrix-green font-bold' 
+                      : 'text-teal-500/70 dark:text-matrix-green/70 hover:text-teal-600 dark:hover:text-matrix-green font-semibold'
+                    } transition-colors duration-200 capitalize ${path === 'analytics' ? 'flex items-center gap-1' : ''}`}
                   >
                     {path === 'analytics' && <LayoutDashboard size={16} />}
                     {path}
@@ -117,7 +89,7 @@ export const Header = () => {
                 {user && <span className="text-white">Hello, {user.firstName || user.email}</span>}
                 <button 
                   onClick={logout} 
-                  className={`${colorClasses.navLink} transition-colors duration-200`}
+                  className="text-teal-500/70 dark:text-matrix-green/70 hover:text-teal-600 dark:hover:text-matrix-green transition-colors duration-200"
                   title="Log out"
                 >
                   Logout
@@ -127,14 +99,14 @@ export const Header = () => {
               <div className="flex gap-2">
                 <Link
                   to="/login"
-                  className={`text-sm px-4 py-1.5 border ${colorClasses.buttonBorder} bg-black/50 ${colorClasses.buttonHover} transition-all duration-300 flex items-center gap-2 ${colorClasses.button}`}
+                  className="text-sm px-4 py-1.5 border border-teal-600 dark:border-matrix-green bg-black/50 dark:bg-black/50 hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 flex items-center gap-2 text-teal-600 dark:text-matrix-green"
                 >
-                  <span className={`w-2 h-2 ${theme.mode === 'light' ? 'bg-teal-600' : 'bg-matrix-green'} rounded-full animate-pulse`} />
+                  <span className="w-2 h-2 bg-teal-600 dark:bg-matrix-green rounded-full animate-pulse" />
                   INITIALIZE
                 </Link>
                 <Link
                   to="/register"
-                  className={`text-sm px-4 py-1.5 border ${theme.mode === 'light' ? 'border-teal-600/50 hover:border-teal-600' : 'border-matrix-green/50 hover:border-matrix-green'} bg-black/30 ${theme.mode === 'light' ? 'hover:bg-teal-600/10' : 'hover:bg-matrix-green/10'} transition-all duration-300 ${colorClasses.button}`}
+                  className="text-sm px-4 py-1.5 border border-teal-600/50 dark:border-matrix-green/50 hover:border-teal-600 dark:hover:border-matrix-green bg-black/30 dark:bg-black/30 hover:bg-teal-600/10 dark:hover:bg-matrix-green/10 transition-all duration-300 text-teal-600 dark:text-matrix-green"
                 >
                   REQUEST ACCESS
                 </Link>
@@ -145,7 +117,7 @@ export const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`md:hidden ${colorClasses.button}`}
+            className="md:hidden text-teal-600 dark:text-matrix-green"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -160,9 +132,9 @@ export const Header = () => {
               exit={{ opacity: 0, y: -20 }}
               className="md:hidden fixed top-[80px] left-4 right-4 z-[70] max-h-[calc(100vh-100px)] overflow-y-auto"
             >
-              <div className={`py-3 ${theme.mode === 'light' ? 'bg-white/95' : 'bg-black/[0.98]'} border ${theme.mode === 'light' ? 'border-teal-600/50' : 'border-matrix-green/50'} rounded-lg backdrop-blur-md shadow-2xl`}>
+              <div className="py-3 bg-white/95 dark:bg-black/[0.98] border border-teal-600/50 dark:border-matrix-green/50 rounded-lg backdrop-blur-md shadow-2xl">
                 {/* Theme Toggle for Mobile */}
-                <div className={`flex justify-center pb-3 border-b ${theme.mode === 'light' ? 'border-teal-600/40' : 'border-matrix-green/40'} mx-3`}>
+                <div className="flex justify-center pb-3 border-b border-teal-600/40 dark:border-matrix-green/40 mx-3">
                   <ThemeToggle variant="simple" size="sm" showLabel={false} />
                 </div>
                 
@@ -170,7 +142,7 @@ export const Header = () => {
                 <div className="p-3 space-y-3">
                   {/* Platform Links - 2x3 Grid */}
                   <div>
-                    <h4 className={`text-xs font-semibold ${colorClasses.button} uppercase tracking-wider mb-2 text-center`}>
+                    <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
                       Platform
                     </h4>
                     <div className="grid grid-cols-2 gap-1.5">
@@ -178,8 +150,10 @@ export const Header = () => {
                         <Link
                           key={path}
                           to={`/${path}`}
-                          className={`text-center transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center text-xs font-medium border ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/80'} ${
-                            location.pathname === `/${path}` ? colorClasses.mobileButtonActive : colorClasses.mobileButton
+                          className={`text-center transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center text-xs font-medium border bg-white/80 dark:bg-black/80 ${
+                            location.pathname === `/${path}` 
+                              ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
+                              : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
                           }`}
                           onClick={() => setIsMenuOpen(false)}
                         >
@@ -191,8 +165,8 @@ export const Header = () => {
                   
                   {/* Authenticated Navigation - Compact Buttons */}
                   {isAuthenticated && (
-                    <div className={`pt-2 border-t ${theme.mode === 'light' ? 'border-teal-600/40' : 'border-matrix-green/40'}`}>
-                      <h4 className={`text-xs font-semibold ${colorClasses.button} uppercase tracking-wider mb-2 text-center`}>
+                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
+                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
                         Account
                       </h4>
                       <div className="grid grid-cols-2 gap-1.5">
@@ -200,12 +174,14 @@ export const Header = () => {
                           <Link
                             key={path}
                             to={`/${path}`}
-                            className={`transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center gap-1.5 text-xs font-medium border ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/80'} ${
-                              location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`) ? colorClasses.mobileButtonActive : colorClasses.mobileButton
+                            className={`transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center gap-1.5 text-xs font-medium border bg-white/80 dark:bg-black/80 ${
+                              location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`)
+                                ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
+                                : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
                             }`}
                             onClick={() => setIsMenuOpen(false)}
                           >
-                            <LayoutDashboard size={12} className={colorClasses.button} />
+                            <LayoutDashboard size={12} className="text-teal-600 dark:text-matrix-green" />
                             <span className="font-medium">{path}</span>
                           </Link>
                         ))}
@@ -214,21 +190,21 @@ export const Header = () => {
                   )}
                   {/* Authentication Section */}
                   {!isAuthenticated ? (
-                    <div className={`pt-2 border-t ${theme.mode === 'light' ? 'border-teal-600/40' : 'border-matrix-green/40'}`}>
-                      <h4 className={`text-xs font-semibold ${colorClasses.button} uppercase tracking-wider mb-2 text-center`}>
+                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
+                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
                         Access
                       </h4>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Link
                           to="/login"
-                          className={`text-xs px-2 py-2.5 border ${colorClasses.buttonBorder} ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/80'} ${colorClasses.buttonHover} transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium ${colorClasses.button}`}
+                          className="text-xs px-2 py-2.5 border border-teal-600 dark:border-matrix-green bg-white/80 dark:bg-black/80 hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium text-teal-600 dark:text-matrix-green"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           INITIALIZE
                         </Link>
                         <Link
                           to="/register"
-                          className={`text-xs px-2 py-2.5 border ${theme.mode === 'light' ? 'border-teal-600/50 hover:border-teal-600 hover:bg-teal-600/15' : 'border-matrix-green/50 hover:border-matrix-green hover:bg-matrix-green/15'} ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/80'} transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium ${colorClasses.button}`}
+                          className="text-xs px-2 py-2.5 border border-teal-600/50 dark:border-matrix-green/50 hover:border-teal-600 dark:hover:border-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 bg-white/80 dark:bg-black/80 transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium text-teal-600 dark:text-matrix-green"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           ACCESS
@@ -236,8 +212,8 @@ export const Header = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className={`pt-2 border-t ${theme.mode === 'light' ? 'border-teal-600/40' : 'border-matrix-green/40'}`}>
-                      <div className={`px-2 py-1.5 text-white text-xs ${theme.mode === 'light' ? 'bg-teal-600/15' : 'bg-matrix-green/15'} rounded-md mb-2 text-center`}>
+                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
+                      <div className="px-2 py-1.5 text-white text-xs bg-teal-600/15 dark:bg-matrix-green/15 rounded-md mb-2 text-center">
                         {user?.firstName || user?.email?.split('@')[0]}
                       </div>
                       <button
@@ -245,7 +221,7 @@ export const Header = () => {
                           logout();
                           setIsMenuOpen(false);
                         }}
-                        className={`w-full px-2 py-2.5 ${colorClasses.button} ${colorClasses.buttonHover} transition-all duration-300 rounded-md min-h-[40px] flex items-center justify-center border ${theme.mode === 'light' ? 'border-teal-600/40' : 'border-matrix-green/40'} font-medium text-xs ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/80'}`}
+                        className="w-full px-2 py-2.5 text-teal-600 dark:text-matrix-green hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 rounded-md min-h-[40px] flex items-center justify-center border border-teal-600/40 dark:border-matrix-green/40 font-medium text-xs bg-white/80 dark:bg-black/80"
                       >
                         Logout
                       </button>

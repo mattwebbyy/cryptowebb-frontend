@@ -92,6 +92,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     
     // Remove existing theme classes
     root.classList.remove(
+      'dark', 'light', // Tailwind classes
       'theme-dark', 'theme-light',
       'variant-matrix', 'variant-minimal', 'variant-cyber',
       'intensity-low', 'intensity-medium', 'intensity-high',
@@ -99,7 +100,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       'motion-reduced'
     );
 
-    // Apply new theme classes
+    // Apply Tailwind dark mode class
+    if (theme.mode === 'dark') {
+      root.classList.add('dark');
+    }
+    
+    // Apply custom theme classes
     root.classList.add(`theme-${theme.mode}`);
     root.classList.add(`variant-${theme.variant}`);
     root.classList.add(`intensity-${theme.matrixIntensity}`);
