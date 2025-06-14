@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Database, Edit, Trash2 } from 'lucide-react';
-import { useDatasources, useDeleteDatasource } from '@/features/datasources/api/useDatasources'; // Import the hook
+import { useDatasources, useDeleteDatasource } from '@/features/dashboards/api/useDatasources'; // Import the hook
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button'; // Assuming you have this component
 import { toast } from 'react-toastify';

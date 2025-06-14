@@ -73,7 +73,6 @@ export const useCryptoWebSocket = (
       wsRef.current = new WebSocket(url);
 
       wsRef.current.onopen = () => {
-        console.log('WebSocket connected:', url);
         setIsConnected(true);
         setConnectionError(null);
         setReconnectAttempts(0);
@@ -99,15 +98,15 @@ export const useCryptoWebSocket = (
               break;
               
             case 'metric_info':
-              console.log('Received metric info:', message.data);
+              // Received metric info
               break;
               
             case 'subscribed':
-              console.log('Successfully subscribed to metric:', message.metricId);
+              // Successfully subscribed to metric
               break;
               
             case 'unsubscribed':
-              console.log('Successfully unsubscribed from metric:', message.metricId);
+              // Successfully unsubscribed from metric
               break;
               
             case 'pong':
@@ -115,31 +114,27 @@ export const useCryptoWebSocket = (
               break;
               
             case 'alert':
-              console.log('Received alert:', message.data);
               // Handle alert notifications
               break;
               
             case 'error':
-              console.error('WebSocket error message:', message.error);
               setConnectionError(message.error || 'Unknown error');
               break;
               
             default:
-              console.log('Unknown message type:', message.type, message);
+              // Unknown message type
           }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          setConnectionError('Error parsing message');
         }
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
         setConnectionError('Connection error');
         onError?.(error);
       };
 
       wsRef.current.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
         setIsConnected(false);
         onDisconnect?.();
 
@@ -147,14 +142,12 @@ export const useCryptoWebSocket = (
         if (autoReconnect && reconnectAttempts < maxReconnectAttempts) {
           setReconnectAttempts(prev => prev + 1);
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(`Reconnecting... (attempt ${reconnectAttempts + 1}/${maxReconnectAttempts})`);
             connect();
           }, reconnectInterval);
         }
       };
 
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
       setConnectionError('Failed to connect');
     }
   }, [getWebSocketUrl, autoReconnect, maxReconnectAttempts, reconnectAttempts, reconnectInterval, onConnect, onDisconnect, onError]);
@@ -178,7 +171,7 @@ export const useCryptoWebSocket = (
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket is not connected');
+      // WebSocket is not connected - message not sent
     }
   }, []);
 

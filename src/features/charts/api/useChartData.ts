@@ -78,7 +78,7 @@ const fetchChartData = async (chartId: string): Promise<ChartData> => {
     console.warn('fetchChartData called without chartId');
     return [];
   }
-  console.debug(`Workspaceing real data for chart: ${chartId}`);
+  console.debug(`Fetching real data for chart: ${chartId}`);
   const data: ChartData = await apiClient.get(`/api/v1/charts/${chartId}/data`);
   return data || [];
 };

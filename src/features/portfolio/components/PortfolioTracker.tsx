@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { GlitchButton } from '@/components/ui/GlitchEffects';
-import { AdvancedChart } from '../charts/components/AdvancedChartTypes';
+import { AdvancedChart } from '../../charts/components/AdvancedChartTypes';
 import { 
   Wallet, 
   Plus, 

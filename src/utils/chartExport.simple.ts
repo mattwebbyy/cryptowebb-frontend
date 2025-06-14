@@ -1,6 +1,8 @@
 // src/utils/chartExport.simple.ts
 // Simplified chart export utility without Highcharts modules dependency
 
+import { toast } from 'sonner';
+
 export interface ExportOptions {
   filename?: string;
   format?: 'png' | 'jpeg' | 'pdf' | 'svg';
@@ -61,11 +63,11 @@ export class ChartExporter {
         });
       } else {
         // If all else fails, show a helpful message
-        alert('Chart export is temporarily unavailable. Please take a screenshot as an alternative.');
+        toast.warning('Chart export is temporarily unavailable. Please take a screenshot as an alternative.');
       }
     } catch (error) {
       console.error('Chart export failed:', error);
-      alert('Chart export failed. Please try again or take a screenshot.');
+      toast.error('Chart export failed. Please try again or take a screenshot.');
     }
   }
 
@@ -119,7 +121,7 @@ export class ChartExporter {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('CSV export failed:', error);
-      alert('CSV export failed. Please try again.');
+      toast.error('CSV export failed. Please try again.');
     }
   }
 

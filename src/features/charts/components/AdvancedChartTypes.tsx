@@ -11,10 +11,22 @@ import { ChartErrorBoundary } from '@/components/ErrorBoundary';
 
 // Initialize Highcharts modules
 if (typeof Highcharts === 'object') {
-  HighchartsStock(Highcharts);
-  HighchartsMore(Highcharts);
-  HeatmapModule(Highcharts);
-  TreemapModule(Highcharts);
+  try {
+    if (HighchartsStock && typeof HighchartsStock === 'function') {
+      HighchartsStock(Highcharts);
+    }
+    if (HighchartsMore && typeof HighchartsMore === 'function') {
+      HighchartsMore(Highcharts);
+    }
+    if (HeatmapModule && typeof HeatmapModule === 'function') {
+      HeatmapModule(Highcharts);
+    }
+    if (TreemapModule && typeof TreemapModule === 'function') {
+      TreemapModule(Highcharts);
+    }
+  } catch (error) {
+    console.warn('Error initializing Highcharts modules:', error);
+  }
 }
 
 // Chart data interfaces

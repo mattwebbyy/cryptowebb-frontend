@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { STRIPE_CONFIG, calculatePrice, getPricePerMonth } from '../config/stripe';
+import { STRIPE_CONFIG, calculatePrice, getPricePerMonth, calculateCryptoPrice, getCryptoPricePerMonth } from '../config/stripe';
 import { useAuth } from '../hooks/useAuth';
 import { format } from 'date-fns';
 
@@ -97,6 +97,7 @@ const PricingPage: React.FC = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'crypto'>('stripe');
 
   // Using Tailwind's dark: modifier instead of custom theme logic
 
@@ -354,6 +355,63 @@ const PricingPage: React.FC = () => {
     }
   };
 
+  const handleCryptoPayment = async () => {
+    if (!selectedPlan) {
+      setError('Please select a plan');
+      return;
+    }
+
+    if (!email && !user) {
+      setError('Please enter your email');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const cryptoPrice = calculateCryptoPrice(selectedPlan.basePrice, billingCycle);
+      
+      const formData = {
+        planTier: selectedPlan.tier,
+        billingCycle,
+        amount: cryptoPrice.toString(),
+        currency: 'USD',
+      };
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (user) {
+        headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/crypto/charges`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create crypto payment');
+      }
+
+      const { hostedUrl } = await response.json();
+      
+      // Redirect to Coinbase Commerce hosted checkout
+      window.location.href = hostedUrl;
+    } catch (err) {
+      console.error('Crypto payment error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -578,6 +636,73 @@ const PricingPage: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* Payment Method and Billing Cycle Toggles */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-6 mb-8">
+            {/* Payment Method Toggle */}
+            <div className="flex flex-col items-center">
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Payment Method</label>
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <button
+                  onClick={() => setPaymentMethod('stripe')}
+                  className={`px-4 py-2 rounded-lg transition-all ${
+                    paymentMethod === 'stripe'
+                      ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  💳 Card (USD)
+                </button>
+                <button
+                  onClick={() => setPaymentMethod('crypto')}
+                  className={`px-4 py-2 rounded-lg transition-all ${
+                    paymentMethod === 'crypto'
+                      ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  ₿ Crypto (-20%)
+                </button>
+              </div>
+            </div>
+
+            {/* Billing Cycle Toggle */}
+            <div className="flex flex-col items-center">
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Billing Cycle</label>
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    billingCycle === 'monthly'
+                      ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingCycle('six_months')}
+                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    billingCycle === 'six_months'
+                      ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  6 Months
+                </button>
+                <button
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    billingCycle === 'yearly'
+                      ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  Yearly
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Plan Selection Grid */}
@@ -620,8 +745,22 @@ const PricingPage: React.FC = () => {
                     <Icon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-teal-600 dark:text-matrix-green" />
                     <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-800 dark:text-matrix-green">{plan.name}</h3>
                     <div className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800 dark:text-matrix-green">
-                      ${getPricePerMonth(plan.basePrice, billingCycle)}
+                      {paymentMethod === 'crypto' ? (
+                        <>
+                          <span className="line-through text-gray-500 dark:text-gray-400 text-xl mr-2">
+                            ${getPricePerMonth(plan.basePrice, billingCycle)}
+                          </span>
+                          ${getCryptoPricePerMonth(plan.basePrice, billingCycle)}
+                        </>
+                      ) : (
+                        `$${getPricePerMonth(plan.basePrice, billingCycle)}`
+                      )}
                       <span className="text-base sm:text-lg font-normal text-gray-600 dark:text-gray-300">/month</span>
+                      {paymentMethod === 'crypto' && (
+                        <div className="text-sm text-green-500 font-normal">
+                          20% crypto discount applied!
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -718,21 +857,38 @@ const PricingPage: React.FC = () => {
               {/* Payment Method */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Payment Method</h3>
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded">
-                  <CardElement
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: '16px',
-                          color: '#10B981',
-                          '::placeholder': {
-                            color: '#6B7280',
+                {paymentMethod === 'stripe' ? (
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded">
+                    <CardElement
+                      options={{
+                        style: {
+                          base: {
+                            fontSize: '16px',
+                            color: '#10B981',
+                            '::placeholder': {
+                              color: '#6B7280',
+                            },
                           },
                         },
-                      },
-                    }}
-                  />
-                </div>
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded bg-gradient-to-r from-orange-500/10 to-yellow-500/10">
+                    <div className="flex items-center justify-center space-x-4 py-4">
+                      <div className="text-4xl">₿</div>
+                      <div>
+                        <h4 className="font-semibold text-orange-500">Cryptocurrency Payment</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          Pay with Bitcoin, Ethereum, Litecoin, and other cryptocurrencies
+                        </p>
+                        <p className="text-xs text-green-500 font-medium">
+                          20% discount automatically applied!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Promo Code */}
@@ -769,10 +925,28 @@ const PricingPage: React.FC = () => {
                         ? '6 Months'
                         : 'Monthly'}
                   </span>
-                  <span>${calculatePrice(selectedPlan.basePrice, billingCycle)}</span>
+                  <span>
+                    {paymentMethod === 'crypto' ? (
+                      <>
+                        <span className="line-through text-gray-500 text-sm mr-2">
+                          ${calculatePrice(selectedPlan.basePrice, billingCycle)}
+                        </span>
+                        ${calculateCryptoPrice(selectedPlan.basePrice, billingCycle)}
+                      </>
+                    ) : (
+                      `$${calculatePrice(selectedPlan.basePrice, billingCycle)}`
+                    )}
+                  </span>
                 </div>
 
-                {billingCycle !== 'monthly' && (
+                {paymentMethod === 'crypto' && (
+                  <div className="flex justify-between text-green-400">
+                    <span>Crypto Discount (20%)</span>
+                    <span>-${calculatePrice(selectedPlan.basePrice, billingCycle) - calculateCryptoPrice(selectedPlan.basePrice, billingCycle)}</span>
+                  </div>
+                )}
+
+                {billingCycle !== 'monthly' && paymentMethod === 'stripe' && (
                   <div className="flex justify-between text-green-400">
                     <span>Annual Savings</span>
                     <span>-${getAnnualSavings()}</span>
@@ -782,13 +956,18 @@ const PricingPage: React.FC = () => {
 
               {/* Submit Button */}
               <motion.button
-                onClick={handleSubmit}
-                disabled={isProcessing || !stripe}
+                onClick={paymentMethod === 'crypto' ? handleCryptoPayment : handleSubmit}
+                disabled={isProcessing || (paymentMethod === 'stripe' && !stripe)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full p-3 bg-teal-600 dark:bg-matrix-green text-white dark:text-black font-bold rounded hover:bg-teal-600/90 dark:hover:bg-matrix-green/90 transition-colors disabled:opacity-50"
               >
-                {isProcessing ? 'Processing...' : 'Subscribe Now'}
+                {isProcessing 
+                  ? 'Processing...' 
+                  : paymentMethod === 'crypto' 
+                    ? 'Pay with Crypto' 
+                    : 'Subscribe Now'
+                }
               </motion.button>
 
               {error && <div className="text-red-500 text-sm mt-2">{error}</div>}

@@ -96,3 +96,15 @@ export const getPricePerMonth = (basePrice: number, billingCycle: BillingCycle):
   const discount = STRIPE_CONFIG.discounts[billingCycle];
   return Math.round(basePrice * (1 - discount));
 };
+
+export const calculateCryptoPrice = (basePrice: number, billingCycle: BillingCycle): number => {
+  const cryptoDiscount = 0.2; // 20% discount for crypto payments
+  const regularPrice = calculatePrice(basePrice, billingCycle);
+  return Math.round(regularPrice * (1 - cryptoDiscount));
+};
+
+export const getCryptoPricePerMonth = (basePrice: number, billingCycle: BillingCycle): number => {
+  const cryptoDiscount = 0.2; // 20% discount for crypto payments
+  const regularPrice = getPricePerMonth(basePrice, billingCycle);
+  return Math.round(regularPrice * (1 - cryptoDiscount));
+};
