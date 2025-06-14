@@ -40,6 +40,8 @@ const CipherMatrix = lazy(() => import('./pages/analytics/CipherMatrix'));
 const DataMetricChartPage = lazy(() => import('@/pages/analytics/DataMetricChartPage'));
 const AlertsPage = lazy(() => import('./pages/analytics/AlertsPage'));
 const LiveCryptoPage = lazy(() => import('./pages/analytics/LiveCryptoPage'));
+const PortfolioPage = lazy(() => import('./pages/analytics/PortfolioPage'));
+const ApiDocumentation = lazy(() => import('./pages/analytics/ApiDocumentation'));
 
 // --- Not Found Page ---
 const NotFound = lazy(() => import('./pages/NotFound')); // Assuming you have this page
@@ -90,6 +92,8 @@ export function Routes() {
           <Route path="metrics/:metricId" element={<DataMetricChartPage />} />
           <Route path="alerts" element={<AlertsPage />} />
           <Route path="live-crypto" element={<LiveCryptoPage />} />
+          <Route path="portfolio" element={<PortfolioPage />} />
+          <Route path="api-docs" element={<ApiDocumentation />} />
         </Route>
 
         {/* Not Found Route */}

@@ -11,6 +11,8 @@ import {
   Bell,
   Zap,
   Command,
+  Wallet,
+  BookOpen,
 } from 'lucide-react';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
 import type { DataMetric } from '@/types/metricsData';
@@ -194,6 +196,18 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
             </NavLink>
           </li>
           <li>
+            <NavLink to="/analytics/portfolio" className={getNavLinkClass}>
+              <Wallet size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-all duration-200">Portfolio</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/analytics/api-docs" className={getNavLinkClass}>
+              <BookOpen size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-all duration-200">API Docs</span>
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/analytics/manage" className={getNavLinkClass}>
               <Settings size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
               <span className="transition-all duration-200">Manage</span>
@@ -361,6 +375,14 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                 <NavLink to="/analytics/alerts" className={`${getMobileNavClass()} justify-center`}>
                   <Bell size={12} />
                   <span>Alerts</span>
+                </NavLink>
+                <NavLink to="/analytics/portfolio" className={`${getMobileNavClass()} justify-center`}>
+                  <Wallet size={12} />
+                  <span>Portfolio</span>
+                </NavLink>
+                <NavLink to="/analytics/api-docs" className={`${getMobileNavClass()} justify-center`}>
+                  <BookOpen size={12} />
+                  <span>API Docs</span>
                 </NavLink>
                 <NavLink to="/analytics/manage" className={`${getMobileNavClass()} justify-center`}>
                   <Settings size={12} />
