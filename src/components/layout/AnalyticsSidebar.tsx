@@ -13,6 +13,7 @@ import {
   Command,
   Wallet,
   BookOpen,
+  Cog,
 } from 'lucide-react';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
 import type { DataMetric } from '@/types/metricsData';
@@ -168,7 +169,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
           <li>
             <NavLink to="/analytics" end className={getNavLinkClass}>
               <LayoutDashboard size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-all duration-200">Dashboards</span>
+              <span className="transition-all duration-200">Dashboard</span>
             </NavLink>
           </li>
           <li>
@@ -181,30 +182,6 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
             <NavLink to="/analytics/cipher-matrix" className={getNavLinkClass}>
               <Eye size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
               <span className="transition-all duration-200">Cipher Matrix</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics/live-crypto" className={getNavLinkClass}>
-              <Zap size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-all duration-200">Live Crypto</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics/alerts" className={getNavLinkClass}>
-              <Bell size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-all duration-200">Alerts</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics/portfolio" className={getNavLinkClass}>
-              <Wallet size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-all duration-200">Portfolio</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics/api-docs" className={getNavLinkClass}>
-              <BookOpen size={20} className="mr-3 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-all duration-200">API Docs</span>
             </NavLink>
           </li>
           <li>
@@ -358,7 +335,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
               <div className="grid grid-cols-2 gap-1.5">
                 <NavLink to="/analytics" end className={`${getMobileNavClass()} justify-center`}>
                   <LayoutDashboard size={12} />
-                  <span>Dashboards</span>
+                  <span>Dashboard</span>
                 </NavLink>
                 <NavLink to="/analytics/datasources" className={`${getMobileNavClass()} justify-center`}>
                   <Database size={12} />
@@ -367,22 +344,6 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                 <NavLink to="/analytics/cipher-matrix" className={`${getMobileNavClass()} justify-center`}>
                   <Eye size={12} />
                   <span>Cipher</span>
-                </NavLink>
-                <NavLink to="/analytics/live-crypto" className={`${getMobileNavClass()} justify-center`}>
-                  <Zap size={12} />
-                  <span>Live</span>
-                </NavLink>
-                <NavLink to="/analytics/alerts" className={`${getMobileNavClass()} justify-center`}>
-                  <Bell size={12} />
-                  <span>Alerts</span>
-                </NavLink>
-                <NavLink to="/analytics/portfolio" className={`${getMobileNavClass()} justify-center`}>
-                  <Wallet size={12} />
-                  <span>Portfolio</span>
-                </NavLink>
-                <NavLink to="/analytics/api-docs" className={`${getMobileNavClass()} justify-center`}>
-                  <BookOpen size={12} />
-                  <span>API Docs</span>
                 </NavLink>
                 <NavLink to="/analytics/manage" className={`${getMobileNavClass()} justify-center`}>
                   <Settings size={12} />

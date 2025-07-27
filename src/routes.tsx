@@ -23,11 +23,11 @@ import OAuthCallback from './components/auth/OAuthCallback'; // Kept as non-lazy
 const BlogList = lazy(() => import('./pages/blog/BlogList'));
 const BlogPost = lazy(() => import('./pages/blog/BlogPost'));
 
-// --- User Dashboard Pages ---
-const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+// --- User Settings Pages ---
+const SettingsLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
+const SettingsOverview = lazy(() => import('./pages/dashboard/Dashboard'));
 const Profile = lazy(() => import('./pages/dashboard/Profile'));
-const Settings = lazy(() => import('./pages/dashboard/Settings')); // API Keys are managed here
+const ApiSettings = lazy(() => import('./pages/dashboard/Settings')); // API Keys are managed here
 const ReferralsPage = lazy(() => import('./pages/dashboard/Referrals')); // Added Referrals page (filename Referrals.tsx)
 const BlogEditor = lazy(() => import('./pages/blog/BlogEditor'));
 
@@ -38,10 +38,11 @@ const DatasourceManager = lazy(() => import('./pages/analytics/DatasourceManager
 const DashboardManager = lazy(() => import('./pages/analytics/DashboardManager'));
 const CipherMatrix = lazy(() => import('./pages/analytics/CipherMatrix'));
 const DataMetricChartPage = lazy(() => import('@/pages/analytics/DataMetricChartPage'));
-const AlertsPage = lazy(() => import('./pages/analytics/AlertsPage'));
-const LiveCryptoPage = lazy(() => import('./pages/analytics/LiveCryptoPage'));
-const PortfolioPage = lazy(() => import('./pages/analytics/PortfolioPage'));
-const ApiDocumentation = lazy(() => import('./pages/analytics/ApiDocumentation'));
+// --- Top-level Feature Pages (moved from analytics) ---
+const AlertsPage = lazy(() => import('./pages/alerts/AlertsPage'));
+const LiveCryptoPage = lazy(() => import('./pages/live-crypto/LiveCryptoPage'));
+const PortfolioPage = lazy(() => import('./pages/portfolio/PortfolioPage'));
+const ApiDocumentation = lazy(() => import('./pages/docs/ApiDocumentation'));
 
 // --- Not Found Page ---
 const NotFound = lazy(() => import('./pages/NotFound')); // Assuming you have this page
@@ -71,30 +72,32 @@ export function Routes() {
         <Route path="/register" element={<Signup />} /> {/* Path as per your JSX example */}
         <Route path="/oauth/callback" element={<OAuthCallback />} /> {/* Path as per your JSX example */}
 
-        {/* User Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
+        {/* User Settings Routes */}
+        <Route path="/settings" element={<SettingsLayout />}>
+          <Route index element={<SettingsOverview />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} /> {/* API Keys are managed within this Settings page */}
+          <Route path="api" element={<ApiSettings />} /> {/* API Keys are managed within this Settings page */}
           <Route path="referrals" element={<ReferralsPage />} /> {/* ADDED: Referrals Route */}
-          <Route path="blog"> {/* Blog editor under dashboard as per your JSX example */}
+          <Route path="blog"> {/* Blog editor under settings as per your JSX example */}
             <Route path="new" element={<BlogEditor />} />
             <Route path="edit/:id" element={<BlogEditor />} />
           </Route>
         </Route>
 
-        {/* Analytics Platform Routes */}
+        {/* Analytics Platform Routes (core analytics only) */}
         <Route path="/analytics" element={<AnalyticsLayout />}>
           <Route index element={<AnalyticsDashboard />} />
           <Route path="datasources" element={<DatasourceManager />} />
           <Route path="manage" element={<DashboardManager />} />
           <Route path="cipher-matrix" element={<CipherMatrix />} />
           <Route path="metrics/:metricId" element={<DataMetricChartPage />} />
-          <Route path="alerts" element={<AlertsPage />} />
-          <Route path="live-crypto" element={<LiveCryptoPage />} />
-          <Route path="portfolio" element={<PortfolioPage />} />
-          <Route path="api-docs" element={<ApiDocumentation />} />
         </Route>
+
+        {/* Top-level Feature Routes */}
+        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
+        <Route path="/live-crypto" element={<LiveCryptoPage />} />
+        <Route path="/docs" element={<ApiDocumentation />} />
 
         {/* Not Found Route */}
         <Route path="*" element={<NotFound />} />

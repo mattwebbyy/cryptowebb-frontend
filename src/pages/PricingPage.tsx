@@ -495,7 +495,7 @@ const PricingPage: React.FC = () => {
 
         toast.success('Subscription created successfully!');
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = '/settings';
         }, 1500);
       } catch (err) {
         console.error('Subscription error:', err);

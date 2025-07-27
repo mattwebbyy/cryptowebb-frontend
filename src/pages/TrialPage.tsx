@@ -268,7 +268,7 @@ const TrialPage = () => {
 
       // Redirect
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/settings';
       }, 1500);
     } catch (err) {
       console.error('Overall Trial Submission Error:', err);

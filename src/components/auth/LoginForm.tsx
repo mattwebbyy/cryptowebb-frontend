@@ -37,7 +37,7 @@ export const LoginForm = () => {
       setIsProcessingOAuth(true);
       login(authData)
         .then(() => {
-          navigate('/dashboard', { replace: true });
+          navigate('/settings', { replace: true });
         })
         .catch((err) => {
           console.error('OAuth login error:', err);
@@ -76,7 +76,7 @@ export const LoginForm = () => {
           const data = await response.json();
           console.log('Google auth response:', data);
           await login(data);
-          navigate('/dashboard', { replace: true });
+          navigate('/settings', { replace: true });
         } catch (err) {
           console.error('Google auth error:', err);
           setError('Failed to complete Google authentication');
@@ -117,7 +117,7 @@ export const LoginForm = () => {
       if (!response.ok) throw new Error(data.error || 'Login failed');
 
       await login(data); // Save tokens and user data to localStorage
-      navigate('/dashboard');
+      navigate('/settings');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

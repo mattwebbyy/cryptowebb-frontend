@@ -98,23 +98,23 @@ const DashboardLayout = () => {
 
   const navItems: NavItem[] = [
     {
-      path: '/dashboard',
+      path: '/settings',
       label: 'Overview',
       icon: <Home className="h-5 w-5" />,
       end: true
     },
     {
-      path: '/dashboard/profile',
+      path: '/settings/profile',
       label: 'Profile',
       icon: <User className="h-5 w-5" />
     },
     {
-      path: '/dashboard/settings',
+      path: '/settings/api',
       label: 'API Keys',
       icon: <SettingsIcon className="h-5 w-5" />
     },
     {
-      path: '/dashboard/referrals',
+      path: '/settings/referrals',
       label: 'Referrals',
       icon: <Share2 className="h-5 w-5" />
     }

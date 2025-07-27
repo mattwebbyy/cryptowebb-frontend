@@ -22,11 +22,11 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   // Quick search suggestions
   const quickSuggestions = [
     { label: 'Analytics Dashboard', path: '/analytics', keywords: ['analytics', 'dashboard', 'charts'] },
-    { label: 'Live Crypto Feed', path: '/analytics/live-crypto', keywords: ['live', 'crypto', 'real-time', 'feed'] },
+    { label: 'Live Crypto Feed', path: '/live-crypto', keywords: ['live', 'crypto', 'real-time', 'feed'] },
     { label: 'Data Sources', path: '/analytics/datasources', keywords: ['data', 'sources', 'connections'] },
-    { label: 'Alerts', path: '/analytics/alerts', keywords: ['alerts', 'notifications', 'monitoring'] },
+    { label: 'Alerts', path: '/alerts', keywords: ['alerts', 'notifications', 'monitoring'] },
     { label: 'Cipher Matrix', path: '/analytics/cipher-matrix', keywords: ['cipher', 'matrix', 'view'] },
-    { label: 'Dashboard', path: '/dashboard', keywords: ['dashboard', 'profile', 'settings'] },
+    { label: 'Settings', path: '/settings', keywords: ['settings', 'profile', 'api'] },
     { label: 'Blog', path: '/blog', keywords: ['blog', 'posts', 'articles'] },
     { label: 'About', path: '/about', keywords: ['about', 'info', 'company'] },
     { label: 'Contact', path: '/contact', keywords: ['contact', 'support', 'help'] },

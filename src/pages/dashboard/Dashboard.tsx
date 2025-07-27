@@ -309,7 +309,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col gap-2 text-left justify-start p-4 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
-            onClick={() => window.location.href = '/dashboard/settings'}
+            onClick={() => window.location.href = '/settings/api'}
           >
             <CreditCard className="h-5 w-5 text-primary" />
             <div>
@@ -321,7 +321,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col gap-2 text-left justify-start p-4 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
-            onClick={() => window.location.href = '/analytics/alerts'}
+            onClick={() => window.location.href = '/alerts'}
           >
             <Bell className="h-5 w-5 text-primary" />
             <div>
@@ -333,7 +333,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col gap-2 text-left justify-start p-4 hover:bg-primary/5 hover:border-primary/30 transition-all duration-300"
-            onClick={() => window.location.href = '/dashboard/referrals'}
+            onClick={() => window.location.href = '/settings/referrals'}
           >
             <Activity className="h-5 w-5 text-primary" />
             <div>

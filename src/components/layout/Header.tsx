@@ -34,11 +34,12 @@ export const Header = () => {
 
   // Organize navigation links properly
   const baseNavLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
-  const authenticatedLinks = ['dashboard', 'analytics'];
+  const authenticatedFeatureLinks = ['portfolio', 'alerts', 'live-crypto', 'docs'];
+  const authenticatedPlatformLinks = ['settings', 'analytics'];
   
   // All navigation links for desktop
   const allNavLinks = isAuthenticated 
-    ? [...baseNavLinks, ...authenticatedLinks] 
+    ? [...baseNavLinks, ...authenticatedFeatureLinks, ...authenticatedPlatformLinks] 
     : baseNavLinks;
 
   // Using Tailwind's dark: modifier instead of custom logic
@@ -163,14 +164,39 @@ export const Header = () => {
                     </div>
                   </div>
                   
-                  {/* Authenticated Navigation - Compact Buttons */}
+                  {/* Features Navigation */}
+                  {isAuthenticated && (
+                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
+                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
+                        Features
+                      </h4>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {authenticatedFeatureLinks.map((path) => (
+                          <Link
+                            key={path}
+                            to={`/${path}`}
+                            className={`transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center gap-1.5 text-xs font-medium border bg-white/80 dark:bg-black/80 ${
+                              location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`)
+                                ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
+                                : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
+                            }`}
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            <span className="font-medium">{path.replace('-', ' ')}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Platform Navigation */}
                   {isAuthenticated && (
                     <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
                       <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
                         Account
                       </h4>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {authenticatedLinks.map((path) => (
+                        {authenticatedPlatformLinks.map((path) => (
                           <Link
                             key={path}
                             to={`/${path}`}

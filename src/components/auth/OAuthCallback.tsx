@@ -29,7 +29,7 @@ const OAuthCallback = () => {
 
       login(authData)
         .then(() => {
-          navigate('/dashboard', { replace: true });
+          navigate('/settings', { replace: true });
         })
         .catch((err) => {
           console.error('Error during OAuth callback:', err);

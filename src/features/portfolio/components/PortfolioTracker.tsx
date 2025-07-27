@@ -81,11 +81,14 @@ export interface Transaction {
   notes?: string;
 }
 
+import { useEnhancedWallet } from '../hooks/useEnhancedWallet';
+
 // Wallet Integration Hook
-export const useWalletIntegration = () => {
+export const useWalletIntegration = (onPortfolioCreated?: (portfolio: Portfolio) => void) => {
   const [wallets, setWallets] = useState<WalletConnection[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const enhancedWallet = useEnhancedWallet();
 
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum) {
@@ -120,20 +123,23 @@ export const useWalletIntegration = () => {
         return [...filtered, wallet];
       });
 
-      // Sync wallet holdings
-      await syncWalletHoldings(wallet);
+      // Create a live portfolio from wallet holdings
+      const livePortfolio = await createLivePortfolioFromWallet(wallet);
+      if (onPortfolioCreated && livePortfolio) {
+        onPortfolioCreated(livePortfolio);
+      }
       
     } catch (err: any) {
       setError(err.message || 'Failed to connect MetaMask');
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [createLivePortfolioFromWallet, onPortfolioCreated]);
 
   const syncWalletHoldings = async (wallet: WalletConnection) => {
     try {
       // This would call your backend API to fetch wallet holdings
-      const response = await fetch('/api/v1/portfolio/sync-wallet', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio/sync-wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,6 +164,54 @@ export const useWalletIntegration = () => {
     }
   };
 
+  const createLivePortfolioFromWallet = useCallback(async (wallet: WalletConnection) => {
+    try {
+      // Fetch all token balances using the enhanced wallet hook
+      await enhancedWallet.fetchWalletTokens(wallet.address, wallet.chainId);
+      
+      // Convert enhanced tokens to portfolio holdings
+      const holdings: PortfolioHolding[] = enhancedWallet.tokens.map((token) => ({
+        id: `${token.symbol.toLowerCase()}_${wallet.address}`,
+        symbol: token.symbol,
+        name: token.name,
+        amount: parseFloat(token.balance),
+        averagePrice: token.price, // This would be calculated from transaction history
+        currentPrice: token.price,
+        totalValue: token.value,
+        totalCost: token.value, // Would be calculated from actual buy prices
+        unrealizedPnL: 0, // Would be calculated from actual cost basis
+        unrealizedPnLPercent: 0,
+        allocation: enhancedWallet.tokens.length > 0 ? (token.value / enhancedWallet.getTotalValue()) * 100 : 0,
+        dayChange: token.value * (token.change24h / 100),
+        dayChangePercent: token.change24h,
+        lastUpdated: new Date().toISOString()
+      }));
+
+      const totalValue = enhancedWallet.getTotalValue();
+      const totalDayChange = holdings.reduce((sum, holding) => sum + holding.dayChange, 0);
+      const dayChangePercent = totalValue > 0 ? (totalDayChange / (totalValue - totalDayChange)) * 100 : 0;
+
+      const livePortfolio: Portfolio = {
+        id: `live_${wallet.address}`,
+        name: `Live Wallet (${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)})`,
+        description: 'Live portfolio from connected wallet',
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        totalValue: totalValue,
+        totalCost: totalValue - totalDayChange, // Estimate based on day change
+        dayChange: totalDayChange,
+        dayChangePercent: dayChangePercent,
+        holdings: holdings
+      };
+
+      return livePortfolio;
+    } catch (err) {
+      console.error('Error creating live portfolio:', err);
+      throw err;
+    }
+  }, [enhancedWallet]);
+
   const disconnectWallet = useCallback((walletId: string) => {
     setWallets(prev => prev.filter(w => w.id !== walletId));
   }, []);
@@ -165,10 +219,13 @@ export const useWalletIntegration = () => {
   return {
     wallets,
     isConnecting,
-    error,
+    error: error || enhancedWallet.error,
     connectMetaMask,
     disconnectWallet,
-    syncWalletHoldings
+    syncWalletHoldings,
+    createLivePortfolioFromWallet,
+    isLoadingTokens: enhancedWallet.isLoading,
+    supportedNetworks: enhancedWallet.supportedNetworks
   };
 };
 
@@ -182,26 +239,32 @@ export const usePortfolioData = () => {
   const fetchPortfolios = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/v1/portfolio', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch portfolios');
+        // If no portfolios exist, that's fine - user can connect wallet to create one
+        console.log('No saved portfolios found - user can connect wallet to create one');
+        setPortfolios([]);
+        setIsLoading(false);
+        return;
       }
 
       const data = await response.json();
-      setPortfolios(data.portfolios);
+      setPortfolios(data.portfolios || []);
       
       // Set default portfolio as active
-      const defaultPortfolio = data.portfolios.find((p: Portfolio) => p.isDefault);
+      const defaultPortfolio = data.portfolios?.find((p: Portfolio) => p.isDefault);
       if (defaultPortfolio) {
         setActivePortfolio(defaultPortfolio);
       }
     } catch (err: any) {
-      setError(err.message);
+      // Don't show error for missing portfolios - this is expected for new users
+      console.log('Portfolio fetch error (this is normal for new users):', err.message);
+      setPortfolios([]);
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +272,7 @@ export const usePortfolioData = () => {
 
   const createPortfolio = useCallback(async (name: string, description?: string) => {
     try {
-      const response = await fetch('/api/v1/portfolio', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -233,7 +296,7 @@ export const usePortfolioData = () => {
 
   const addTransaction = useCallback(async (transaction: Omit<Transaction, 'id'>) => {
     try {
-      const response = await fetch('/api/v1/portfolio/transactions', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio/transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -292,8 +355,14 @@ export const PortfolioTracker: React.FC = () => {
     isConnecting,
     error: walletError,
     connectMetaMask,
-    disconnectWallet
-  } = useWalletIntegration();
+    disconnectWallet,
+    createLivePortfolioFromWallet,
+    isLoadingTokens,
+    supportedNetworks
+  } = useWalletIntegration((livePortfolio) => {
+    // Set the live portfolio as active when wallet is connected
+    setActivePortfolio(livePortfolio);
+  });
 
   if (isLoading) {
     return (
@@ -310,13 +379,58 @@ export const PortfolioTracker: React.FC = () => {
     );
   }
 
-  if (portfolioError) {
+  // Show empty state if no portfolios and no active portfolio
+  if (!isLoading && portfolios.length === 0 && !activePortfolio) {
     return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{portfolioError}</AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold font-mono text-teal-600 dark:text-matrix-green">
+              Portfolio Tracker
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Connect your wallet to start tracking your crypto holdings
+            </p>
+          </div>
+        </div>
+
+        {/* Empty State */}
+        <div className="text-center py-12">
+          <Wallet className="w-16 h-16 text-teal-600 dark:text-matrix-green mx-auto mb-4 opacity-60" />
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+            No Portfolio Connected
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            Connect your MetaMask wallet to automatically import your holdings and start tracking your portfolio performance.
+          </p>
+          
+          <GlitchButton
+            onClick={() => setShowWalletConnect(true)}
+            className="gap-2"
+            disabled={isConnecting || isLoadingTokens}
+          >
+            <Wallet className="w-4 h-4" />
+            {isConnecting ? 'Connecting...' : isLoadingTokens ? 'Loading Tokens...' : 'Connect Wallet'}
+          </GlitchButton>
+          
+          {walletError && (
+            <Alert variant="destructive" className="mt-4 max-w-md mx-auto">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{walletError}</AlertDescription>
+            </Alert>
+          )}
+        </div>
+
+        {/* Wallet Connection Modal */}
+        <WalletConnectModal
+          isOpen={showWalletConnect}
+          onClose={() => setShowWalletConnect(false)}
+          onConnectMetaMask={connectMetaMask}
+          isConnecting={isConnecting}
+          error={walletError}
+        />
+      </div>
     );
   }
 
@@ -342,6 +456,26 @@ export const PortfolioTracker: React.FC = () => {
             <Wallet className="w-4 h-4" />
             Connect Wallet
           </GlitchButton>
+          
+          {/* Show save button for live portfolios */}
+          {activePortfolio && activePortfolio.id.startsWith('live_') && (
+            <GlitchButton
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  await createPortfolio(activePortfolio.name, activePortfolio.description);
+                  // Refresh portfolios after saving
+                  refetchPortfolios();
+                } catch (err) {
+                  console.error('Failed to save portfolio:', err);
+                }
+              }}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Save Portfolio
+            </GlitchButton>
+          )}
           
           <GlitchButton
             onClick={() => setShowAddTransaction(true)}
