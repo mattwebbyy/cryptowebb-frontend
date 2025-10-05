@@ -1,0 +1,18 @@
+
+> matrix-portfolio@0.0.0 storybook
+> storybook dev -p 6006 -c storybook/config
+
+storybook v9.0.18
+
+info => Starting manager..
+info => Starting preview..
+info Using tsconfig paths for react-docgen
+╭───────────────────────────────────────────────────╮
+│                                                   │
+│   [38;2;162;224;94mStorybook 9.0.18 for react-vite started[39m         │
+│   1.15 s for manager and 15 s for preview         │
+│                                                   │
+│    Local:            http://localhost:6006/       │
+│    On your network:  http://172.17.29.19:6006/    │
+│                                                   │
+╰───────────────────────────────────────────────────╯

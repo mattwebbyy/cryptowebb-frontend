@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,48 +10,31 @@ import configureStore from 'redux-mock-store';
 
 import { AuthProvider } from '../../hooks/useAuth';
 
-// Mock the chart components to avoid Highcharts complexity in tests
-jest.mock('../../components/charts/LineChart', () => ({
-  LineChart: ({ data, title }: { data: any[]; title: string }) => (
-    <div data-testid="line-chart">
-      <h3>{title}</h3>
-      <div>Data points: {data?.length || 0}</div>
-    </div>
-  ),
-}));
-
-jest.mock('../../components/charts/BarChart', () => ({
-  BarChart: ({ data, title }: { data: any[]; title: string }) => (
-    <div data-testid="bar-chart">
-      <h3>{title}</h3>
-      <div>Data points: {data?.length || 0}</div>
-    </div>
-  ),
-}));
-
 // Mock API clients
-jest.mock('../../api/chartApi', () => ({
-  fetchChartData: jest.fn(),
+vi.mock('@/api/chartApi', () => ({
+  fetchChartData: vi.fn(),
 }));
 
-jest.mock('../../api/dashboardApi', () => ({
-  fetchDashboardConfig: jest.fn(),
-  saveDashboardConfig: jest.fn(),
+vi.mock('@/api/dashboardApi', () => ({
+  fetchDashboardConfig: vi.fn(),
+  saveDashboardConfig: vi.fn(),
 }));
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
 // Mock fetch for auth
-global.fetch = jest.fn();
+const fetchMock = vi.fn();
+global.fetch = fetchMock as unknown as typeof fetch;
+const fetchMockFn = fetchMock as unknown as Mock;
 
 const mockStore = configureStore([]);
 
@@ -194,7 +178,7 @@ const MockAnalyticsDashboard = () => {
 
 describe('Dashboard Analytics Integration Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Mock authenticated user
     localStorageMock.getItem.mockImplementation((key) => {
@@ -204,7 +188,7 @@ describe('Dashboard Analytics Integration Tests', () => {
       return null;
     });
 
-    (fetch as jest.Mock).mockResolvedValue({
+    fetchMockFn.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
         user: {
@@ -218,12 +202,12 @@ describe('Dashboard Analytics Integration Tests', () => {
     });
 
     // Suppress console logs
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Dashboard Rendering and Navigation', () => {

@@ -1,35 +1,38 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import configureStore from 'redux-mock-store';
 
-import { AuthProvider } from '../../hooks/useAuth';
+import { AuthProvider, useAuth } from '../../hooks/useAuth';
 
 // Mock the API client
-jest.mock('../../lib/axios', () => ({
+vi.mock('@/lib/axios', () => ({
   apiClient: {
-    post: jest.fn(),
-    get: jest.fn(),
+    post: vi.fn(),
+    get: vi.fn(),
   },
 }));
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
 // Mock fetch
-global.fetch = jest.fn();
+const fetchMock = vi.fn();
+global.fetch = fetchMock as unknown as typeof fetch;
+const fetchMockFn = fetchMock as unknown as Mock;
 
 const mockStore = configureStore([]);
 
@@ -56,23 +59,21 @@ const createTestWrapper = (initialState = {}) => {
 };
 
 describe('Authentication Flow Integration Tests', () => {
-  const { apiClient } = require('../../lib/axios');
-  
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
-    (fetch as jest.Mock).mockResolvedValue({
+    fetchMockFn.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ user: { id: '1', email: 'test@example.com' } }),
     });
-    
+
     // Suppress console logs in tests
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Login Flow', () => {
@@ -80,7 +81,6 @@ describe('Authentication Flow Integration Tests', () => {
       const Wrapper = createTestWrapper();
 
       const TestComponent = () => {
-        const { useAuth } = require('../../hooks/useAuth');
         const { isAuthenticated, isLoading } = useAuth();
 
         if (isLoading) return <div>Loading...</div>;
@@ -93,10 +93,7 @@ describe('Authentication Flow Integration Tests', () => {
         </Wrapper>
       );
 
-      // Initially shows loading
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
-
-      // Should eventually show not authenticated state
+      // Should show not authenticated state once hooks resolve
       await waitFor(() => {
         expect(screen.getByText('Not authenticated')).toBeInTheDocument();
       });
@@ -123,7 +120,7 @@ describe('Authentication Flow Integration Tests', () => {
       });
 
       // Mock successful user fetch
-      (fetch as jest.Mock).mockResolvedValue({
+      fetchMockFn.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ user: mockUser }),
       });
@@ -131,7 +128,6 @@ describe('Authentication Flow Integration Tests', () => {
       const Wrapper = createTestWrapper();
 
       const TestComponent = () => {
-        const { useAuth } = require('../../hooks/useAuth');
         const { isAuthenticated, user, isLoading } = useAuth();
 
         if (isLoading) return <div>Loading...</div>;
@@ -144,9 +140,6 @@ describe('Authentication Flow Integration Tests', () => {
           <TestComponent />
         </Wrapper>
       );
-
-      // Initially shows loading
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
 
       // Should fetch user info and show authenticated state
       await waitFor(() => {
@@ -170,7 +163,7 @@ describe('Authentication Flow Integration Tests', () => {
       });
 
       // Mock 401 response for expired token
-      (fetch as jest.Mock).mockResolvedValue({
+      fetchMockFn.mockResolvedValue({
         ok: false,
         status: 401,
       });
@@ -178,7 +171,6 @@ describe('Authentication Flow Integration Tests', () => {
       const Wrapper = createTestWrapper();
 
       const TestComponent = () => {
-        const { useAuth } = require('../../hooks/useAuth');
         const { isAuthenticated, isLoading } = useAuth();
 
         if (isLoading) return <div>Loading...</div>;

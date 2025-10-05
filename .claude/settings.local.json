@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm view:*)",
+      "Bash(npm run storybook:*)",
+      "Bash(mv:*)",
+      "Bash(npx storybook@latest upgrade:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(ls:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build-storybook:*)",
+      "Bash(timeout 10s npm run storybook)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run:*)"
+    ],
+    "deny": []
+  }
+}

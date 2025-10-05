@@ -1,8 +1,9 @@
 // src/lib/axios.ts
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { getEnvValue } from '@/config/runtimeEnv';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+const API_URL = getEnvValue('VITE_BACKEND_URL', 'http://localhost:8080');
 
 export const apiClient = axios.create({
   baseURL: API_URL,

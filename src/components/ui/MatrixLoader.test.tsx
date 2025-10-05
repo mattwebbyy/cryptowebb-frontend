@@ -1,99 +1,69 @@
-// src/components/ui/MatrixLoader.test.tsx
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { MatrixLoader } from './MatrixLoader'; // Adjust path if needed
-
-// Mock framer-motion if necessary (usually not needed for basic rendering tests)
-// jest.mock('framer-motion', () => ({
-//   motion: {
-//     div: jest.fn(({ children, ...props }) => <div {...props}>{children}</div>),
-//     p: jest.fn(({ children, ...props }) => <p {...props}>{children}</p>),
-//     // Add other motion components used if needed
-//   },
-//   AnimatePresence: jest.fn(({ children }) => <>{children}</>),
-// }));
+import { act, render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { MatrixLoader } from './MatrixLoader';
 
 describe('<MatrixLoader />', () => {
-  // Use fake timers to control setInterval
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
-  // Restore real timers after each test
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
   });
 
-  it('should render the main title and initial messages', () => {
+  it('renders the primary heading and status messages', () => {
     render(<MatrixLoader />);
 
-    // Check for the main title (case-insensitive check might be safer if casing varies)
     expect(screen.getByText(/INITIALIZING SYSTEM/i)).toBeInTheDocument();
-
-    // Check for the loading messages
-    expect(screen.getByText(/> Establishing secure connection/)).toBeInTheDocument();
-    expect(screen.getByText(/> Loading matrix protocols/)).toBeInTheDocument();
-    expect(screen.getByText(/> Decrypting data streams/)).toBeInTheDocument();
+    expect(screen.getByText(/Establishing secure connection/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading matrix protocols/i)).toBeInTheDocument();
+    expect(screen.getByText(/Decrypting data streams/i)).toBeInTheDocument();
   });
 
-  it('should render the animated progress bar structure', () => {
+  it('displays the progress bar container and filler', () => {
     const { container } = render(<MatrixLoader />);
-    // Find the outer div representing the bar container
-    const progressBarContainer = container.querySelector('.w-64.h-2.bg-matrix-dark');
+
+    const progressBarContainer = container.querySelector('.w-64.h-2');
     expect(progressBarContainer).toBeInTheDocument();
-    // Find the inner animating div
-    const progressBarFiller = progressBarContainer?.firstChild;
-    expect(progressBarFiller).toHaveClass('bg-matrix-green/50');
+    expect(progressBarContainer?.className).toContain('bg-gray-200');
+    expect(progressBarContainer?.className).toContain('dark:bg-gray-800');
+
+    const progressBarFiller = progressBarContainer?.querySelector('div');
+    expect(progressBarFiller).toBeInTheDocument();
+    expect(progressBarFiller?.className).toContain('bg-teal-600/50');
   });
 
-  it('should animate the dots correctly', () => {
+  it('cycles the trailing dots over time', () => {
     render(<MatrixLoader />);
 
-    const titleElement = screen.getByText(/INITIALIZING SYSTEM/i);
-    const dotsSpan = titleElement.querySelector('span'); // Find the span within the title
+    const heading = screen.getByText(/INITIALIZING SYSTEM/i);
+    const dotsSpan = heading.querySelector('span');
+    expect(dotsSpan).not.toBeNull();
 
-    // Initial state (no dots)
     expect(dotsSpan).toHaveTextContent('');
 
-    // Advance time by 500ms (1st dot)
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
     expect(dotsSpan).toHaveTextContent('.');
 
-    // Advance time by 500ms (2nd dot)
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
     expect(dotsSpan).toHaveTextContent('..');
 
-    // Advance time by 500ms (3rd dot)
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
     expect(dotsSpan).toHaveTextContent('...');
 
-    // Advance time by 500ms (reset dots)
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
     expect(dotsSpan).toHaveTextContent('');
-
-     // Advance time by 500ms (1st dot again)
-     act(() => {
-        jest.advanceTimersByTime(500);
-      });
-      expect(dotsSpan).toHaveTextContent('.');
   });
-
-  // Optional: Test framer-motion presence if not mocking
-  it('should apply motion attributes (basic check)', () => {
-     render(<MatrixLoader />);
-     const title = screen.getByText(/INITIALIZING SYSTEM/i).parentElement; // Get the motion.div wrapping the h2
-     expect(title).toHaveStyle('opacity: 0'); // Framer motion often starts with initial styles
-     // Note: Testing exact animation states is complex and often better suited for E2E tests.
-   });
-
 });

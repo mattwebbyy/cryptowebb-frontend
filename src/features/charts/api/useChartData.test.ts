@@ -1,27 +1,33 @@
 // src/features/charts/api/useChartData.test.ts
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/axios'; // Import the actual client
-import { useChartData } from './useChartData'; // Import the hook
-import { ChartData } from '@/types/data'; // Import types
+import { apiClient } from '@/lib/axios';
+import { useChartData } from './useChartData';
+import { ChartData } from '@/types/data';
 
-// Mock React Query's useQuery
-// We only need to mock the parts our hook relies on
-jest.mock('@tanstack/react-query', () => ({
-  ...jest.requireActual('@tanstack/react-query'), // Keep original functionalities
-  useQuery: jest.fn(), // Mock useQuery specifically
-}));
+// Mock React Query's useQuery while preserving other exports
+vi.mock('@tanstack/react-query', async () => {
+  const actual = await vi.importActual<typeof import('@tanstack/react-query')>(
+    '@tanstack/react-query'
+  );
+  return {
+    ...actual,
+    useQuery: vi.fn(),
+  };
+});
 
 // Mock the apiClient
-jest.mock('@/lib/axios', () => ({
+vi.mock('@/lib/axios', () => ({
   apiClient: {
-    get: jest.fn(), // Mock the get method
+    get: vi.fn(),
   },
 }));
 
 // Type assertion for mocked functions
-const mockedUseQuery = useQuery as jest.Mock;
-const mockedApiClientGet = apiClient.get as jest.Mock;
+const mockedUseQuery = useQuery as unknown as Mock;
+const mockedApiClientGet = apiClient.get as unknown as Mock;
 
 // Helper to provide a basic QueryClient wrapper if needed, though often not
 // necessary when directly mocking useQuery's return value.
