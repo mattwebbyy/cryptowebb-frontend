@@ -1,17 +1,21 @@
-// src/store/hooks.test.tsx
 import React from 'react';
 import { Provider } from 'react-redux';
-import configureStore from 'redux-mock-store';
+import { configureStore } from '@reduxjs/toolkit';
 import { renderHook, act } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import matrixReducer, {
+  setSpeed,
+  setDensity,
+  setGlitchIntensity,
+  setTheme,
+} from './slices/matrixSlice';
 import { useMatrixSettings } from './hooks';
-import { setSpeed, setDensity, setGlitchIntensity, setTheme } from './slices/matrixSlice';
-import type { RootState } from './store'; // Use your RootState type
+import type { RootState } from './store';
 
-// Configure the mock store
-const mockStore = configureStore<RootState>([]); // Provide RootState type argument
+describe('useMatrixSettings', () => {
+  let store: ReturnType<typeof configureStore>;
+  let dispatchSpy: ReturnType<typeof vi.spyOn>;
 
-describe('useMatrixSettings Hook', () => {
-  let store: ReturnType<typeof mockStore>;
   const initialState: RootState = {
     matrix: {
       speed: 50,
@@ -22,22 +26,25 @@ describe('useMatrixSettings Hook', () => {
         backgroundColor: '#000000',
       },
     },
-    // Add other slices initial states here if needed for RootState
   };
 
   beforeEach(() => {
-    // Create a new store instance for each test
-    store = mockStore(initialState);
-    // Mock dispatch directly on the store instance if needed (optional)
-    store.dispatch = jest.fn();
+    store = configureStore({
+      reducer: { matrix: matrixReducer },
+      preloadedState: initialState,
+    });
+    dispatchSpy = vi.spyOn(store, 'dispatch');
   });
 
-  // Wrapper component providing the mock Redux store
+  afterEach(() => {
+    dispatchSpy.mockRestore();
+  });
+
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <Provider store={store}>{children}</Provider>
   );
 
-  it('should select initial state from the store', () => {
+  it('selects the current matrix state', () => {
     const { result } = renderHook(() => useMatrixSettings(), { wrapper });
 
     expect(result.current.speed).toBe(initialState.matrix.speed);
@@ -46,52 +53,45 @@ describe('useMatrixSettings Hook', () => {
     expect(result.current.theme).toEqual(initialState.matrix.theme);
   });
 
-  it('should dispatch setSpeed action when updateSpeed is called', () => {
+  it('dispatches setSpeed when updateSpeed is called', () => {
     const { result } = renderHook(() => useMatrixSettings(), { wrapper });
-    const newSpeed = 75;
 
     act(() => {
-      result.current.updateSpeed(newSpeed);
+      result.current.updateSpeed(75);
     });
 
-    // Check if the correct action was dispatched
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(setSpeed(newSpeed));
+    expect(dispatchSpy).toHaveBeenCalledWith(setSpeed(75));
   });
 
-  it('should dispatch setDensity action when updateDensity is called', () => {
+  it('dispatches setDensity when updateDensity is called', () => {
     const { result } = renderHook(() => useMatrixSettings(), { wrapper });
-    const newDensity = 0.8;
 
     act(() => {
-      result.current.updateDensity(newDensity);
+      result.current.updateDensity(0.8);
     });
 
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(setDensity(newDensity));
+    expect(dispatchSpy).toHaveBeenCalledWith(setDensity(0.8));
   });
 
-  it('should dispatch setGlitchIntensity action when updateGlitchIntensity is called', () => {
+  it('dispatches setGlitchIntensity when updateGlitchIntensity is called', () => {
     const { result } = renderHook(() => useMatrixSettings(), { wrapper });
-    const newIntensity = 0.5;
 
     act(() => {
-      result.current.updateGlitchIntensity(newIntensity);
+      result.current.updateGlitchIntensity(0.5);
     });
 
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(setGlitchIntensity(newIntensity));
+    expect(dispatchSpy).toHaveBeenCalledWith(setGlitchIntensity(0.5));
   });
 
-  it('should dispatch setTheme action when updateTheme is called', () => {
+  it('dispatches setTheme when updateTheme is called', () => {
     const { result } = renderHook(() => useMatrixSettings(), { wrapper });
+
     const newTheme = { primaryColor: '#ffffff' };
 
     act(() => {
       result.current.updateTheme(newTheme);
     });
 
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(setTheme(newTheme));
+    expect(dispatchSpy).toHaveBeenCalledWith(setTheme(newTheme));
   });
 });

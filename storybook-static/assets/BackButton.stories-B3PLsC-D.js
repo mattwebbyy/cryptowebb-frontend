@@ -1,4 +1,4 @@
-import{j as e}from"./jsx-runtime-D_zvdyIk.js";import{R as u}from"./iframe-BIPmi7o-.js";const t=({onClick:a=()=>console.log("◀ MATRIX NAVIGATION: PREVIOUS_SECTOR"),className:v="",variant:b="quantum",size:g="default",disabled:N=!1})=>{const[x,f]=u.useState(!1),[h,p]=u.useState(!1),_=`
+import{j as e}from"./jsx-runtime-D_zvdyIk.js";import{R as u}from"./iframe-lSEetYu3.js";const t=({onClick:a=()=>console.log("◀ MATRIX NAVIGATION: PREVIOUS_SECTOR"),className:v="",variant:b="quantum",size:g="default",disabled:N=!1})=>{const[x,f]=u.useState(!1),[h,p]=u.useState(!1),_=`
     relative inline-flex items-center justify-center gap-3
     font-mono font-bold text-sm tracking-[0.15em] uppercase
     transition-all duration-300 ease-out cursor-pointer

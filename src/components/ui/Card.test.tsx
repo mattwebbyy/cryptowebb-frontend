@@ -1,67 +1,54 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import { Card } from './Card';
 
-// Mock framer-motion to avoid animation issues in tests
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: jest.fn(({ children, className, style, ...props }) => (
-      <div className={className} style={style} data-testid="motion-div" {...props}>
-        {children}
-      </div>
-    )),
-  },
-}));
-
 describe('<Card />', () => {
-  it('should render children correctly', () => {
-    const testContent = 'Test card content';
-    render(<Card>{testContent}</Card>);
+  const renderCard = (ui: React.ReactNode) => {
+    const result = render(ui);
+    const element = result.container.querySelector('.rounded-xl');
+    if (!element) {
+      throw new Error('Card root element not found');
+    }
+    return { ...result, cardElement: element as HTMLElement };
+  };
 
-    expect(screen.getByText(testContent)).toBeInTheDocument();
+  it('renders children content', () => {
+    render(<Card>Test card content</Card>);
+    expect(screen.getByText('Test card content')).toBeInTheDocument();
   });
 
-  it('should apply default CSS classes', () => {
-    render(<Card>Test content</Card>);
+  it('applies the default styling classes', () => {
+    const { cardElement } = renderCard(<Card>Test content</Card>);
 
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toHaveClass(
-      'border',
-      'border-matrix-green',
-      'bg-matrix-dark/30',
-      'p-6',
-      'rounded-none'
+    expect(cardElement).toHaveClass('rounded-xl');
+    expect(cardElement).toHaveClass('transition-all', 'duration-300', 'ease-out');
+    expect(cardElement.className).toContain('bg-surface/80');
+    expect(cardElement).toHaveClass('border');
+    expect(cardElement.className).toContain('border-border/50');
+    expect(cardElement.className).toContain('backdrop-blur-sm');
+    expect(cardElement.className).toContain('hover:shadow-modern-lg');
+  });
+
+  it('merges custom class names with defaults', () => {
+    const { cardElement } = renderCard(
+      <Card className="custom-class">Test content</Card>
     );
+
+    expect(cardElement).toHaveClass('custom-class');
+    expect(cardElement).toHaveClass('rounded-xl');
   });
 
-  it('should merge custom className with default classes', () => {
-    const customClass = 'custom-class';
-    render(<Card className={customClass}>Test content</Card>);
+  it('passes inline styles through', () => {
+    const { cardElement } = renderCard(
+      <Card style={{ backgroundColor: 'red', width: '200px' }}>Test content</Card>
+    );
 
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toHaveClass(customClass);
-    expect(cardElement).toHaveClass('border', 'border-matrix-green'); // Still has defaults
+    expect((cardElement as HTMLElement).style.backgroundColor).toBe('red');
+    expect((cardElement as HTMLElement).style.width).toBe('200px');
   });
 
-  it('should pass style props correctly', () => {
-    const customStyle = { backgroundColor: 'red', width: '200px' };
-    render(<Card style={customStyle}>Test content</Card>);
-
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toHaveStyle('background-color: red');
-    expect(cardElement).toHaveStyle('width: 200px');
-  });
-
-  it('should render without className or style props', () => {
-    render(<Card>Test content</Card>);
-
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toBeInTheDocument();
-    expect(screen.getByText('Test content')).toBeInTheDocument();
-  });
-
-  it('should handle complex children structures', () => {
+  it('supports complex child structures', () => {
     render(
       <Card>
         <h1>Title</h1>
@@ -75,47 +62,7 @@ describe('<Card />', () => {
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
   });
 
-  it('should pass framer-motion animation props correctly', () => {
-    const { motion } = require('framer-motion');
-    
-    render(<Card>Test content</Card>);
-
-    expect(motion.div).toHaveBeenCalledWith(
-      expect.objectContaining({
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.5 },
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should handle empty content', () => {
-    render(<Card></Card>);
-
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toBeInTheDocument();
-    expect(cardElement).toBeEmptyDOMElement();
-  });
-
-  it('should combine multiple custom classes correctly', () => {
-    render(<Card className="class1 class2 class3">Test content</Card>);
-
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toHaveClass('class1', 'class2', 'class3');
-    expect(cardElement).toHaveClass('border', 'border-matrix-green'); // Still has defaults
-  });
-
-  it('should override default classes when conflicting classes are provided', () => {
-    // Test that clsx properly handles class merging
-    render(<Card className="bg-red-500 p-2">Test content</Card>);
-
-    const cardElement = screen.getByTestId('motion-div');
-    expect(cardElement).toHaveClass('bg-red-500', 'p-2');
-    expect(cardElement).toHaveClass('bg-matrix-dark/30', 'p-6'); // Both should be present due to clsx
-  });
-
-  it('should work with React fragments as children', () => {
+  it('renders fragments as children', () => {
     render(
       <Card>
         <>

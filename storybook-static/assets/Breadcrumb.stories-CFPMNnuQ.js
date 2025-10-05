@@ -1,4 +1,4 @@
-import{j as a}from"./jsx-runtime-D_zvdyIk.js";import{R as h}from"./iframe-BIPmi7o-.js";const m=({items:o=[{label:"HOME",href:"/"},{label:"ANALYTICS",href:"/analytics"},{label:"CURRENT",isActive:!0}],variant:i="matrix",separator:d="▶",className:b=""})=>{const p=`
+import{j as a}from"./jsx-runtime-D_zvdyIk.js";import{R as h}from"./iframe-lSEetYu3.js";const m=({items:o=[{label:"HOME",href:"/"},{label:"ANALYTICS",href:"/analytics"},{label:"CURRENT",isActive:!0}],variant:i="matrix",separator:d="▶",className:b=""})=>{const p=`
     inline-flex items-center gap-3
     font-mono font-bold tracking-[0.1em] uppercase text-sm
     transition-all duration-300 ease-out

@@ -2,9 +2,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/axios';
 import { ChartData, ChartDataRow } from '@/types/data'; // Import shared types
+import { getEnvValue } from '@/config/runtimeEnv';
 
 // --- Mock Data Generation ---
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+const USE_MOCK_DATA = getEnvValue('VITE_USE_MOCK_DATA', 'false') === 'true';
 
 const generateMockLineData = (points = 20): ChartData => {
   const data: ChartData = [];

@@ -1,5 +1,7 @@
 // src/config/stripe.ts
 
+import { getEnvValue } from '@/config/runtimeEnv';
+
 type BillingCycle = 'monthly' | 'six_months' | 'yearly';
 
 interface StripePrices {
@@ -23,22 +25,22 @@ interface DiscountRates {
 
 export const STRIPE_CONFIG = {
   freeTrialDays: 14,
-  publicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY,
+  publicKey: getEnvValue('VITE_STRIPE_PUBLIC_KEY', ''),
   prices: {
     basic: {
-      monthly: import.meta.env.VITE_STRIPE_BASIC_MONTHLY_PRICE_ID,
-      six_months: import.meta.env.VITE_STRIPE_BASIC_SIX_MONTHS_PRICE_ID,
-      yearly: import.meta.env.VITE_STRIPE_BASIC_YEARLY_PRICE_ID,
+      monthly: getEnvValue('VITE_STRIPE_BASIC_MONTHLY_PRICE_ID', ''),
+      six_months: getEnvValue('VITE_STRIPE_BASIC_SIX_MONTHS_PRICE_ID', ''),
+      yearly: getEnvValue('VITE_STRIPE_BASIC_YEARLY_PRICE_ID', ''),
     },
     pro: {
-      monthly: import.meta.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID,
-      six_months: import.meta.env.VITE_STRIPE_PRO_SIX_MONTHS_PRICE_ID,
-      yearly: import.meta.env.VITE_STRIPE_PRO_YEARLY_PRICE_ID,
+      monthly: getEnvValue('VITE_STRIPE_PRO_MONTHLY_PRICE_ID', ''),
+      six_months: getEnvValue('VITE_STRIPE_PRO_SIX_MONTHS_PRICE_ID', ''),
+      yearly: getEnvValue('VITE_STRIPE_PRO_YEARLY_PRICE_ID', ''),
     },
     enterprise: {
-      monthly: import.meta.env.VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID,
-      six_months: import.meta.env.VITE_STRIPE_ENTERPRISE_SIX_MONTHS_PRICE_ID,
-      yearly: import.meta.env.VITE_STRIPE_ENTERPRISE_YEARLY_PRICE_ID,
+      monthly: getEnvValue('VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID', ''),
+      six_months: getEnvValue('VITE_STRIPE_ENTERPRISE_SIX_MONTHS_PRICE_ID', ''),
+      yearly: getEnvValue('VITE_STRIPE_ENTERPRISE_YEARLY_PRICE_ID', ''),
     },
   } as StripePrices,
   plans: {

@@ -1,36 +1,45 @@
-// src/lib/utils.test.ts
-import { generateRandomChar, randomRange } from './utils';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cn, generateRandomChar, randomRange } from './utils';
 
-describe('Utility Functions', () => {
-  describe('generateRandomChar', () => {
-    it('should return a character from the provided string', () => {
-      const chars = 'abc';
-      const result = generateRandomChar(chars);
-      expect(chars).toContain(result);
-      expect(result).toHaveLength(1);
-    });
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
-    it('should handle an empty string', () => {
-      const chars = '';
-      const result = generateRandomChar(chars);
-      expect(result).toBeUndefined(); // Or expect it to throw, depending on desired behavior
-    });
+describe('cn', () => {
+  it('merges Tailwind classes giving precedence to the latest duplicates', () => {
+    expect(cn('p-2', 'text-sm', 'p-4')).toBe('text-sm p-4');
   });
 
-  describe('randomRange', () => {
-    it('should return a number within the specified range', () => {
-      const min = 10;
-      const max = 20;
-      const result = randomRange(min, max);
-      expect(result).toBeGreaterThanOrEqual(min);
-      expect(result).toBeLessThan(max); // Math.random() is exclusive of 1
-    });
+  it('filters out falsy values and keeps truthy conditional classes', () => {
+    const result = cn('bg-red-500', ['text-white', undefined], { 'p-2': false, 'p-4': true });
+    expect(result).toBe('bg-red-500 text-white p-4');
+  });
+});
 
-    it('should handle min and max being the same', () => {
-      const min = 15;
-      const max = 15;
-      const result = randomRange(min, max);
-      expect(result).toBe(min);
-    });
+describe('generateRandomChar', () => {
+  it('returns a predictable character when Math.random is mocked', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.75);
+    expect(generateRandomChar('abcd')).toBe('d');
+  });
+
+  it('returns undefined when provided string is empty', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.4);
+    expect(generateRandomChar('')).toBeUndefined();
+  });
+});
+
+describe('randomRange', () => {
+  it('scales Math.random output to the requested range', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    expect(randomRange(10, 20)).toBeCloseTo(15, 5);
+  });
+
+  it('resolves to the lower bound when Math.random returns 0', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    expect(randomRange(5, 9)).toBe(5);
+  });
+
+  it('returns the lower bound when min and max are equal', () => {
+    expect(randomRange(7, 7)).toBe(7);
   });
 });

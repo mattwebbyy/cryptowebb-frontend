@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import GoogleLoginButton from './GoogleLoginButton';
 
 describe('<GoogleLoginButton />', () => {
-  const mockOnClick = jest.fn();
+  const mockOnClick = vi.fn();
 
   beforeEach(() => {
-    mockOnClick.mockClear();
+    mockOnClick.mockReset();
   });
 
   it('should render with correct text and icon', () => {
