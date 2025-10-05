@@ -1,0 +1,25 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { MatrixLoader } from '../../src/components/ui/MatrixLoader';
+
+const meta = {
+  title: 'UI/MatrixLoader',
+  component: MatrixLoader,
+  parameters: {
+    layout: 'fullscreen',
+  },
+  tags: ['autodocs'],
+} satisfies Meta<typeof MatrixLoader>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+
+export const InContainer: Story = {
+  render: () => (
+    <div className="relative h-screen bg-gray-100 dark:bg-gray-900">
+      <MatrixLoader />
+    </div>
+  ),
+};

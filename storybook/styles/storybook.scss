@@ -1,0 +1,304 @@
+// High-tech Matrix-themed Storybook styles
+@use "sass:color";
+
+// Matrix-themed color palette
+$matrix-green: #00ff00;
+$matrix-dark-green: #003300;
+$matrix-bg: #000000;
+$matrix-text: #00ff00;
+$matrix-glow: rgba(0, 255, 0, 0.3);
+$matrix-border: rgba(0, 255, 0, 0.3);
+
+// Import Tailwind
+@import '../../src/index.css';
+
+// Global Matrix styles for Storybook
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: $matrix-bg !important;
+  color: $matrix-text !important;
+}
+
+// Override Storybook UI
+.sb-show-main {
+  background: $matrix-bg !important;
+  color: $matrix-text !important;
+}
+
+// Matrix container base
+.matrix-container {
+  background: linear-gradient(135deg, $matrix-bg 0%, $matrix-dark-green 50%, $matrix-bg 100%);
+  border: 1px solid $matrix-border;
+  border-radius: 0;
+  box-shadow: 
+    0 0 20px $matrix-glow,
+    inset 0 0 20px rgba(0, 255, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.03) 2px,
+    rgba(0, 255, 0, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+// High-tech Matrix button styles
+.matrix-btn {
+  @extend .matrix-container;
+  padding: 12px 24px;
+  background: $matrix-bg;
+  color: $matrix-green;
+  border: 2px solid $matrix-green;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, $matrix-glow, transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover {
+    background: $matrix-green;
+    color: $matrix-bg;
+    box-shadow: 
+      0 0 30px $matrix-glow,
+      inset 0 0 30px rgba(0, 255, 0, 0.3);
+    transform: translateY(-2px);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &.btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  
+  &.btn-lg {
+    padding: 16px 32px;
+    font-size: 18px;
+    letter-spacing: 3px;
+  }
+}
+
+// Matrix card with sharp edges and hacker styling
+.matrix-card {
+  @extend .matrix-container;
+  padding: 24px;
+  margin: 16px 0;
+  background: 
+    linear-gradient(135deg, $matrix-bg 0%, rgba(0, 51, 0, 0.3) 50%, $matrix-bg 100%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 255, 0, 0.05) 1px,
+      rgba(0, 255, 0, 0.05) 2px
+    );
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0, 255, 0, 0.1) 100%);
+    pointer-events: none;
+  }
+}
+
+// Matrix terminal/input styling
+.matrix-input {
+  background: $matrix-bg;
+  border: 2px solid $matrix-border;
+  border-radius: 0;
+  color: $matrix-green;
+  font-family: 'Courier New', monospace;
+  padding: 12px 16px;
+  outline: none;
+  position: relative;
+  
+  &::before {
+    content: '> ';
+    position: absolute;
+    left: -24px;
+    color: $matrix-green;
+  }
+  
+  &:focus {
+    border-color: $matrix-green;
+    box-shadow: 
+      0 0 20px $matrix-glow,
+      inset 0 0 20px rgba(0, 255, 0, 0.1);
+  }
+}
+
+// Matrix loading with advanced animation
+.matrix-loader {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid $matrix-border;
+  border-radius: 0;
+  border-top: 3px solid $matrix-green;
+  animation: matrix-spin 1s linear infinite;
+  box-shadow: 0 0 15px $matrix-glow;
+}
+
+@keyframes matrix-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Matrix text effects
+.matrix-text {
+  color: $matrix-green;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px $matrix-glow;
+  
+  &.matrix-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    border-bottom: 2px solid $matrix-green;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  
+  &.matrix-glow {
+    animation: matrix-text-glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes matrix-text-glow {
+  from {
+    text-shadow: 0 0 10px $matrix-glow;
+  }
+  to {
+    text-shadow: 
+      0 0 20px $matrix-glow,
+      0 0 30px $matrix-glow,
+      0 0 40px $matrix-green;
+  }
+}
+
+// Matrix alert with sharp styling
+.matrix-alert {
+  @extend .matrix-container;
+  padding: 16px 20px;
+  margin: 12px 0;
+  border-left: 4px solid $matrix-green;
+  background: 
+    $matrix-bg,
+    linear-gradient(90deg, rgba(0, 255, 0, 0.1) 0%, transparent 10%);
+  position: relative;
+  
+  &::before {
+    content: '⚠ ';
+    font-size: 1.2em;
+    margin-right: 8px;
+    color: $matrix-green;
+  }
+  
+  &.error {
+    border-left-color: #ff0040;
+    color: #ff0040;
+    
+    &::before {
+      content: '✗ ';
+      color: #ff0040;
+    }
+  }
+  
+  &.success {
+    &::before {
+      content: '✓ ';
+    }
+  }
+}
+
+// Matrix grid overlay
+.matrix-grid {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+}
+
+// Matrix scanlines effect
+.matrix-scanlines {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      transparent 50%, 
+      rgba(0, 255, 0, 0.1) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    animation: matrix-scanlines 0.1s linear infinite;
+  }
+}
+
+@keyframes matrix-scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}

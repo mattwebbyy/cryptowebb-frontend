@@ -1,0 +1,116 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+
+import { Button } from '../../src/components/ui/Button';
+
+const meta = {
+  title: 'UI/Button',
+  component: Button,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'outline', 'ghost', 'primary', 'gradient', 'glass'],
+    },
+    size: {
+      control: 'select',
+      options: ['xs', 'sm', 'md', 'lg', 'xl'],
+    },
+    rounded: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'xl', 'full'],
+    },
+    isLoading: {
+      control: 'boolean',
+    },
+  },
+  args: { onClick: fn() },
+} satisfies Meta<typeof Button>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    children: 'Default Button',
+    variant: 'default',
+    size: 'md',
+  },
+};
+
+export const Primary: Story = {
+  args: {
+    children: 'Primary Button',
+    variant: 'primary',
+    size: 'md',
+  },
+};
+
+export const Outline: Story = {
+  args: {
+    children: 'Outline Button',
+    variant: 'outline',
+    size: 'md',
+  },
+};
+
+export const Ghost: Story = {
+  args: {
+    children: 'Ghost Button',
+    variant: 'ghost',
+    size: 'md',
+  },
+};
+
+export const Gradient: Story = {
+  args: {
+    children: 'Gradient Button',
+    variant: 'gradient',
+    size: 'md',
+  },
+};
+
+export const Glass: Story = {
+  args: {
+    children: 'Glass Button',
+    variant: 'glass',
+    size: 'md',
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    children: 'Loading Button',
+    variant: 'primary',
+    size: 'md',
+    isLoading: true,
+  },
+};
+
+export const AllSizes: Story = {
+  render: () => (
+    <div className="flex gap-4 items-center">
+      <Button size="xs">Extra Small</Button>
+      <Button size="sm">Small</Button>
+      <Button size="md">Medium</Button>
+      <Button size="lg">Large</Button>
+      <Button size="xl">Extra Large</Button>
+    </div>
+  ),
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex gap-4 flex-wrap">
+      <Button variant="default">Default</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="primary">Primary</Button>
+      <Button variant="gradient">Gradient</Button>
+      <Button variant="glass">Glass</Button>
+    </div>
+  ),
+};

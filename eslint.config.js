@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 // eslint.config.js
 import js from '@eslint/js';
 import globals from 'globals';
@@ -14,37 +17,32 @@ Object.entries(globals.browser).forEach(([key, value]) => {
   browserGlobals[trimmedKey] = value;
 });
 
-export default tseslint.config(
-  { ignores: ['dist'] },
-  js.configs.recommended,
-  ...tseslint.configs.recommended, // Apply TS recommendations
-  // Optional: If you want stricter type checking (requires parserOptions.project configuration)
-  // ...tseslint.configs.recommendedTypeChecked,
-  // ...tseslint.configs.strictTypeChecked,
-  {
-    // Settings specific to TS/TSX files
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-        // Uncomment and configure if using type-aware linting
-        // project: true,
-        // tsconfigRootDir: import.meta.dirname,
-      },
-      globals: browserGlobals, // Use the cleaned globals object
+export default tseslint.config({ ignores: ['dist'] }, js.configs.recommended, // Apply TS recommendations
+...tseslint.configs.recommended, // Optional: If you want stricter type checking (requires parserOptions.project configuration)
+// ...tseslint.configs.recommendedTypeChecked,
+// ...tseslint.configs.strictTypeChecked,
+{
+  // Settings specific to TS/TSX files
+  files: ['**/*.{ts,tsx}'],
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: { jsx: true },
+      // Uncomment and configure if using type-aware linting
+      // project: true,
+      // tsconfigRootDir: import.meta.dirname,
     },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      // Add any specific TS/React rules here if needed
-      '@typescript-eslint/no-unused-vars': 'warn', // Example: warn about unused vars
-      '@typescript-eslint/no-explicit-any': 'warn', // Example: warn about explicit 'any'
-    },
+    globals: browserGlobals, // Use the cleaned globals object
   },
-  // IMPORTANT: Add Prettier config LAST to override other formatting rules
-  eslintConfigPrettier
-);
+  plugins: {
+    'react-hooks': reactHooks,
+    'react-refresh': reactRefresh,
+  },
+  rules: {
+    ...reactHooks.configs.recommended.rules,
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    // Add any specific TS/React rules here if needed
+    '@typescript-eslint/no-unused-vars': 'warn', // Example: warn about unused vars
+    '@typescript-eslint/no-explicit-any': 'warn', // Example: warn about explicit 'any'
+  },
+}, // IMPORTANT: Add Prettier config LAST to override other formatting rules
+eslintConfigPrettier, storybook.configs["flat/recommended"]);

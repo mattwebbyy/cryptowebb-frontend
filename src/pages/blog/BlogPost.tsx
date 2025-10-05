@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Helmet } from 'react-helmet-async';
 import { ChevronLeft, Clock, Tag, List } from 'lucide-react';
 
 interface BlogPost {
@@ -145,20 +144,51 @@ function BlogPost() {
     month: 'long',
     day: 'numeric',
   });
+  // Update document metadata
+  useEffect(() => {
+    if (post) {
+      document.title = `${post.title} | CryptoWebb Blog`;
+      
+      // Helper function to set or update meta tags
+      const setMetaTag = (name: string, content: string, property?: boolean) => {
+        const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+        let meta = document.querySelector(selector) as HTMLMetaElement;
+        
+        if (!meta) {
+          meta = document.createElement('meta');
+          if (property) {
+            meta.setAttribute('property', name);
+          } else {
+            meta.setAttribute('name', name);
+          }
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      setMetaTag('description', post.meta_desc);
+      setMetaTag('og:title', post.title, true);
+      setMetaTag('og:description', post.meta_desc, true);
+      if (post.image_url) setMetaTag('og:image', post.image_url, true);
+      setMetaTag('og:type', 'article', true);
+      setMetaTag('article:published_time', post.created_at, true);
+      
+      // Remove existing article tags first
+      const existingTags = document.querySelectorAll('meta[property="article:tag"]');
+      existingTags.forEach(tag => tag.remove());
+      
+      // Add new article tags
+      post.tags.forEach(tag => {
+        const meta = document.createElement('meta');
+        meta.setAttribute('property', 'article:tag');
+        meta.setAttribute('content', tag);
+        document.head.appendChild(meta);
+      });
+    }
+  }, [post]);
+
   return (
     <>
-      <Helmet>
-        <title>{post.title} | CryptoWebb Blog</title>
-        <meta name="description" content={post.meta_desc} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.meta_desc} />
-        {post.image_url && <meta property="og:image" content={post.image_url} />}
-        <meta property="og:type" content="article" />
-        <meta property="article:published_time" content={post.created_at} />
-        {post.tags.map((tag) => (
-          <meta key={tag} property="article:tag" content={tag} />
-        ))}
-      </Helmet>
 
       <div className="min-h-screen pt-24 px-4 pb-12">
         <motion.div
