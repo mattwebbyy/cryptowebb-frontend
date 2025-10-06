@@ -1,5 +1,5 @@
 // src/lib/axios.ts
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
@@ -31,23 +31,23 @@ apiClient.interceptors.request.use(
 // Response Interceptor: Handle common errors and return data directly
 apiClient.interceptors.response.use(
   (response) => {
-    // *** IMPORTANT: Explicitly return response.data here ***
+    // Return payload directly so callers receive the decoded data structure
     return response.data;
   },
-  (error) => {
+  (error: AxiosError | Error) => {
     let errorMessage = 'An unexpected error occurred';
-    let errorCode = null;
 
-    if (error.response) {
-      // Server responded with a status code outside 2xx range
-      errorCode = error.response.status;
-      console.error(`API Error Response (Status ${errorCode}):`, error.response.data);
-      errorMessage =
-        error.response.data?.error ||
-        error.response.data?.message ||
-        `Request failed with status ${errorCode}`;
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const responseData = (data ?? {}) as Record<string, unknown>;
+      console.error(`API Error Response (Status ${status}):`, data);
+      const apiErrorMessage =
+        (typeof responseData.error === 'string' && responseData.error) ||
+        (typeof responseData.message === 'string' && responseData.message) ||
+        undefined;
+      errorMessage = apiErrorMessage || `Request failed with status ${status}`;
 
-      if (errorCode === 401) {
+      if (status === 401) {
         errorMessage = 'Session expired or invalid. Please log in again.';
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
@@ -57,20 +57,30 @@ apiClient.interceptors.response.use(
             window.location.href = '/login';
           }
         }, 1500);
-      } else if (errorCode === 403) {
+      } else if (status === 403) {
         errorMessage = 'Permission denied.';
       }
+
       toast.error(errorMessage);
-    } else if (error.request) {
+
+      const enhancedError = error;
+      enhancedError.message = errorMessage;
+      return Promise.reject(enhancedError);
+    }
+
+    if (axios.isAxiosError(error) && error.request) {
       console.error('API No Response Error:', error.request);
       errorMessage = 'Network error or server unavailable.';
       toast.error(errorMessage);
-    } else {
-      console.error('API Request Setup Error:', error.message);
-      errorMessage = `Request setup failed: ${error.message}`;
-      toast.error(errorMessage);
+      const enhancedError = error;
+      enhancedError.message = errorMessage;
+      return Promise.reject(enhancedError);
     }
-    // Reject with an Error object containing the message
-    return Promise.reject(new Error(errorMessage));
+
+    console.error('API Request Setup Error:', error.message);
+    errorMessage = `Request setup failed: ${error.message}`;
+    toast.error(errorMessage);
+    const genericError = new Error(errorMessage);
+    return Promise.reject(genericError);
   }
 );

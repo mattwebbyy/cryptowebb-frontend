@@ -24,11 +24,11 @@ const BlogList = lazy(() => import('./pages/blog/BlogList'));
 const BlogPost = lazy(() => import('./pages/blog/BlogPost'));
 
 // --- User Settings Pages ---
-const SettingsLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
-const SettingsOverview = lazy(() => import('./pages/dashboard/Dashboard'));
-const Profile = lazy(() => import('./pages/dashboard/Profile'));
-const ApiSettings = lazy(() => import('./pages/dashboard/Settings')); // API Keys are managed here
-const ReferralsPage = lazy(() => import('./pages/dashboard/Referrals')); // Added Referrals page (filename Referrals.tsx)
+const SettingsLayout = lazy(() => import('./pages/settings/SettingsLayout'));
+const SettingsOverview = lazy(() => import('./pages/settings/SettingsOverview'));
+const Profile = lazy(() => import('./pages/settings/Profile'));
+const ApiSettings = lazy(() => import('./pages/settings/Settings')); // API Keys are managed here
+const ReferralsPage = lazy(() => import('./pages/settings/Referrals')); // Added Referrals page (filename Referrals.tsx)
 const BlogEditor = lazy(() => import('./pages/blog/BlogEditor'));
 
 // --- Analytics Pages ---
@@ -48,9 +48,9 @@ const ApiDocumentation = lazy(() => import('./pages/docs/ApiDocumentation'));
 const NotFound = lazy(() => import('./pages/NotFound')); // Assuming you have this page
 
 export function Routes() {
-  // Note: For protected routes like /dashboard and /analytics, you would typically wrap
+  // Note: For protected routes like /settings and /analytics, you would typically wrap
   // their 'element' prop with your ProtectedRoute component.
-  // Example: element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}
+  // Example: element={<ProtectedRoute><SettingsLayout /></ProtectedRoute>}
   // I'm keeping it as you provided for now, focusing on adding the referral route.
   return (
     <Suspense fallback={<MatrixLoader />}>

@@ -2,11 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Wifi, WifiOff, Activity } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { useCryptoWebSocket } from '@/hooks/useCryptoWebSocket';
+import type { LiveDataPoint } from '@/hooks/useCryptoWebSocket';
 
 interface LivePriceCardProps {
   metricId: number;
   metricName: string;
+  data?: LiveDataPoint;
+  isConnected: boolean;
+  connectionError?: string | null;
   className?: string;
   showChart?: boolean;
   showStatus?: boolean;
@@ -15,48 +18,28 @@ interface LivePriceCardProps {
 export const LivePriceCard: React.FC<LivePriceCardProps> = ({
   metricId,
   metricName,
+  data,
+  isConnected,
+  connectionError,
   className = '',
   showChart = false,
   showStatus = true,
 }) => {
-  const {
-    isConnected,
-    liveData,
-    connectionError,
-    getLiveDataForMetric,
-  } = useCryptoWebSocket();
-
   const [priceHistory, setPriceHistory] = useState<{ value: number; timestamp: string }[]>([]);
-  const currentData = getLiveDataForMetric(metricId);
-
-  // Subscribe to specific metric
-  const { subscribe, unsubscribe, isSubscribedTo } = useCryptoWebSocket();
-
-  useEffect(() => {
-    if (isConnected && !isSubscribedTo(metricId)) {
-      subscribe(metricId);
-    }
-
-    return () => {
-      if (isSubscribedTo(metricId)) {
-        unsubscribe(metricId);
-      }
-    };
-  }, [metricId, isConnected, subscribe, unsubscribe, isSubscribedTo]);
 
   // Track price history for mini chart
   useEffect(() => {
-    if (currentData?.value !== null && currentData?.value !== undefined) {
+    if (data?.value !== null && data?.value !== undefined) {
       setPriceHistory(prev => {
         const newHistory = [...prev, {
-          value: currentData.value!,
-          timestamp: currentData.timestamp
+          value: data.value!,
+          timestamp: data.timestamp
         }];
         // Keep only last 20 data points
         return newHistory.slice(-20);
       });
     }
-  }, [currentData]);
+  }, [data]);
 
   const formatPrice = (value: number | null) => {
     if (value === null || value === undefined) return '--';
@@ -91,7 +74,7 @@ export const LivePriceCard: React.FC<LivePriceCardProps> = ({
   };
 
   const priceDirection = getPriceDirection();
-  const changeData = formatChange(currentData?.changePerc);
+  const changeData = formatChange(data?.changePerc ?? null);
 
   return (
     <Card className={`relative overflow-hidden transition-all duration-300 ${className}`}>
@@ -137,13 +120,13 @@ export const LivePriceCard: React.FC<LivePriceCardProps> = ({
         {/* Current Price */}
         <div className="mb-3">
           <div className={`text-2xl font-bold transition-colors duration-300 ${
-            priceDirection === 'up' 
-              ? 'text-success' 
-              : priceDirection === 'down' 
-                ? 'text-error' 
+            priceDirection === 'up'
+              ? 'text-success'
+              : priceDirection === 'down'
+                ? 'text-error'
                 : 'text-text'
           }`}>
-            {formatPrice(currentData?.value ?? null)}
+            {formatPrice(data?.value ?? null)}
           </div>
           
           {/* Price Change */}
@@ -193,9 +176,9 @@ export const LivePriceCard: React.FC<LivePriceCardProps> = ({
 
         {/* Last Update */}
         <div className="text-xs text-text-secondary">
-          {currentData ? (
+          {data ? (
             <>
-              Last update: {new Date(currentData.timestamp).toLocaleTimeString()}
+              Last update: {new Date(data.timestamp).toLocaleTimeString()}
             </>
           ) : (
             <>

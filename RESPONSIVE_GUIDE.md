@@ -72,7 +72,7 @@ import { RESPONSIVE_CLASSES } from '@/config/responsive';
 ### Updated Components:
 - ✅ **Header.tsx**: Compact mobile hamburger, no scrolling needed
 - ✅ **Dashboard.tsx**: Standardized responsive text and grid classes
-- ✅ **DashboardLayout.tsx**: Fixed width container (1000px exactly)
+- ✅ **SettingsLayout.tsx**: Fixed width container (1000px exactly)
 - ✅ **useResponsive.ts**: Aligned with new breakpoint system
 
 ## 🎨 **Mobile Menu Layout**

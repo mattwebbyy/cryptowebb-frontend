@@ -1,4 +1,4 @@
-// src/pages/dashboard/DashboardManager.tsx
+// src/pages/analytics/DashboardManager.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; // To navigate to the dashboard view

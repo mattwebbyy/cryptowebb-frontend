@@ -1,5 +1,6 @@
-// src/pages/dashboard/Referrals.tsx
+// src/pages/settings/Referrals.tsx
 import React, { useState, useEffect, useCallback } from 'react';
+import type { AxiosError } from 'axios';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../lib/axios';
 import { toast } from 'react-toastify';
@@ -27,6 +28,54 @@ interface NewReferralCode {
   description: string;
 }
 
+type RawReferralCode = Partial<ReferralCode> & {
+  ID?: string;
+  Platform?: string;
+  Code?: string;
+  Description?: string;
+  Active?: boolean;
+  CreatedAt?: string;
+  UpdatedAt?: string;
+};
+
+type ReferralApiResponse =
+  | RawReferralCode[]
+  | {
+      referralCodes?: RawReferralCode[];
+      data?: RawReferralCode[];
+    }
+  | Record<string, unknown>
+  | null;
+
+const extractReferralList = (payload: ReferralApiResponse): RawReferralCode[] => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (payload && typeof payload === 'object') {
+    const withCodes = payload as { referralCodes?: RawReferralCode[]; data?: RawReferralCode[] };
+    if (Array.isArray(withCodes.referralCodes)) {
+      return withCodes.referralCodes;
+    }
+    if (Array.isArray(withCodes.data)) {
+      return withCodes.data;
+    }
+
+    for (const value of Object.values(payload)) {
+      if (Array.isArray(value)) {
+        return value as RawReferralCode[];
+      }
+      if (value && typeof value === 'object') {
+        const nested = extractReferralList(value as ReferralApiResponse);
+        if (nested.length > 0) {
+          return nested;
+        }
+      }
+    }
+  }
+  return [];
+};
+
 const ReferralsPage: React.FC = () => {
   const { user } = useAuth();
   const [referralCodes, setReferralCodes] = useState<ReferralCode[]>([]);
@@ -44,45 +93,13 @@ const ReferralsPage: React.FC = () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      // Make the API call with proper typing
-      const response = await apiClient.get<any>('/api/v1/users/referral-codes');
-      
-      let codesArray: any[] = [];
-      
-      // The response.data is the correct way to access data in Axios responses
-      if (response.data && typeof response.data === 'object') {
-        // Check if response.data has a referralCodes property
-        if (response.data.referralCodes && Array.isArray(response.data.referralCodes)) {
-          codesArray = response.data.referralCodes;
-        } 
-        // Check if response.data is directly the array
-        else if (Array.isArray(response.data)) {
-          codesArray = response.data;
-        } 
-        // Last resort - search for any arrays in the response.data
-        else {
-          const findArrays = (obj: any): any[] => {
-            if (!obj || typeof obj !== 'object') return [];
-            
-            for (const key in obj) {
-              if (Array.isArray(obj[key])) {
-                return obj[key];
-              } else if (obj[key] && typeof obj[key] === 'object') {
-                const found = findArrays(obj[key]);
-                if (found.length > 0) return found;
-              }
-            }
-            
-            return [];
-          };
-          
-          codesArray = findArrays(response.data);
-        }
-      }
+      const response = await apiClient.get<ReferralApiResponse>('/api/v1/users/referral-codes');
+
+      const codesArray = extractReferralList(response);
       
       // Normalize the data by handling field capitalization differences
       if (codesArray.length > 0) {
-        const normalizedCodes = codesArray.map((code: any) => ({
+        const normalizedCodes = codesArray.map((code) => ({
           id: code.ID || code.id || '',
           platform: code.Platform || code.platform || '',
           code: code.Code || code.code || '',
@@ -98,8 +115,9 @@ const ReferralsPage: React.FC = () => {
         setReferralCodes([]);
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch referral codes.';
       console.error('Error fetching referral codes:', error);
-      toast.error('Failed to fetch referral codes.');
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -131,24 +149,15 @@ const ReferralsPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Using the full path
       await apiClient.post('/api/v1/users/referral-codes', newCode);
       toast.success('Referral code added successfully!');
-      // Reset form, keeping platform as 'general'
       setNewCode({ platform: 'general', code: '', description: '' });
-      fetchReferralCodes(); // Refresh the list
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        if (error.response.data.error === 'User already has a referral code for this platform') {
-          toast.error('Referral code for this platform already exists.');
-        } else if (error.response.data.error === 'Invalid platform') {
-          toast.error('Invalid platform selected. Please refresh and try again.'); // Should ideally not happen with dropdown
-        } else {
-          toast.error(error.response.data.error || 'Failed to add referral code. Please try again.');
-        }
-      } else {
-        toast.error('Failed to add referral code. Please try again.');
-      }
+      fetchReferralCodes();
+    } catch (error) {
+      const axiosError = error as AxiosError<{ error?: string }>;
+      const specificMessage = axiosError.response?.data?.error;
+      const fallbackMessage = axiosError.message || 'Failed to add referral code. Please try again.';
+      toast.error(specificMessage || fallbackMessage);
       console.error('Error adding referral code:', error);
     } finally {
       setIsSubmitting(false);
@@ -183,7 +192,7 @@ const ReferralsPage: React.FC = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full overflow-hidden">
         <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
             <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
               <FiPlusCircle className="mr-3 text-primary" />

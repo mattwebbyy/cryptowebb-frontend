@@ -1,4 +1,4 @@
-// src/pages/dashboard/DashboardLayout.tsx
+// src/pages/settings/SettingsLayout.tsx
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3, Menu, X, CreditCard } from 'lucide-react';
@@ -77,7 +77,7 @@ const fetchAPIUsageData = async (): Promise<APIUsageData> => {
   }
 };
 
-const DashboardLayout = () => {
+const SettingsLayout = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -91,7 +91,6 @@ const DashboardLayout = () => {
     queryFn: fetchAPIUsageData,
   });
 
-  // Close mobile menu when route changes
   const handleNavClick = () => {
     setIsMobileMenuOpen(false);
   };
@@ -128,11 +127,8 @@ const DashboardLayout = () => {
     }`;
 
   return (
-    <div className="min-h-screen relative pt-20 ">
-      {/* Subtle Background */}
-      
-      {/* Header - Professional Styling */}
-      <div className='bg-white dark:bg-black'>
+    <div className="min-h-screen w-full relative pt-20 overflow-x-hidden">
+      <div className='bg-white dark:bg-black overflow-x-hidden'>
       <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm bg-b">
         <div className="flex items-center justify-between bg-ba">
           <div className="flex items-center gap-3">
@@ -143,12 +139,11 @@ const DashboardLayout = () => {
               <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 CryptoWebb
               </h1>
-              <p className="text-xs md:text-sm text-text-secondary">User Dashboard</p>
+              <p className="text-xs md:text-sm text-text-secondary">User Settings Dashboard</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-2">
               <NavLink
                 to="/analytics"
@@ -160,7 +155,6 @@ const DashboardLayout = () => {
               </NavLink>
             </nav>
             
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-lg text-text hover:bg-primary/20 transition-colors"
@@ -175,14 +169,12 @@ const DashboardLayout = () => {
           </div>
         </div>
         
-        {/* Mobile Dropdown Menu - Compact No-Scroll Design */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-white/[0.98] backdrop-blur-md border-b border-border shadow-xl z-[80] mt-2 mx-4 rounded-lg border border-primary/50">
             <nav className="p-3 space-y-3">
-              {/* Dashboard Navigation Section */}
               <div>
                 <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
-                  Dashboard
+                  Settings
                 </h4>
                 <div className="grid grid-cols-2 gap-1.5">
                   {navItems.map((item) => (
@@ -208,13 +200,11 @@ const DashboardLayout = () => {
                 </div>
               </div>
               
-              {/* Platform Navigation Section */}
               <div className="pt-2 border-t border-primary/40">
                 <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
                   Platform
                 </h4>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {/* Analytics Platform */}
                   <NavLink
                     to="/analytics"
                     onClick={handleNavClick}
@@ -224,7 +214,6 @@ const DashboardLayout = () => {
                     <span className="font-medium">Analytics</span>
                   </NavLink>
                   
-                  {/* Home */}
                   <NavLink
                     to="/"
                     onClick={handleNavClick}
@@ -234,7 +223,6 @@ const DashboardLayout = () => {
                     <span className="font-medium">Home</span>
                   </NavLink>
                   
-                  {/* Pricing */}
                   <NavLink
                     to="/pricing"
                     onClick={handleNavClick}
@@ -244,7 +232,6 @@ const DashboardLayout = () => {
                     <span className="font-medium">Pricing</span>
                   </NavLink>
                   
-                  {/* About */}
                   <NavLink
                     to="/about"
                     onClick={handleNavClick}
@@ -260,11 +247,9 @@ const DashboardLayout = () => {
         )}
       </header>
 
-      <div className="flex">
-        {/* Professional Sidebar - Hidden on Mobile */}
-        <aside className="hidden md:block relative z-10 w-64 bg-surface/95 backdrop-blur-sm border-r border-border min-h-[calc(100vh-80px)] shadow-sm">
+      <div className="flex w-full max-w-7xl mx-auto overflow-hidden">
+        <aside className="hidden md:block relative z-10 w-64 flex-shrink-0 bg-surface/95 backdrop-blur-sm border-r border-border min-h-[calc(100vh-80px)] shadow-sm">
           <div className="p-6">
-            {/* Navigation Section */}
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
@@ -294,7 +279,6 @@ const DashboardLayout = () => {
                 </nav>
               </div>
 
-              {/* Quick Stats */}
               <div className="pt-6 border-t border-border">
                 <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
                   Quick Access
@@ -335,12 +319,12 @@ const DashboardLayout = () => {
           </div>
         </aside>
 
-        {/* Main Content - Full Width Bento Layout */}
-        <main className="relative z-10 flex-1 min-h-[calc(100vh-80px)] overflow-y-auto">
-          <div className="p-4 md:p-6 lg:p-8 h-full">
-            {/* FULL WIDTH CONTAINER for Bento Grid - No fixed width constraints */}
-            <div className="w-full h-full bg-surface/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-4 md:p-6 lg:p-8">
-              <Outlet />
+        <main className="relative z-10 flex-1 min-h-[calc(100vh-80px)] min-w-0 overflow-hidden">
+          <div className="h-full w-full px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 flex items-start justify-center">
+            <div className="w-full max-w-5xl min-w-0">
+              <div className="settings-scroll w-full bg-surface/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-4 md:p-6 lg:p-8 min-h-[calc(100vh-220px)]">
+                <Outlet />
+              </div>
             </div>
           </div>
         </main>
@@ -350,4 +334,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default SettingsLayout;

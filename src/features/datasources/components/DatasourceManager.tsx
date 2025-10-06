@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { GlitchButton } from '@/components/ui/GlitchEffects';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useDatasources } from '../api/useDatasources';
+import { useDatasources, useDeleteDatasource } from '../api/useDatasources';
 import { DataSource } from '../types';
 import { 
   Plus,
@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 
 export const DatasourceManager: React.FC = () => {
-  const { datasources, isLoading, error, createDatasource, deleteDatasource } = useDatasources();
+  const { data: datasources = [], isLoading, error } = useDatasources();
+  const deleteMutation = useDeleteDatasource();
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   if (isLoading) {
@@ -43,7 +44,7 @@ export const DatasourceManager: React.FC = () => {
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
   }
@@ -159,12 +160,13 @@ export const DatasourceManager: React.FC = () => {
                   <Button size="sm" variant="outline" className="flex-1">
                     Configure
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="destructive"
-                    onClick={() => deleteDatasource(datasource.id)}
+                    disabled={deleteMutation.isPending && deleteMutation.variables === datasource.id}
+                    onClick={() => deleteMutation.mutate(datasource.id)}
                   >
-                    Delete
+                    {deleteMutation.isPending && deleteMutation.variables === datasource.id ? '...' : 'Delete'}
                   </Button>
                 </div>
               </Card>

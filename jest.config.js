@@ -22,6 +22,7 @@ export default {
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.(vitest)\\.[jt]sx?$'],
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   // Mock environment variables
   setupFiles: ['<rootDir>/src/test/env-setup.ts'],

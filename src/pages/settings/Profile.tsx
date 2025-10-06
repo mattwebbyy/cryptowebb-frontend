@@ -244,7 +244,7 @@ const Profile = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full overflow-hidden">
           {/* Avatar Section */}
           <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
           <div className="flex items-center space-x-6">

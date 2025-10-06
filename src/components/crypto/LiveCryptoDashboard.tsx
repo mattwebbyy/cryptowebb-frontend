@@ -1,5 +1,5 @@
 // src/components/crypto/LiveCryptoDashboard.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RefreshCw, Settings, TrendingUp } from 'lucide-react';
 import { LivePriceCard } from './LivePriceCard';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +17,7 @@ export const LiveCryptoDashboard: React.FC<LiveCryptoDashboardProps> = ({
   className = '',
   maxItems = 12,
   showControls = true,
-  autoRefresh = true,
+  autoRefresh: _autoRefresh = true,
 }) => {
   const { data: metrics, isLoading, refetch } = useDataMetricsList();
   const [selectedMetrics, setSelectedMetrics] = useState<number[]>([]);
@@ -29,7 +29,11 @@ export const LiveCryptoDashboard: React.FC<LiveCryptoDashboardProps> = ({
     connectionError,
     connect,
     disconnect,
+    subscribe,
+    unsubscribe,
   } = useCryptoWebSocket();
+
+  const previousSelectionRef = useRef<number[]>([]);
 
   // Initialize with first few metrics
   useEffect(() => {
@@ -39,6 +43,33 @@ export const LiveCryptoDashboard: React.FC<LiveCryptoDashboardProps> = ({
       setSelectedMetrics(defaultMetrics);
     }
   }, [metrics, selectedMetrics.length, maxItems]);
+
+  // Manage WebSocket subscriptions as selection changes
+  useEffect(() => {
+    const previous = previousSelectionRef.current;
+    const added = selectedMetrics.filter(id => !previous.includes(id));
+    const removed = previous.filter(id => !selectedMetrics.includes(id));
+
+    added.forEach(subscribe);
+    removed.forEach(unsubscribe);
+
+    previousSelectionRef.current = selectedMetrics;
+  }, [selectedMetrics, subscribe, unsubscribe]);
+
+  // Re-subscribe metrics if the socket reconnects
+  useEffect(() => {
+    if (!isConnected) {
+      return;
+    }
+    selectedMetrics.forEach(subscribe);
+  }, [isConnected, selectedMetrics, subscribe]);
+
+  // Cleanup subscriptions on unmount
+  useEffect(() => {
+    return () => {
+      previousSelectionRef.current.forEach(unsubscribe);
+    };
+  }, [unsubscribe]);
 
   const handleMetricToggle = (metricId: number) => {
     setSelectedMetrics(prev => {
@@ -205,6 +236,9 @@ export const LiveCryptoDashboard: React.FC<LiveCryptoDashboardProps> = ({
               key={metricId}
               metricId={metricId}
               metricName={metric.MetricName}
+              data={liveData[metricId]}
+              isConnected={isConnected}
+              connectionError={connectionError}
               showChart={true}
               showStatus={false}
               className="h-full"

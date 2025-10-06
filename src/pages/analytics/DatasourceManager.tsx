@@ -1,4 +1,4 @@
-// src/pages/dashboard/DatasourceManager.tsx
+// src/pages/analytics/DatasourceManager.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Database, Edit, Trash2 } from 'lucide-react';

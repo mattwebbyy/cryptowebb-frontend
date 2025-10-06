@@ -119,6 +119,17 @@ html {
   transition: color 0.3s ease;
 }
 
+.settings-scroll {
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  scrollbar-gutter: stable;
+}
+
+.settings-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

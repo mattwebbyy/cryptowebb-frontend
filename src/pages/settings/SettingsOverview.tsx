@@ -1,10 +1,16 @@
-// src/pages/Dashboard.tsx
+// src/pages/settings/SettingsOverview.tsx
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { User, Mail, Calendar, Activity, TrendingUp, CreditCard, Bell, Key } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { RESPONSIVE_CLASSES } from '@/config/responsive';
+import {
+  fetchUserProfile,
+  fetchUserApiKeys,
+  fetchSubscriptionSummary,
+  type SubscriptionSummary,
+} from '@/api/dashboardApi';
 
 type Profile = {
   id: string;
@@ -31,40 +37,15 @@ type APIKeyData = {
   callsToday: number;
 };
 
-type SubscriptionData = {
-  tier: string;
-  status: string;
-  renewalDate?: string;
-  daysRemaining?: number;
-};
-
-const makeAuthRequest = async (url: string) => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No authentication token');
-  
-  const response = await fetch(`http://localhost:8080${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}`);
-  }
-  
-  return response.json();
-};
+type SubscriptionData = SubscriptionSummary;
 
 const fetchProfile = async (): Promise<Profile> => {
-  const data = await makeAuthRequest('/api/v1/users/me');
-  return data.user || data;
+  return await fetchUserProfile();
 };
 
 const fetchAPIKeyData = async (): Promise<APIKeyData> => {
   try {
-    const data = await makeAuthRequest('/api/v1/users/me/api-keys');
-    const keys = Array.isArray(data) ? data : [];
+    const keys = await fetchUserApiKeys();
     
     // For now, return mock call data since we don't have usage endpoints
     return {
@@ -82,28 +63,10 @@ const fetchAPIKeyData = async (): Promise<APIKeyData> => {
 };
 
 const fetchSubscriptionData = async (): Promise<SubscriptionData> => {
-  try {
-    // This would be a real subscription endpoint when available
-    // For now, return mock data
-    const mockTiers = ['Free', 'Basic', 'Pro', 'Enterprise'];
-    const randomTier = mockTiers[Math.floor(Math.random() * mockTiers.length)];
-    const daysRemaining = Math.floor(Math.random() * 30) + 1;
-    
-    return {
-      tier: randomTier,
-      status: 'Active',
-      daysRemaining,
-      renewalDate: new Date(Date.now() + daysRemaining * 24 * 60 * 60 * 1000).toISOString(),
-    };
-  } catch (error) {
-    return {
-      tier: 'Free',
-      status: 'Active',
-    };
-  }
+  return await fetchSubscriptionSummary();
 };
 
-const Dashboard = () => {
+const SettingsOverview = () => {
   const {
     data: profile,
     isLoading: profileLoading,
@@ -219,7 +182,7 @@ const Dashboard = () => {
       </div>
 
       {/* Improved Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr min-h-[500px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr min-h-[500px] max-w-full overflow-hidden">
         
         {/* Quick Stats - Individual Cards */}
         {quickStats.map((stat, index) => (
@@ -245,8 +208,8 @@ const Dashboard = () => {
           </Card>
         ))}
 
-        {/* Profile Card - Spans 2 columns on larger screens */}
-        <Card className="col-span-1 lg:col-span-2 xl:col-span-2 p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md min-h-[200px]">
+        {/* Profile Card - Spans entire row on larger screens */}
+        <Card className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md min-h-[200px]">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               {profile?.avatarUrl ? (
@@ -347,4 +310,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default SettingsOverview;

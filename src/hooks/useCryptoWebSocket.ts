@@ -9,7 +9,7 @@ interface WebSocketMessage {
   error?: string;
 }
 
-interface LiveDataPoint {
+export interface LiveDataPoint {
   metricId: number;
   metricName: string;
   value: number | null;
