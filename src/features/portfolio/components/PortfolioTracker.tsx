@@ -1,906 +1,794 @@
-// src/features/portfolio/components/PortfolioTracker.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useId, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { GlitchButton } from '@/components/ui/GlitchEffects';
-import { AdvancedChart } from '../../charts/components/AdvancedChartTypes';
-import { 
-  Wallet, 
-  Plus, 
-  Trash2, 
-  RefreshCw, 
-  TrendingUp, 
+import { Button } from '@/components/ui/Button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Wallet,
+  TrendingUp,
   TrendingDown,
   DollarSign,
   PieChart,
   BarChart3,
-  Settings,
+  CalendarDays,
   Download,
   Share2,
-  AlertTriangle,
-  CheckCircle,
-  ExternalLink
 } from 'lucide-react';
 
-// Types
-export interface Portfolio {
-  id: string;
-  name: string;
-  description?: string;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-  totalValue: number;
-  totalCost: number;
-  dayChange: number;
-  dayChangePercent: number;
-  holdings: PortfolioHolding[];
-}
+type Timeframe = '1W' | '1M' | '3M' | 'YTD' | '1Y';
 
-export interface PortfolioHolding {
-  id: string;
+type PerformancePoint = {
+  label: string;
+  value: number;
+};
+
+type Holding = {
   symbol: string;
   name: string;
   amount: number;
-  averagePrice: number;
   currentPrice: number;
-  totalValue: number;
-  totalCost: number;
-  unrealizedPnL: number;
-  unrealizedPnLPercent: number;
-  allocation: number; // Percentage of portfolio
-  dayChange: number;
-  dayChangePercent: number;
-  lastUpdated: string;
-}
+  costBasis: number;
+  dayChangePct: number;
+};
 
-export interface WalletConnection {
-  id: string;
-  address: string;
-  walletType: 'metamask' | 'walletconnect' | 'manual' | 'exchange';
-  name?: string;
-  isConnected: boolean;
-  lastSync: string;
-  chainId?: number;
-  balance?: number;
-}
+type TransactionType = 'buy' | 'sell' | 'stake' | 'rebalance';
 
-export interface Transaction {
+type Transaction = {
   id: string;
-  portfolioId: string;
-  type: 'buy' | 'sell' | 'transfer_in' | 'transfer_out';
   symbol: string;
-  amount: number;
+  type: TransactionType;
+  quantity: number;
   price: number;
-  fee: number;
-  timestamp: string;
-  txHash?: string;
-  exchange?: string;
+  date: string;
+  counterparty?: string;
   notes?: string;
-}
-
-import { useEnhancedWallet } from '../hooks/useEnhancedWallet';
-
-// Wallet Integration Hook
-export const useWalletIntegration = (onPortfolioCreated?: (portfolio: Portfolio) => void) => {
-  const [wallets, setWallets] = useState<WalletConnection[]>([]);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const enhancedWallet = useEnhancedWallet();
-
-  const connectMetaMask = useCallback(async () => {
-    if (!window.ethereum) {
-      setError('MetaMask is not installed');
-      return;
-    }
-
-    setIsConnecting(true);
-    setError(null);
-
-    try {
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
-      });
-      
-      const chainId = await window.ethereum.request({ 
-        method: 'eth_chainId' 
-      });
-
-      const wallet: WalletConnection = {
-        id: `metamask_${accounts[0]}`,
-        address: accounts[0],
-        walletType: 'metamask',
-        name: `MetaMask (${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)})`,
-        isConnected: true,
-        lastSync: new Date().toISOString(),
-        chainId: parseInt(chainId, 16)
-      };
-
-      setWallets(prev => {
-        const filtered = prev.filter(w => w.address !== accounts[0]);
-        return [...filtered, wallet];
-      });
-
-      // Create a live portfolio from wallet holdings
-      const livePortfolio = await createLivePortfolioFromWallet(wallet);
-      if (onPortfolioCreated && livePortfolio) {
-        onPortfolioCreated(livePortfolio);
-      }
-      
-    } catch (err: any) {
-      setError(err.message || 'Failed to connect MetaMask');
-    } finally {
-      setIsConnecting(false);
-    }
-  }, [createLivePortfolioFromWallet, onPortfolioCreated]);
-
-  const syncWalletHoldings = async (wallet: WalletConnection) => {
-    try {
-      // This would call your backend API to fetch wallet holdings
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio/sync-wallet`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          address: wallet.address,
-          chainId: wallet.chainId,
-          walletType: wallet.walletType
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to sync wallet holdings');
-      }
-
-      const data = await response.json();
-      return data.holdings;
-    } catch (err) {
-      console.error('Wallet sync error:', err);
-      throw err;
-    }
-  };
-
-  const createLivePortfolioFromWallet = useCallback(async (wallet: WalletConnection) => {
-    try {
-      // Fetch all token balances using the enhanced wallet hook
-      await enhancedWallet.fetchWalletTokens(wallet.address, wallet.chainId);
-      
-      // Convert enhanced tokens to portfolio holdings
-      const holdings: PortfolioHolding[] = enhancedWallet.tokens.map((token) => ({
-        id: `${token.symbol.toLowerCase()}_${wallet.address}`,
-        symbol: token.symbol,
-        name: token.name,
-        amount: parseFloat(token.balance),
-        averagePrice: token.price, // This would be calculated from transaction history
-        currentPrice: token.price,
-        totalValue: token.value,
-        totalCost: token.value, // Would be calculated from actual buy prices
-        unrealizedPnL: 0, // Would be calculated from actual cost basis
-        unrealizedPnLPercent: 0,
-        allocation: enhancedWallet.tokens.length > 0 ? (token.value / enhancedWallet.getTotalValue()) * 100 : 0,
-        dayChange: token.value * (token.change24h / 100),
-        dayChangePercent: token.change24h,
-        lastUpdated: new Date().toISOString()
-      }));
-
-      const totalValue = enhancedWallet.getTotalValue();
-      const totalDayChange = holdings.reduce((sum, holding) => sum + holding.dayChange, 0);
-      const dayChangePercent = totalValue > 0 ? (totalDayChange / (totalValue - totalDayChange)) * 100 : 0;
-
-      const livePortfolio: Portfolio = {
-        id: `live_${wallet.address}`,
-        name: `Live Wallet (${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)})`,
-        description: 'Live portfolio from connected wallet',
-        isDefault: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        totalValue: totalValue,
-        totalCost: totalValue - totalDayChange, // Estimate based on day change
-        dayChange: totalDayChange,
-        dayChangePercent: dayChangePercent,
-        holdings: holdings
-      };
-
-      return livePortfolio;
-    } catch (err) {
-      console.error('Error creating live portfolio:', err);
-      throw err;
-    }
-  }, [enhancedWallet]);
-
-  const disconnectWallet = useCallback((walletId: string) => {
-    setWallets(prev => prev.filter(w => w.id !== walletId));
-  }, []);
-
-  return {
-    wallets,
-    isConnecting,
-    error: error || enhancedWallet.error,
-    connectMetaMask,
-    disconnectWallet,
-    syncWalletHoldings,
-    createLivePortfolioFromWallet,
-    isLoadingTokens: enhancedWallet.isLoading,
-    supportedNetworks: enhancedWallet.supportedNetworks
-  };
 };
 
-// Portfolio API Hook
-export const usePortfolioData = () => {
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [activePortfolio, setActivePortfolio] = useState<Portfolio | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPortfolios = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        // If no portfolios exist, that's fine - user can connect wallet to create one
-        console.log('No saved portfolios found - user can connect wallet to create one');
-        setPortfolios([]);
-        setIsLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-      setPortfolios(data.portfolios || []);
-      
-      // Set default portfolio as active
-      const defaultPortfolio = data.portfolios?.find((p: Portfolio) => p.isDefault);
-      if (defaultPortfolio) {
-        setActivePortfolio(defaultPortfolio);
-      }
-    } catch (err: any) {
-      // Don't show error for missing portfolios - this is expected for new users
-      console.log('Portfolio fetch error (this is normal for new users):', err.message);
-      setPortfolios([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const createPortfolio = useCallback(async (name: string, description?: string) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ name, description })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create portfolio');
-      }
-
-      const newPortfolio = await response.json();
-      setPortfolios(prev => [...prev, newPortfolio]);
-      return newPortfolio;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  }, []);
-
-  const addTransaction = useCallback(async (transaction: Omit<Transaction, 'id'>) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/portfolio/transactions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(transaction)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add transaction');
-      }
-
-      // Refresh portfolio data
-      await fetchPortfolios();
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  }, [fetchPortfolios]);
-
-  useEffect(() => {
-    fetchPortfolios();
-  }, [fetchPortfolios]);
-
-  return {
-    portfolios,
-    activePortfolio,
-    setActivePortfolio,
-    isLoading,
-    error,
-    createPortfolio,
-    addTransaction,
-    refetchPortfolios: fetchPortfolios
-  };
+type Portfolio = {
+  id: string;
+  name: string;
+  description: string;
+  baseCurrency: string;
+  performance: Record<Timeframe, PerformancePoint[]>;
+  holdings: Holding[];
+  lastUpdated: string;
 };
 
-// Main Portfolio Tracker Component
-export const PortfolioTracker: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'overview' | 'holdings' | 'transactions' | 'analytics'>('overview');
-  const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const [showWalletConnect, setShowWalletConnect] = useState(false);
+const TIMEFRAMES: Timeframe[] = ['1W', '1M', '3M', 'YTD', '1Y'];
 
-  const {
-    portfolios,
-    activePortfolio,
-    setActivePortfolio,
-    isLoading,
-    error: portfolioError,
-    createPortfolio,
-    addTransaction,
-    refetchPortfolios
-  } = usePortfolioData();
+const MOCK_PORTFOLIOS: Portfolio[] = [
+  {
+    id: 'core-crypto',
+    name: 'Core Crypto Holdings',
+    description: 'Long-term allocation across major layer 1 and DeFi assets.',
+    baseCurrency: 'USD',
+    lastUpdated: '2024-05-21T14:05:00Z',
+    performance: {
+      '1W': [
+        { label: 'Mon', value: 187_500 },
+        { label: 'Tue', value: 188_300 },
+        { label: 'Wed', value: 189_120 },
+        { label: 'Thu', value: 190_450 },
+        { label: 'Fri', value: 191_260 },
+        { label: 'Sat', value: 192_840 },
+        { label: 'Sun', value: 194_200 },
+      ],
+      '1M': [
+        { label: 'Week 1', value: 176_400 },
+        { label: 'Week 2', value: 181_250 },
+        { label: 'Week 3', value: 188_100 },
+        { label: 'Week 4', value: 194_200 },
+      ],
+      '3M': [
+        { label: 'Mar', value: 149_000 },
+        { label: 'Apr', value: 162_500 },
+        { label: 'May', value: 194_200 },
+      ],
+      YTD: [
+        { label: 'Jan', value: 132_000 },
+        { label: 'Feb', value: 141_350 },
+        { label: 'Mar', value: 149_000 },
+        { label: 'Apr', value: 162_500 },
+        { label: 'May', value: 194_200 },
+      ],
+      '1Y': [
+        { label: 'Q3 23', value: 96_000 },
+        { label: 'Q4 23', value: 118_400 },
+        { label: 'Q1 24', value: 149_000 },
+        { label: 'Q2 24', value: 194_200 },
+      ],
+    },
+    holdings: [
+      {
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        amount: 0.85,
+        currentPrice: 63_400,
+        costBasis: 41_500,
+        dayChangePct: 2.1,
+      },
+      {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        amount: 8.6,
+        currentPrice: 3_240,
+        costBasis: 2_120,
+        dayChangePct: 1.4,
+      },
+      {
+        symbol: 'SOL',
+        name: 'Solana',
+        amount: 120,
+        currentPrice: 158,
+        costBasis: 88,
+        dayChangePct: 3.6,
+      },
+      {
+        symbol: 'LINK',
+        name: 'Chainlink',
+        amount: 420,
+        currentPrice: 16.3,
+        costBasis: 7.1,
+        dayChangePct: 2.9,
+      },
+      {
+        symbol: 'AAVE',
+        name: 'Aave',
+        amount: 55,
+        currentPrice: 98,
+        costBasis: 62,
+        dayChangePct: -0.8,
+      },
+    ],
+  },
+  {
+    id: 'emerging-adoption',
+    name: 'Emerging Adoption',
+    description: 'Focused on AI, real-world assets, and staking yield plays.',
+    baseCurrency: 'USD',
+    lastUpdated: '2024-05-21T12:20:00Z',
+    performance: {
+      '1W': [
+        { label: 'Mon', value: 72_400 },
+        { label: 'Tue', value: 71_950 },
+        { label: 'Wed', value: 73_120 },
+        { label: 'Thu', value: 74_010 },
+        { label: 'Fri', value: 74_480 },
+        { label: 'Sat', value: 75_860 },
+        { label: 'Sun', value: 76_540 },
+      ],
+      '1M': [
+        { label: 'Week 1', value: 66_100 },
+        { label: 'Week 2', value: 68_020 },
+        { label: 'Week 3', value: 72_340 },
+        { label: 'Week 4', value: 76_540 },
+      ],
+      '3M': [
+        { label: 'Mar', value: 54_000 },
+        { label: 'Apr', value: 62_500 },
+        { label: 'May', value: 76_540 },
+      ],
+      YTD: [
+        { label: 'Jan', value: 41_200 },
+        { label: 'Feb', value: 47_880 },
+        { label: 'Mar', value: 54_000 },
+        { label: 'Apr', value: 62_500 },
+        { label: 'May', value: 76_540 },
+      ],
+      '1Y': [
+        { label: 'Q3 23', value: 29_400 },
+        { label: 'Q4 23', value: 36_800 },
+        { label: 'Q1 24', value: 54_000 },
+        { label: 'Q2 24', value: 76_540 },
+      ],
+    },
+    holdings: [
+      {
+        symbol: 'FET',
+        name: 'Fetch.ai',
+        amount: 3_400,
+        currentPrice: 2.1,
+        costBasis: 0.94,
+        dayChangePct: 4.8,
+      },
+      {
+        symbol: 'RNDR',
+        name: 'Render',
+        amount: 1_250,
+        currentPrice: 10.2,
+        costBasis: 4.9,
+        dayChangePct: 2.2,
+      },
+      {
+        symbol: 'INJ',
+        name: 'Injective',
+        amount: 410,
+        currentPrice: 29.5,
+        costBasis: 12.4,
+        dayChangePct: 3.1,
+      },
+      {
+        symbol: 'RWA',
+        name: 'Maple Finance',
+        amount: 600,
+        currentPrice: 13.4,
+        costBasis: 6.8,
+        dayChangePct: 1.9,
+      },
+    ],
+  },
+];
 
-  const {
-    wallets,
-    isConnecting,
-    error: walletError,
-    connectMetaMask,
-    disconnectWallet,
-    createLivePortfolioFromWallet,
-    isLoadingTokens,
-    supportedNetworks
-  } = useWalletIntegration((livePortfolio) => {
-    // Set the live portfolio as active when wallet is connected
-    setActivePortfolio(livePortfolio);
+const TRANSACTIONS: Record<string, Transaction[]> = {
+  'core-crypto': [
+    {
+      id: 'tx-201',
+      symbol: 'BTC',
+      type: 'buy',
+      quantity: 0.35,
+      price: 39_500,
+      date: '2024-03-18',
+      notes: 'Added on dip after CPI print',
+    },
+    {
+      id: 'tx-202',
+      symbol: 'ETH',
+      type: 'stake',
+      quantity: 4,
+      price: 0,
+      date: '2024-02-28',
+      counterparty: 'Lido',
+      notes: 'Moved to liquid staking to earn 4.1% APR',
+    },
+    {
+      id: 'tx-203',
+      symbol: 'SOL',
+      type: 'buy',
+      quantity: 60,
+      price: 112,
+      date: '2024-01-11',
+    },
+    {
+      id: 'tx-204',
+      symbol: 'AAVE',
+      type: 'rebalance',
+      quantity: 15,
+      price: 89,
+      date: '2023-12-20',
+      notes: 'Trimmed to keep risk weights in line',
+    },
+  ],
+  'emerging-adoption': [
+    {
+      id: 'tx-301',
+      symbol: 'FET',
+      type: 'buy',
+      quantity: 1_800,
+      price: 1.15,
+      date: '2024-04-05',
+    },
+    {
+      id: 'tx-302',
+      symbol: 'RNDR',
+      type: 'buy',
+      quantity: 600,
+      price: 7.4,
+      date: '2024-02-16',
+    },
+    {
+      id: 'tx-303',
+      symbol: 'INJ',
+      type: 'buy',
+      quantity: 210,
+      price: 18.8,
+      date: '2024-01-22',
+    },
+  ],
+};
+
+const formatCurrency = (value: number, currency: string) =>
+  value.toLocaleString(undefined, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: value >= 1 ? 2 : 4,
   });
 
-  if (isLoading) {
+const formatPercent = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+
+const Sparkline = ({ points, positive }: { points: PerformancePoint[]; positive: boolean }) => {
+  const gradientId = useId();
+
+  if (points.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
-          </div>
-        </div>
+      <div className="flex h-24 w-full items-center justify-center text-sm text-text-secondary">
+        No performance data yet
       </div>
     );
   }
 
-  // Show empty state if no portfolios and no active portfolio
-  if (!isLoading && portfolios.length === 0 && !activePortfolio) {
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold font-mono text-teal-600 dark:text-matrix-green">
-              Portfolio Tracker
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Connect your wallet to start tracking your crypto holdings
-            </p>
-          </div>
-        </div>
+  const width = 320;
+  const height = 96;
+  const values = points.map((point) => point.value);
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
 
-        {/* Empty State */}
-        <div className="text-center py-12">
-          <Wallet className="w-16 h-16 text-teal-600 dark:text-matrix-green mx-auto mb-4 opacity-60" />
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
-            No Portfolio Connected
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            Connect your MetaMask wallet to automatically import your holdings and start tracking your portfolio performance.
-          </p>
-          
-          <GlitchButton
-            onClick={() => setShowWalletConnect(true)}
-            className="gap-2"
-            disabled={isConnecting || isLoadingTokens}
-          >
-            <Wallet className="w-4 h-4" />
-            {isConnecting ? 'Connecting...' : isLoadingTokens ? 'Loading Tokens...' : 'Connect Wallet'}
-          </GlitchButton>
-          
-          {walletError && (
-            <Alert variant="destructive" className="mt-4 max-w-md mx-auto">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{walletError}</AlertDescription>
-            </Alert>
-          )}
-        </div>
+  const linePath = points
+    .map((point, index) => {
+      const x = (index / Math.max(points.length - 1, 1)) * width;
+      const y = height - ((point.value - min) / range) * height;
+      return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(' ');
 
-        {/* Wallet Connection Modal */}
-        <WalletConnectModal
-          isOpen={showWalletConnect}
-          onClose={() => setShowWalletConnect(false)}
-          onConnectMetaMask={connectMetaMask}
-          isConnecting={isConnecting}
-          error={walletError}
-        />
-      </div>
-    );
-  }
+  const areaPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-mono text-teal-600 dark:text-matrix-green">
-            Portfolio Tracker
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Track your crypto holdings and performance
-          </p>
-        </div>
+    <svg
+      className="w-full"
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+          <stop
+            offset="0%"
+            stopColor={positive ? 'rgba(20,184,166,0.45)' : 'rgba(239,68,68,0.45)'}
+          />
+          <stop offset="100%" stopColor="rgba(15,23,42,0)" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill={`url(#${gradientId})`} opacity={0.65} />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={positive ? '#14b8a6' : '#ef4444'}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
 
-        <div className="flex gap-2">
-          <GlitchButton
-            variant="secondary"
-            onClick={() => setShowWalletConnect(true)}
-            className="gap-2"
-          >
-            <Wallet className="w-4 h-4" />
-            Connect Wallet
-          </GlitchButton>
-          
-          {/* Show save button for live portfolios */}
-          {activePortfolio && activePortfolio.id.startsWith('live_') && (
-            <GlitchButton
-              variant="secondary"
-              onClick={async () => {
-                try {
-                  await createPortfolio(activePortfolio.name, activePortfolio.description);
-                  // Refresh portfolios after saving
-                  refetchPortfolios();
-                } catch (err) {
-                  console.error('Failed to save portfolio:', err);
-                }
-              }}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Save Portfolio
-            </GlitchButton>
-          )}
-          
-          <GlitchButton
-            onClick={() => setShowAddTransaction(true)}
-            className="gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Transaction
-          </GlitchButton>
-        </div>
-      </div>
+const HoldingsTable = ({ holdings, currency }: { holdings: Holding[]; currency: string }) => (
+  <Card className="overflow-hidden border-border/60">
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-border/60 text-left">
+        <thead className="bg-surface/70">
+          <tr className="text-xs uppercase tracking-wide text-text-secondary">
+            <th className="px-5 py-3 font-medium">Asset</th>
+            <th className="px-5 py-3 font-medium">Holdings</th>
+            <th className="px-5 py-3 font-medium">Price</th>
+            <th className="px-5 py-3 font-medium">Value</th>
+            <th className="px-5 py-3 font-medium">Cost Basis</th>
+            <th className="px-5 py-3 font-medium">Unrealized P&amp;L</th>
+            <th className="px-5 py-3 font-medium">24h</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border/40 text-sm">
+          {holdings.map((holding) => {
+            const marketValue = holding.amount * holding.currentPrice;
+            const costBasis = holding.amount * holding.costBasis;
+            const unrealized = marketValue - costBasis;
+            const unrealizedPct = costBasis > 0 ? (unrealized / costBasis) * 100 : 0;
 
-      {/* Portfolio Selector */}
-      {portfolios.length > 1 && (
-        <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-teal-600 dark:text-matrix-green">Portfolio:</span>
-            <select
-              value={activePortfolio?.id || ''}
-              onChange={(e) => {
-                const portfolio = portfolios.find(p => p.id === e.target.value);
-                if (portfolio) setActivePortfolio(portfolio);
-              }}
-              className="bg-transparent border border-gray-300 dark:border-gray-600 rounded px-3 py-1 text-teal-600 dark:text-matrix-green focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green"
-            >
-              {portfolios.map(portfolio => (
-                <option key={portfolio.id} value={portfolio.id} className="bg-white dark:bg-black">
-                  {portfolio.name} {portfolio.isDefault ? '(Default)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-        </Card>
-      )}
-
-      {/* Portfolio Overview Cards */}
-      {activePortfolio && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Value</p>
-                <p className="text-2xl font-bold text-teal-600 dark:text-matrix-green">
-                  ${activePortfolio.totalValue.toLocaleString()}
-                </p>
-              </div>
-              <DollarSign className="w-8 h-8 text-teal-600 dark:text-matrix-green opacity-60" />
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total P&L</p>
-                <p className={`text-2xl font-bold ${
-                  (activePortfolio.totalValue - activePortfolio.totalCost) >= 0 
-                    ? 'text-green-500' 
-                    : 'text-red-500'
-                }`}>
-                  ${(activePortfolio.totalValue - activePortfolio.totalCost).toLocaleString()}
-                </p>
-              </div>
-              {(activePortfolio.totalValue - activePortfolio.totalCost) >= 0 ? (
-                <TrendingUp className="w-8 h-8 text-green-500 opacity-60" />
-              ) : (
-                <TrendingDown className="w-8 h-8 text-red-500 opacity-60" />
-              )}
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">24h Change</p>
-                <p className={`text-2xl font-bold ${
-                  activePortfolio.dayChange >= 0 ? 'text-green-500' : 'text-red-500'
-                }`}>
-                  {activePortfolio.dayChangePercent >= 0 ? '+' : ''}
-                  {activePortfolio.dayChangePercent.toFixed(2)}%
-                </p>
-              </div>
-              {activePortfolio.dayChange >= 0 ? (
-                <TrendingUp className="w-8 h-8 text-green-500 opacity-60" />
-              ) : (
-                <TrendingDown className="w-8 h-8 text-red-500 opacity-60" />
-              )}
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Holdings</p>
-                <p className="text-2xl font-bold text-teal-600 dark:text-matrix-green">
-                  {activePortfolio.holdings.length}
-                </p>
-              </div>
-              <PieChart className="w-8 h-8 text-teal-600 dark:text-matrix-green opacity-60" />
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* View Mode Tabs */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit">
-        {[
-          { id: 'overview', label: 'Overview', icon: PieChart },
-          { id: 'holdings', label: 'Holdings', icon: BarChart3 },
-          { id: 'transactions', label: 'Transactions', icon: RefreshCw },
-          { id: 'analytics', label: 'Analytics', icon: TrendingUp }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setViewMode(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors font-mono text-sm ${
-              viewMode === tab.id
-                ? 'bg-teal-600 dark:bg-matrix-green text-white dark:text-black'
-                : 'text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-matrix-green'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* View Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={viewMode}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          {viewMode === 'overview' && activePortfolio && (
-            <PortfolioOverview portfolio={activePortfolio} />
-          )}
-          
-          {viewMode === 'holdings' && activePortfolio && (
-            <PortfolioHoldings holdings={activePortfolio.holdings} />
-          )}
-          
-          {viewMode === 'transactions' && (
-            <PortfolioTransactions portfolioId={activePortfolio?.id || ''} />
-          )}
-          
-          {viewMode === 'analytics' && activePortfolio && (
-            <PortfolioAnalytics portfolio={activePortfolio} />
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Connected Wallets */}
-      {wallets.length > 0 && (
-        <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-          <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green mb-4">
-            Connected Wallets
-          </h3>
-          <div className="space-y-2">
-            {wallets.map(wallet => (
-              <div key={wallet.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${wallet.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            return (
+              <tr key={holding.symbol} className="hover:bg-surface/60">
+                <td className="whitespace-nowrap px-5 py-4 font-medium text-text">
                   <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">{wallet.name}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Last sync: {new Date(wallet.lastSync).toLocaleString()}
-                    </p>
+                    {holding.symbol}
+                    <span className="block text-xs font-normal text-text-secondary">
+                      {holding.name}
+                    </span>
                   </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => disconnectWallet(wallet.id)}
+                </td>
+                <td className="whitespace-nowrap px-5 py-4 text-text-secondary">
+                  {holding.amount.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                </td>
+                <td className="whitespace-nowrap px-5 py-4 text-text">
+                  {formatCurrency(holding.currentPrice, currency)}
+                </td>
+                <td className="whitespace-nowrap px-5 py-4 text-text">
+                  {formatCurrency(marketValue, currency)}
+                </td>
+                <td className="whitespace-nowrap px-5 py-4 text-text-secondary">
+                  {formatCurrency(costBasis, currency)}
+                </td>
+                <td
+                  className={`whitespace-nowrap px-5 py-4 font-medium ${
+                    unrealized >= 0 ? 'text-success' : 'text-error'
+                  }`}
                 >
-                  Disconnect
-                </Button>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Wallet Connection Modal */}
-      <AnimatePresence>
-        {showWalletConnect && (
-          <WalletConnectModal
-            isOpen={showWalletConnect}
-            onClose={() => setShowWalletConnect(false)}
-            onConnectMetaMask={connectMetaMask}
-            isConnecting={isConnecting}
-            error={walletError}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Add Transaction Modal */}
-      <AnimatePresence>
-        {showAddTransaction && (
-          <AddTransactionModal
-            isOpen={showAddTransaction}
-            onClose={() => setShowAddTransaction(false)}
-            portfolioId={activePortfolio?.id || ''}
-            onAddTransaction={addTransaction}
-          />
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-// Portfolio Overview Component
-const PortfolioOverview: React.FC<{ portfolio: Portfolio }> = ({ portfolio }) => {
-  const treemapData = portfolio.holdings.map(holding => ({
-    name: holding.symbol,
-    value: holding.totalValue,
-    colorValue: holding.unrealizedPnLPercent
-  }));
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-        <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green mb-4">
-          Portfolio Allocation
-        </h3>
-        <AdvancedChart
-          chartType="treemap"
-          data={treemapData}
-          height={300}
-        />
-      </Card>
-
-      <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-        <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green mb-4">
-          Top Holdings
-        </h3>
-        <div className="space-y-3">
-          {portfolio.holdings
-            .sort((a, b) => b.totalValue - a.totalValue)
-            .slice(0, 5)
-            .map(holding => (
-              <div key={holding.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-teal-600 dark:bg-matrix-green flex items-center justify-center text-white dark:text-black text-xs font-bold">
-                    {holding.symbol.slice(0, 2)}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">{holding.symbol}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{holding.amount.toFixed(4)}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-800 dark:text-gray-200">
-                    ${holding.totalValue.toLocaleString()}
-                  </p>
-                  <p className={`text-sm ${holding.unrealizedPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {holding.unrealizedPnL >= 0 ? '+' : ''}
-                    {holding.unrealizedPnLPercent.toFixed(2)}%
-                  </p>
-                </div>
-              </div>
-            ))}
-        </div>
-      </Card>
-    </div>
-  );
-};
-
-// Portfolio Holdings Component
-const PortfolioHoldings: React.FC<{ holdings: PortfolioHolding[] }> = ({ holdings }) => {
-  return (
-    <Card className="bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="text-left p-4 font-mono text-teal-600 dark:text-matrix-green">Asset</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">Amount</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">Price</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">Value</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">P&L</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">24h</th>
-              <th className="text-right p-4 font-mono text-teal-600 dark:text-matrix-green">Allocation</th>
-            </tr>
-          </thead>
-          <tbody>
-            {holdings.map(holding => (
-              <tr key={holding.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-teal-600 dark:bg-matrix-green flex items-center justify-center text-white dark:text-black text-xs font-bold">
-                      {holding.symbol.slice(0, 2)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 dark:text-gray-200">{holding.symbol}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{holding.name}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-right text-gray-800 dark:text-gray-200">
-                  {holding.amount.toFixed(4)}
-                </td>
-                <td className="p-4 text-right text-gray-800 dark:text-gray-200">
-                  ${holding.currentPrice.toFixed(2)}
-                </td>
-                <td className="p-4 text-right text-gray-800 dark:text-gray-200">
-                  ${holding.totalValue.toLocaleString()}
-                </td>
-                <td className={`p-4 text-right ${holding.unrealizedPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {holding.unrealizedPnL >= 0 ? '+' : ''}${Math.abs(holding.unrealizedPnL).toLocaleString()}
-                  <br />
-                  <span className="text-sm">
-                    ({holding.unrealizedPnLPercent >= 0 ? '+' : ''}{holding.unrealizedPnLPercent.toFixed(2)}%)
+                  {formatCurrency(unrealized, currency)}
+                  <span className="ml-2 text-xs font-normal">
+                    ({formatPercent(unrealizedPct)})
                   </span>
                 </td>
-                <td className={`p-4 text-right ${holding.dayChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {holding.dayChangePercent >= 0 ? '+' : ''}{holding.dayChangePercent.toFixed(2)}%
-                </td>
-                <td className="p-4 text-right text-gray-800 dark:text-gray-200">
-                  {holding.allocation.toFixed(1)}%
+                <td
+                  className={`whitespace-nowrap px-5 py-4 font-medium ${
+                    holding.dayChangePct >= 0 ? 'text-success' : 'text-error'
+                  }`}
+                >
+                  {formatPercent(holding.dayChangePct)}
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+);
+
+const AllocationList = ({ holdings, currency }: { holdings: Holding[]; currency: string }) => {
+  const totalValue = holdings.reduce(
+    (sum, holding) => sum + holding.amount * holding.currentPrice,
+    0,
+  );
+
+  return (
+    <div className="space-y-4">
+      {holdings.map((holding) => {
+        const value = holding.amount * holding.currentPrice;
+        const percentage = totalValue > 0 ? (value / totalValue) * 100 : 0;
+
+        return (
+          <div key={holding.symbol} className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="font-medium text-text">
+                {holding.symbol}
+                <span className="ml-2 text-xs font-normal text-text-secondary">
+                  {holding.name}
+                </span>
+              </div>
+              <div className="text-right text-text-secondary">
+                {formatCurrency(value, currency)}
+                <span className="ml-2 font-medium text-text">{percentage.toFixed(1)}%</span>
+              </div>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-border/60">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary/80 to-secondary"
+                style={{ width: `${Math.min(percentage, 100)}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const TransactionsList = ({
+  transactions,
+  currency,
+}: {
+  transactions: Transaction[];
+  currency: string;
+}) => {
+  if (transactions.length === 0) {
+    return (
+      <Card className="flex items-center justify-center border-dashed border-border/60 py-12 text-text-secondary">
+        No transactions recorded yet. Connect a wallet or import trades to get started.
+      </Card>
+    );
+  }
+
+  const typeLabel: Record<TransactionType, string> = {
+    buy: 'Buy',
+    sell: 'Sell',
+    stake: 'Stake',
+    rebalance: 'Rebalance',
+  };
+
+  return (
+    <Card className="space-y-6 border-border/60 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-text">Recent activity</h3>
+          <p className="text-sm text-text-secondary">
+            The latest on-chain trades and adjustments across this portfolio
+          </p>
+        </div>
+        <Button variant="outline" size="sm">
+          View all
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        {transactions.map((transaction) => {
+          const isBuyLike = transaction.type === 'buy' || transaction.type === 'stake';
+          const iconBg = isBuyLike ? 'bg-success/10 text-success' : 'bg-error/10 text-error';
+
+          return (
+            <div
+              key={transaction.id}
+              className="flex items-start justify-between rounded-lg border border-border/60 bg-surface/70 p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className={`rounded-xl p-2 ${iconBg}`}>
+                  {isBuyLike ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-text">
+                    {typeLabel[transaction.type]}
+                    <span className="text-text-secondary">•</span>
+                    <span>{transaction.symbol}</span>
+                  </div>
+                  <p className="text-sm text-text-secondary">
+                    {transaction.quantity.toLocaleString(undefined, { maximumFractionDigits: 4 })}{' '}
+                    units @ {transaction.price > 0 ? formatCurrency(transaction.price, currency) : 'On-chain'}
+                  </p>
+                  <p className="text-xs text-text-secondary/80">
+                    {new Date(transaction.date).toLocaleString(undefined, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                    {transaction.counterparty ? ` • ${transaction.counterparty}` : ''}
+                  </p>
+                  {transaction.notes && (
+                    <p className="mt-2 text-xs text-text-secondary/90">{transaction.notes}</p>
+                  )}
+                </div>
+              </div>
+              <div className="text-right text-sm font-medium text-text">
+                {transaction.price > 0
+                  ? formatCurrency(transaction.quantity * transaction.price, currency)
+                  : 'Yield strategy'}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
 };
 
-// Portfolio Transactions Component (placeholder)
-const PortfolioTransactions: React.FC<{ portfolioId: string }> = ({ portfolioId }) => {
-  return (
-    <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-      <p className="text-center text-gray-600 dark:text-gray-400">
-        Transaction history will be displayed here
-      </p>
-    </Card>
+export const PortfolioTracker = () => {
+  const [activePortfolioId, setActivePortfolioId] = useState<string>(MOCK_PORTFOLIOS[0]?.id ?? '');
+  const [timeframe, setTimeframe] = useState<Timeframe>('1M');
+
+  const activePortfolio = useMemo(
+    () => MOCK_PORTFOLIOS.find((portfolio) => portfolio.id === activePortfolioId),
+    [activePortfolioId],
   );
-};
 
-// Portfolio Analytics Component (placeholder)
-const PortfolioAnalytics: React.FC<{ portfolio: Portfolio }> = ({ portfolio }) => {
+  const summary = useMemo(() => {
+    if (!activePortfolio) return null;
+
+    const totalValue = activePortfolio.holdings.reduce(
+      (sum, holding) => sum + holding.amount * holding.currentPrice,
+      0,
+    );
+
+    const totalCost = activePortfolio.holdings.reduce(
+      (sum, holding) => sum + holding.amount * holding.costBasis,
+      0,
+    );
+
+    const dayChangeValue = activePortfolio.holdings.reduce((sum, holding) => {
+      const value = holding.amount * holding.currentPrice;
+      return sum + value * (holding.dayChangePct / 100);
+    }, 0);
+
+    const totalReturnPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+
+    return {
+      totalValue,
+      totalCost,
+      dayChangeValue,
+      totalReturnPct,
+    };
+  }, [activePortfolio]);
+
+  if (!activePortfolio || !summary) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          We could not locate a portfolio configuration. Please add portfolio data or try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const performancePoints = activePortfolio.performance[timeframe] ?? [];
+  const transactions = TRANSACTIONS[activePortfolio.id] ?? [];
+  const isDayGainPositive = summary.dayChangeValue >= 0;
+
   return (
-    <Card className="p-4 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-      <p className="text-center text-gray-600 dark:text-gray-400">
-        Advanced analytics charts will be displayed here
-      </p>
-    </Card>
-  );
-};
+    <div className="w-full space-y-8 text-left">
+      <header className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-primary">
+              Portfolio intelligence
+            </p>
+            <h1 className="mt-1 text-3xl font-bold text-text">{activePortfolio.name}</h1>
+            <p className="mt-2 max-w-xl text-sm text-text-secondary">
+              {activePortfolio.description}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => undefined}>
+              <Wallet className="h-4 w-4" />
+              Connect wallet
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <Button variant="primary" className="gap-2">
+              <Share2 className="h-4 w-4" />
+              Share snapshot
+            </Button>
+          </div>
+        </div>
 
-// Wallet Connect Modal (placeholder)
-const WalletConnectModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  onConnectMetaMask: () => void;
-  isConnecting: boolean;
-  error: string | null;
-}> = ({ isOpen, onClose, onConnectMetaMask, isConnecting, error }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="p-6 bg-white/95 dark:bg-black/95 border-teal-600 dark:border-matrix-green max-w-md w-full mx-4">
-        <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green mb-4">
-          Connect Wallet
-        </h3>
-        
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+        {MOCK_PORTFOLIOS.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
+              Portfolio
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {MOCK_PORTFOLIOS.map((portfolio) => (
+                <Button
+                  key={portfolio.id}
+                  size="sm"
+                  variant={portfolio.id === activePortfolioId ? 'primary' : 'outline'}
+                  onClick={() => setActivePortfolioId(portfolio.id)}
+                  className="whitespace-nowrap"
+                >
+                  {portfolio.name}
+                </Button>
+              ))}
+            </div>
+          </div>
         )}
 
-        <div className="space-y-3">
-          <GlitchButton
-            onClick={onConnectMetaMask}
-            disabled={isConnecting}
-            className="w-full justify-center gap-2"
-          >
-            <Wallet className="w-4 h-4" />
-            {isConnecting ? 'Connecting...' : 'MetaMask'}
-          </GlitchButton>
-          
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="w-full"
-          >
-            Cancel
+        <Alert className="border-border/60 bg-surface/70 text-text">
+          <AlertDescription>
+            Data shown here is simulated to illustrate the CryptoWebb portfolio experience. Connect a wallet or import
+            fills when ready to transition this dashboard to live balances.
+          </AlertDescription>
+        </Alert>
+      </header>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="border-border/60 p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Total value</p>
+              <p className="mt-3 text-3xl font-semibold text-text">
+                {formatCurrency(summary.totalValue, activePortfolio.baseCurrency)}
+              </p>
+              <p className="mt-2 text-xs text-text-secondary">
+                Updated {new Date(activePortfolio.lastUpdated).toLocaleString()}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+              <DollarSign className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="mt-5 text-sm text-text-secondary">
+            Cost basis {formatCurrency(summary.totalCost, activePortfolio.baseCurrency)}
+          </p>
+        </Card>
+
+        <Card className="border-border/60 p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Daily change</p>
+              <p
+                className={`mt-3 text-3xl font-semibold ${
+                  isDayGainPositive ? 'text-success' : 'text-error'
+                }`}
+              >
+                {formatCurrency(summary.dayChangeValue, activePortfolio.baseCurrency)}
+              </p>
+              <p className="mt-2 text-xs text-text-secondary">
+                {isDayGainPositive ? 'Gain' : 'Drawdown'} in the last 24 hours
+              </p>
+            </div>
+            <div className={`rounded-2xl p-3 ${isDayGainPositive ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
+              {isDayGainPositive ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-border/60 p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Total return</p>
+              <p className="mt-3 text-3xl font-semibold text-text">
+                {formatPercent(summary.totalReturnPct)}
+              </p>
+              <p className="mt-2 text-xs text-text-secondary">Unrealized performance relative to cost basis</p>
+            </div>
+            <div className="rounded-2xl bg-secondary/10 p-3 text-secondary">
+              <PieChart className="h-5 w-5" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-border/60 p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Rebalancing window</p>
+              <p className="mt-3 text-lg font-semibold text-text">Every 30 days</p>
+              <p className="mt-2 text-xs text-text-secondary">Next review June 1st, 2024</p>
+            </div>
+            <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+              <CalendarDays className="h-5 w-5" />
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <Card className="border-border/60 p-6 xl:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-text">Performance</h2>
+              <p className="text-sm text-text-secondary">
+                Track cumulative returns for the selected timeframe.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TIMEFRAMES.map((frame) => (
+                <Button
+                  key={frame}
+                  size="sm"
+                  variant={timeframe === frame ? 'primary' : 'outline'}
+                  onClick={() => setTimeframe(frame)}
+                  className="whitespace-nowrap"
+                >
+                  {frame}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Sparkline points={performancePoints} positive={summary.totalReturnPct >= 0} />
+          </div>
+        </Card>
+
+        <Card className="border-border/60 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-text">Allocation</h2>
+              <p className="text-sm text-text-secondary">Relative weighting across the active portfolio.</p>
+            </div>
+            <div className="rounded-2xl bg-secondary/10 p-3 text-secondary">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <AllocationList holdings={activePortfolio.holdings} currency={activePortfolio.baseCurrency} />
+          </div>
+        </Card>
+      </section>
+
+      <section className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-text">Holdings</h2>
+            <p className="text-sm text-text-secondary">
+              Snapshot of each component with mark-to-market valuation and unrealized impact.
+            </p>
+          </div>
+          <Button variant="outline" size="sm">
+            Export holdings
           </Button>
         </div>
-      </Card>
-    </div>
-  );
-};
 
-// Add Transaction Modal (placeholder)
-const AddTransactionModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  portfolioId: string;
-  onAddTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
-}> = ({ isOpen, onClose, portfolioId, onAddTransaction }) => {
-  if (!isOpen) return null;
+        <HoldingsTable holdings={activePortfolio.holdings} currency={activePortfolio.baseCurrency} />
+      </section>
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="p-6 bg-white/95 dark:bg-black/95 border-teal-600 dark:border-matrix-green max-w-md w-full mx-4">
-        <h3 className="text-lg font-semibold text-teal-600 dark:text-matrix-green mb-4">
-          Add Transaction
-        </h3>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-4">
-          Transaction form will be implemented here
-        </p>
-        <Button
-          variant="outline"
-          onClick={onClose}
-          className="w-full"
-        >
-          Close
-        </Button>
-      </Card>
+      <TransactionsList transactions={transactions} currency={activePortfolio.baseCurrency} />
     </div>
   );
 };

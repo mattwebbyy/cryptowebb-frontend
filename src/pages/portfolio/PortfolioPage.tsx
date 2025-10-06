@@ -1,4 +1,4 @@
-// src/pages/analytics/PortfolioPage.tsx
+// src/pages/portfolio/PortfolioPage.tsx
 import React from 'react';
 import { PortfolioTracker } from '@/features/portfolio/components/PortfolioTracker';
 import { EnhancedSEO } from '@/components/EnhancedSEO';
