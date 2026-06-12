@@ -53,9 +53,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   ];
 
   const variantOptions: { variant: ThemeVariant; label: string; description: string }[] = [
-    { variant: 'matrix', label: 'Matrix', description: 'Classic green matrix theme' },
-    { variant: 'minimal', label: 'Minimal', description: 'Clean and simple' },
-    { variant: 'cyber', label: 'Cyber', description: 'Futuristic cyberpunk' },
+    { variant: 'default', label: 'Modern', description: 'Clean analytics look' },
+    { variant: 'matrix', label: 'Matrix', description: 'Classic green easter egg' },
   ];
 
   const intensityOptions = [

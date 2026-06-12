@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
+import { Button } from '@/components/ui/Button';
+import { Input, Label } from '@/components/ui/Input';
+import { API_BASE_URL } from '@/lib/config';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -19,7 +22,6 @@ export const LoginForm = () => {
     // --- Option 1: Check if token data is in the URL (from backend redirect) ---
     const token = searchParams.get('token');
     if (token) {
-      // Build the auth response object from the URL query parameters
       const authData = {
         token,
         refreshToken: searchParams.get('refreshToken') || '',
@@ -47,7 +49,7 @@ export const LoginForm = () => {
         .finally(() => {
           setIsProcessingOAuth(false);
         });
-      return; // No need to process further if token was found
+      return;
     }
 
     // --- Fallback: Check for a "code" parameter (if still in use) ---
@@ -56,9 +58,8 @@ export const LoginForm = () => {
       setIsProcessingOAuth(true);
       const handleGoogleCallback = async () => {
         try {
-          console.log('Handling Google callback with code:', code);
           const response = await fetch(
-            `http://localhost:8080/api/v1/auth/google/callback?code=${code}`,
+            `${API_BASE_URL}/api/v1/auth/google/callback?code=${code}`,
             {
               method: 'GET',
               headers: {
@@ -74,7 +75,6 @@ export const LoginForm = () => {
           }
 
           const data = await response.json();
-          console.log('Google auth response:', data);
           await login(data);
           navigate('/settings', { replace: true });
         } catch (err) {
@@ -92,11 +92,12 @@ export const LoginForm = () => {
 
   if (isProcessingOAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-primary text-center">
-          <div className="mb-4">Processing Google Authentication...</div>
-          {/* You could add a loading spinner here if desired */}
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-text-secondary">
+        <div
+          className="w-6 h-6 rounded-full border-2 border-border border-t-primary animate-spin"
+          aria-hidden="true"
+        />
+        Completing Google sign-in…
       </div>
     );
   }
@@ -107,7 +108,7 @@ export const LoginForm = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -116,7 +117,7 @@ export const LoginForm = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Login failed');
 
-      await login(data); // Save tokens and user data to localStorage
+      await login(data);
       navigate('/settings');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -127,74 +128,98 @@ export const LoginForm = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/google/login');
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/google/login`);
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.error || 'Failed to initiate Google login');
 
-      // Redirect the user to the Google OAuth page.
       window.location.href = data.url;
-    } catch (err) {
+    } catch {
       setError('Failed to initiate Google login');
     }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-lg w-full mx-4 sm:mx-auto p-6 sm:p-8 border border-primary bg-surface/30 shadow-lg rounded-lg"
+      transition={{ duration: 0.3 }}
+      className="w-full max-w-md mx-auto"
     >
-      <h2 className="text-2xl sm:text-3xl mb-6 sm:mb-8 text-center text-primary font-bold px-4 sm:px-16">System Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-        <div>
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 sm:p-4 bg-surface border border-primary text-primary rounded focus:outline-none focus:ring-2 focus:ring-primary text-base min-h-[44px]"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
+      <div className="rounded-2xl border border-border bg-surface p-8 shadow-xl shadow-black/10">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-text-secondary">Sign in to your CryptoWebb account</p>
         </div>
-        <div>
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 sm:p-4 bg-surface border border-primary text-primary rounded focus:outline-none focus:ring-2 focus:ring-primary text-base min-h-[44px]"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required
-          />
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleGoogleSignIn}
+          type="button"
+        >
+          <FaGoogle className="mr-2 w-4 h-4" aria-hidden="true" />
+          Continue with Google
+        </Button>
+
+        <div className="my-6 flex items-center gap-3" role="separator" aria-label="or">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-text-secondary uppercase tracking-wider">or</span>
+          <div className="h-px flex-1 bg-border" />
         </div>
-        {error && <div className="text-red-500 text-sm p-2 bg-red-900/20 border border-red-500/30 rounded">{error}</div>}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          type="submit"
-          className="w-full p-3 sm:p-4 bg-primary text-background font-bold rounded hover:bg-primary-90 transition-colors min-h-[44px] text-base"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Authenticating...' : 'Access System'}
-        </motion.button>
-      </form>
-      <div className="my-4 sm:my-6 text-center text-primary font-semibold">or</div>
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={handleGoogleSignIn}
-        className="w-full flex items-center justify-center gap-2 p-3 sm:p-4 bg-white text-black font-bold rounded hover:bg-gray-200 transition-colors min-h-[44px] text-base"
-      >
-        <FaGoogle size={20} />
-        Sign in with Google
-      </motion.button>
-      <div className="mt-4 sm:mt-6 text-center">
-        <button
-          onClick={() => navigate('/register')}
-          className="text-primary hover:text-primary-70 transition-colors p-2 min-h-[44px] flex items-center justify-center mx-auto"
-        >
-          Initialize New Account
-        </button>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="login-email">Email</Label>
+            <Input
+              id="login-email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="login-password">Password</Label>
+            <Input
+              id="login-password"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+            />
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="text-sm text-error p-3 rounded-lg border border-error/40 bg-error/10"
+            >
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+            disabled={isSubmitting}
+            isLoading={isSubmitting}
+          >
+            Sign in
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-text-secondary">
+          New to CryptoWebb?{' '}
+          <Link to="/register" className="text-primary hover:underline font-medium">
+            Create an account
+          </Link>
+        </p>
       </div>
     </motion.div>
   );

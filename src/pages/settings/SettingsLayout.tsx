@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { User, Settings as SettingsIcon, Home, Share2, ChevronRight, BarChart3, Menu, X, CreditCard } from 'lucide-react';
 import { useState } from 'react';
 import React from 'react';
+import { API_BASE_URL } from '@/lib/config';
 
 interface NavItem {
   path: string;
@@ -29,7 +30,7 @@ const makeAuthRequest = async (url: string) => {
   const token = localStorage.getItem('token');
   if (!token) throw new Error('No authentication token');
   
-  const response = await fetch(`http://localhost:8080${url}`, {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -128,9 +129,9 @@ const SettingsLayout = () => {
 
   return (
     <div className="min-h-screen w-full relative pt-20 overflow-x-hidden">
-      <div className='bg-white dark:bg-black overflow-x-hidden'>
-      <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm bg-b">
-        <div className="flex items-center justify-between bg-ba">
+      <div className="bg-background overflow-x-hidden">
+      <header className="relative z-50 bg-surface/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 shadow-sm">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-white" />
@@ -170,10 +171,10 @@ const SettingsLayout = () => {
         </div>
         
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white/[0.98] backdrop-blur-md border-b border-border shadow-xl z-[80] mt-2 mx-4 rounded-lg border border-primary/50">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-surface/95 backdrop-blur-md shadow-xl z-[80] mt-2 mx-4 rounded-lg border border-border">
             <nav className="p-3 space-y-3">
               <div>
-                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
+                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 text-center">
                   Settings
                 </h4>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -184,10 +185,10 @@ const SettingsLayout = () => {
                       end={item.end}
                       onClick={handleNavClick}
                       className={({ isActive }) =>
-                        `flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border  ${
+                        `flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border ${
                           isActive
-                            ? 'bg-primary/25 text-primary border-primary/60'
-                            : 'text-text-secondary hover:text-primary hover:bg-primary/15 border-primary/30 hover:border-primary/50'
+                            ? 'bg-primary/10 text-primary border-primary/40'
+                            : 'text-text-secondary hover:text-text hover:bg-surface-2 border-border'
                         }`
                       }
                     >
@@ -200,15 +201,15 @@ const SettingsLayout = () => {
                 </div>
               </div>
               
-              <div className="pt-2 border-t border-primary/40">
-                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 text-center">
+              <div className="pt-2 border-t border-border">
+                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 text-center">
                   Platform
                 </h4>
                 <div className="grid grid-cols-2 gap-1.5">
                   <NavLink
                     to="/analytics"
                     onClick={handleNavClick}
-                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-text hover:bg-surface-2 transition-all duration-200 min-h-[40px] text-xs font-medium border border-border"
                   >
                     <BarChart3 className="h-3 w-3 flex-shrink-0" />
                     <span className="font-medium">Analytics</span>
@@ -217,7 +218,7 @@ const SettingsLayout = () => {
                   <NavLink
                     to="/"
                     onClick={handleNavClick}
-                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-text hover:bg-surface-2 transition-all duration-200 min-h-[40px] text-xs font-medium border border-border"
                   >
                     <Home className="h-3 w-3 flex-shrink-0" />
                     <span className="font-medium">Home</span>
@@ -226,7 +227,7 @@ const SettingsLayout = () => {
                   <NavLink
                     to="/pricing"
                     onClick={handleNavClick}
-                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-text hover:bg-surface-2 transition-all duration-200 min-h-[40px] text-xs font-medium border border-border"
                   >
                     <CreditCard className="h-3 w-3 flex-shrink-0" />
                     <span className="font-medium">Pricing</span>
@@ -235,7 +236,7 @@ const SettingsLayout = () => {
                   <NavLink
                     to="/about"
                     onClick={handleNavClick}
-                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/15 transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 hover:border-primary/50 bg-black/80"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md text-text-secondary hover:text-text hover:bg-surface-2 transition-all duration-200 min-h-[40px] text-xs font-medium border border-border"
                   >
                     <User className="h-3 w-3 flex-shrink-0" />
                     <span className="font-medium">About</span>

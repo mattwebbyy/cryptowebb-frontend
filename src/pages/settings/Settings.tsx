@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { API_BASE_URL } from '@/lib/config';
 
 type APIKey = {
   id: string;
@@ -51,7 +52,7 @@ const Settings = () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token not found.');
 
-    const response = await fetch('http://localhost:8080/api/v1/users/me/api-keys', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const Settings = () => {
     // Ensure expiresIn is handled correctly, especially 'Never' (0)
     const expiryInSeconds = payload.expiresIn > 0 ? payload.expiresIn * 24 * 3600 : 0;
 
-    const response = await fetch('http://localhost:8080/api/v1/users/me/api-keys', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,7 +145,7 @@ const Settings = () => {
 
     console.log('Revoking key:', keyId); // Debug log
 
-    const response = await fetch(`http://localhost:8080/api/v1/users/me/api-keys/${keyId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys/${keyId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -243,7 +244,7 @@ const Settings = () => {
 
             <form onSubmit={handleGenerate} className="space-y-8">
               <div className="space-y-2">
-              <label htmlFor="keyName" className="block mb-3 text-text font-medium">
+              <label htmlFor="keyName" className="block mb-1.5 text-sm font-medium text-text">
                 Key Name
               </label>
               <input
@@ -252,24 +253,20 @@ const Settings = () => {
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 placeholder="e.g., My Development Key"
-                className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl
-                           text-text placeholder-text-secondary/50 focus:border-primary/50
-                           focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 required
               />
               </div>
 
               <div className="space-y-2">
-              <label htmlFor="keyExpiry" className="block mb-3 text-text font-medium">
+              <label htmlFor="keyExpiry" className="block mb-1.5 text-sm font-medium text-text">
                 Expiration Period
               </label>
               <select
                 id="keyExpiry"
                 value={newKeyExpiry}
                 onChange={(e) => setNewKeyExpiry(e.target.value)}
-                className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl
-                           text-text focus:border-primary/50 focus:outline-none
-                           focus:ring-2 focus:ring-primary/50 appearance-none transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 cursor-pointer"
               >
                 <option value="7">7 Days</option>
                 <option value="30">30 Days</option>
@@ -292,7 +289,7 @@ const Settings = () => {
 
           {/* Display Generated Key */}
           {generateMutation.error && (
-            <div className="mt-4 p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm">
+            <div className="mt-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
               Error generating key: {generateMutation.error.message}
             </div>
           )}
@@ -336,24 +333,24 @@ const Settings = () => {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="text-primary text-center py-4">Loading API keys...</div>
+            <div className="text-text-secondary text-center py-4">Loading API keys...</div>
           )}
 
           {/* Fetch Error State */}
           {fetchError && (
-            <div className="p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm text-center">
+            <div className="p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm text-center">
               Error loading keys: {fetchError.message}
             </div>
           )}
 
           {/* Empty State (after loading, no error) */}
           {!isLoading && !fetchError && (!keys || keys.length === 0) && (
-            <div className="text-primary/70 text-center py-4">No active API keys found.</div>
+            <div className="text-text-secondary text-center py-4">No active API keys found.</div>
           )}
 
           {/* Revoke Error State */}
           {revokeMutation.error && (
-            <div className="mt-4 mb-4 p-3 bg-red-900/50 border border-red-500/70 rounded-lg text-red-300 text-sm">
+            <div className="mt-4 mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
               Error revoking key: {revokeMutation.error.message}
             </div>
           )}
@@ -361,8 +358,7 @@ const Settings = () => {
           {/* Display Keys (after loading, no error, keys exist) */}
           {!isLoading && !fetchError && keys && keys.length > 0 && (
             <div
-              className="space-y-4 max-h-[400px] overflow-y-auto pr-2
-                           scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-primary/50"
+              className="space-y-4 max-h-[400px] overflow-y-auto pr-2"
             >
               {keys.map((key) => (
                 <div

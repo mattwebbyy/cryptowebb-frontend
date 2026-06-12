@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '@/lib/config';
 
 interface ProfileData {
   firstName: string;
@@ -52,7 +53,7 @@ const Profile = () => {
       throw new Error('No auth token');
     }
 
-    const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+    const API_URL = API_BASE_URL;
     return fetch(`${API_URL}${url}`, {
       ...options,
       headers: {
@@ -255,7 +256,7 @@ const Profile = () => {
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               ) : (
-                <Camera className="w-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                <Camera className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
               )}
             </div>
             <div className="space-y-2">
@@ -283,49 +284,49 @@ const Profile = () => {
           <form onSubmit={handleProfileSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-text font-medium mb-3">First Name</label>
+                <label className="block mb-1.5 text-sm font-medium text-text">First Name</label>
                 <input
                   type="text"
                   name="firstName"
                   value={profileData.firstName}
                   onChange={handleProfileChange}
-                  className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                   placeholder="Enter your first name"
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-text font-medium mb-3">Last Name</label>
+                <label className="block mb-1.5 text-sm font-medium text-text">Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={profileData.lastName}
                   onChange={handleProfileChange}
-                  className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                   placeholder="Enter your last name"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-text font-medium mb-3">Bio</label>
+              <label className="block mb-1.5 text-sm font-medium text-text">Bio</label>
               <textarea
                 name="bio"
                 value={profileData.bio}
                 onChange={handleProfileChange}
                 rows={4}
-                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 resize-none backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 resize-none"
                 placeholder="Tell us about yourself..."
               />
             </div>
 
             <div className="space-y-2">
-              <label className="block text-text font-medium mb-3">Phone Number</label>
+              <label className="block mb-1.5 text-sm font-medium text-text">Phone Number</label>
               <input
                 type="tel"
                 name="phoneNumber"
                 value={profileData.phoneNumber}
                 onChange={handleProfileChange}
-                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 placeholder="Enter your phone number"
               />
             </div>
@@ -344,30 +345,30 @@ const Profile = () => {
         </div>
 
         {/* Password Change Form - Full Width */}
-        <Card className="p-6 bg-primary/[0.10] backdrop-blur-lg border border-primary/35 hover:bg-primary/[0.15] transition-all duration-300 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30">
+        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border shadow-sm" hover={false}>
           <h3 className="text-2xl font-bold text-text mb-8">Change Password</h3>
           <form onSubmit={handlePasswordSubmit} className="space-y-8">
             <div className="space-y-2">
-              <label className="block text-text font-medium mb-3">Current Password</label>
+              <label className="block mb-1.5 text-sm font-medium text-text">Current Password</label>
               <input
                 type="password"
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 placeholder="Enter your current password"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="block text-text font-medium mb-3">New Password</label>
+              <label className="block mb-1.5 text-sm font-medium text-text">New Password</label>
               <input
                 type="password"
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 placeholder="Enter your new password (min 8 characters)"
                 required
                 minLength={8}
@@ -375,13 +376,13 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-text font-medium mb-3">Confirm New Password</label>
+              <label className="block mb-1.5 text-sm font-medium text-text">Confirm New Password</label>
               <input
                 type="password"
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
-                className="w-full bg-surface/80 border border-border/50 p-4 text-text rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 placeholder="Confirm your new password"
                 required
                 minLength={8}

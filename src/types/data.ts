@@ -25,6 +25,7 @@ export interface DashboardConfig {
   id: string;
   userId: string;
   name: string;
+  description?: string;
   layout: string;
   charts: ChartConfig[]; // Or just IDs
   createdAt: string;

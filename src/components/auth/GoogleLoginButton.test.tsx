@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import GoogleLoginButton from './GoogleLoginButton';
 
 describe('<GoogleLoginButton />', () => {
-  const mockOnClick = jest.fn();
+  const mockOnClick = vi.fn();
 
   beforeEach(() => {
     mockOnClick.mockClear();

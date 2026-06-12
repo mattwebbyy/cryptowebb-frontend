@@ -85,20 +85,20 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   return (
     <nav 
       aria-label="Breadcrumb" 
-      className={cn("flex items-center space-x-1 text-sm text-matrix-green/70", className)}
+      className={cn("flex items-center space-x-1 text-sm text-primary/70", className)}
     >
       {/* Home link */}
       {showHome && (
         <>
           <Link
             to="/"
-            className="flex items-center hover:text-matrix-green transition-colors"
+            className="flex items-center hover:text-primary transition-colors"
             aria-label="Home"
           >
             <Home className="h-4 w-4" />
           </Link>
           {breadcrumbItems.length > 0 && (
-            <ChevronRight className="h-4 w-4 text-matrix-green/50" />
+            <ChevronRight className="h-4 w-4 text-primary/50" />
           )}
         </>
       )}
@@ -112,7 +112,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             {item.href && !item.isActive ? (
               <Link
                 to={item.href}
-                className="flex items-center hover:text-matrix-green transition-colors font-medium"
+                className="flex items-center hover:text-primary transition-colors font-medium"
               >
                 {item.icon && <span className="mr-1">{item.icon}</span>}
                 {item.label}
@@ -122,8 +122,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                 className={cn(
                   "flex items-center font-medium",
                   item.isActive || isLast 
-                    ? "text-matrix-green" 
-                    : "text-matrix-green/70"
+                    ? "text-primary" 
+                    : "text-primary/70"
                 )}
                 aria-current={item.isActive || isLast ? "page" : undefined}
               >
@@ -133,7 +133,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             )}
             
             {!isLast && (
-              <ChevronRight className="h-4 w-4 text-matrix-green/50" />
+              <ChevronRight className="h-4 w-4 text-primary/50" />
             )}
           </React.Fragment>
         );

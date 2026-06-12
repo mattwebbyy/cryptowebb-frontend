@@ -1,6 +1,6 @@
 // src/hooks/useWebSocketImproved.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 interface WebSocketOptions {
   onOpen?: (event: Event) => void;
@@ -258,7 +258,7 @@ export const useWebSocketImproved = <T = any>(
             
             if (event.code !== 1000 && event.code !== 1001) {
               toast.error('Connection lost. Max reconnect attempts reached.', {
-                autoClose: 7000,
+                duration: 7000,
               });
             }
           }
@@ -291,7 +291,7 @@ export const useWebSocketImproved = <T = any>(
   ]);
 
   // Manual disconnect function
-  const disconnect = useCallback((code = 1000, reason = 'Manual disconnect') => {
+  const disconnect = useCallback((_code = 1000, _reason = 'Manual disconnect') => {
     setState(prev => ({
       ...prev,
       reconnectCount: reconnectAttempts + 1, // Prevent reconnection
@@ -311,7 +311,7 @@ export const useWebSocketImproved = <T = any>(
       return true;
     } else {
       console.warn('WebSocket: Cannot send message, connection not open');
-      toast.warn('Connection not available. Message not sent.');
+      toast.warning('Connection not available. Message not sent.');
       return false;
     }
   }, []);

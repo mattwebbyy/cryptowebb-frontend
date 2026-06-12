@@ -1,12 +1,26 @@
-import React from 'react';
-import { ToastContainer } from 'react-toastify';
-import { MatrixRain } from './components/matrix/MatrixRain';
+import { lazy, Suspense } from 'react';
+import { Toaster } from 'sonner';
 import { Layout } from './components/layout/Layout';
 import { AuthProvider } from './hooks/useAuth';
 import { StripeProvider } from './components/providers/StripeProvider';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { Routes } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
+
+// Matrix rain only loads (and only costs bytes) under the matrix easter-egg theme.
+const MatrixRain = lazy(() =>
+  import('./components/matrix/MatrixRain').then((m) => ({ default: m.MatrixRain }))
+);
+
+const MatrixRainGate = () => {
+  const { theme } = useTheme();
+  if (theme.variant !== 'matrix') return null;
+  return (
+    <Suspense fallback={null}>
+      <MatrixRain />
+    </Suspense>
+  );
+};
 
 function App() {
   return (
@@ -15,20 +29,11 @@ function App() {
         <AuthProvider>
           <StripeProvider>
             <div className="app-container w-full overflow-x-hidden">
-              <MatrixRain />
+              <MatrixRainGate />
               <Layout>
                 <Routes />
               </Layout>
-              <ToastContainer
-                position="bottom-right"
-                autoClose={5000}
-                newestOnTop
-                closeOnClick
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="dark"
-              />
+              <Toaster position="bottom-right" richColors closeButton theme="dark" />
             </div>
           </StripeProvider>
         </AuthProvider>

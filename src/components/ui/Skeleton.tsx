@@ -21,9 +21,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   const baseClasses = "block";
   
   const variantClasses = {
-    default: "bg-gray-300 animate-pulse",
-    matrix: "bg-gradient-to-r from-matrix-green/10 via-matrix-green/20 to-matrix-green/10 animate-pulse",
-    pulse: "bg-matrix-green/20 animate-bounce"
+    default: "bg-surface-2 animate-pulse",
+    matrix: "bg-gradient-to-r from-primary/10 via-primary/20 to-primary/10 animate-pulse",
+    pulse: "bg-primary/20 animate-bounce"
   };
 
   const style: React.CSSProperties = {};
@@ -46,7 +46,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 // Chart skeleton for dashboard loading
 export const ChartSkeleton: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={cn("bg-black/50 border border-matrix-green/30 rounded-lg p-4", className)}>
+  <div className={cn("bg-surface border border-border rounded-lg p-4", className)}>
     {/* Chart title skeleton */}
     <div className="mb-4">
       <Skeleton className="h-5 w-48 mb-2" />
@@ -98,9 +98,9 @@ export const TableSkeleton: React.FC<{
   columns = 4, 
   className 
 }) => (
-  <div className={cn("bg-black/50 border border-matrix-green/30 rounded-lg overflow-hidden", className)}>
+  <div className={cn("bg-surface border border-border rounded-lg overflow-hidden", className)}>
     {/* Table header */}
-    <div className="border-b border-matrix-green/20 p-4">
+    <div className="border-b border-primary/20 p-4">
       <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {Array.from({ length: columns }).map((_, i) => (
           <Skeleton key={i} className="h-4 w-full" />
@@ -109,7 +109,7 @@ export const TableSkeleton: React.FC<{
     </div>
     
     {/* Table rows */}
-    <div className="divide-y divide-matrix-green/10">
+    <div className="divide-y divide-primary/10">
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div key={rowIndex} className="p-4">
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
@@ -131,7 +131,7 @@ export const TableSkeleton: React.FC<{
 export const MetricsListSkeleton: React.FC<{ className?: string }> = ({ className }) => (
   <div className={cn("space-y-4", className)}>
     {Array.from({ length: 6 }).map((_, i) => (
-      <div key={i} className="bg-black/50 border border-matrix-green/30 rounded-lg p-4">
+      <div key={i} className="bg-surface border border-border rounded-lg p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -149,7 +149,7 @@ export const MetricsListSkeleton: React.FC<{ className?: string }> = ({ classNam
               ))}
             </div>
             
-            <div className="mt-3 p-2 bg-matrix-green/5 rounded border border-matrix-green/10">
+            <div className="mt-3 p-2 bg-primary/5 rounded border border-primary/10">
               <Skeleton className="h-3 w-12 mb-1" />
               <Skeleton className="h-4 w-full" />
             </div>
@@ -218,11 +218,11 @@ export const MatrixCardSkeleton: React.FC<{
   children?: React.ReactNode;
 }> = ({ className, children }) => (
   <div className={cn(
-    "bg-black/50 border border-matrix-green/30 rounded-lg p-6 relative overflow-hidden",
+    "bg-surface border border-border rounded-lg p-6 relative overflow-hidden",
     className
   )}>
     {/* Matrix scan line effect */}
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-matrix-green/5 to-transparent animate-pulse" />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-pulse" />
     
     {children || (
       <div className="relative z-10">

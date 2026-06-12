@@ -3,9 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { ReactNode } from 'react';
 import { STRIPE_CONFIG } from '../../config/stripe';
 
-const stripePromise = loadStripe(
-  'pk_test_51QoZwtEHguG1cYSgFmvuo6rS7p5Rb7cQCQFCvPX7nWEnSnecnhOOYyDQXe7Vwyeppp4oIw6DxEf8h54qIIRZ7XCA00lKlYemMq'
-);
+const stripePromise = loadStripe(STRIPE_CONFIG.publicKey);
 
 interface StripeProviderProps {
   children: ReactNode;

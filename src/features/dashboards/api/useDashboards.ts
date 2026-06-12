@@ -3,15 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/axios';
 import { DashboardConfig } from '@/types/data';
 
-// Fetch Function
+// Backend DashboardResponse — DashboardConfig plus share fields.
+export interface SharedDashboardResponse extends DashboardConfig {
+  isPublic: boolean;
+  shareUrl?: string;
+}
+
 const fetchDashboards = async (): Promise<DashboardConfig[]> => {
-  console.debug('Fetching dashboards...');
-  // Adjust endpoint if needed
   const data = await apiClient.get<DashboardConfig[]>('/api/v1/dashboards');
   return data || [];
 };
 
-// Custom Hook for fetching
 export const useDashboards = () => {
   return useQuery<DashboardConfig[], Error>({
     queryKey: ['dashboards'],
@@ -20,18 +22,26 @@ export const useDashboards = () => {
   });
 };
 
-// --- Placeholder Mutations (Implement later) ---
-
 export const useCreateDashboard = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (
-      newDashboard: Omit<DashboardConfig, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'charts'>
-    ) => {
-      console.warn('useCreateDashboard mutationFn not implemented', newDashboard);
-      await new Promise((res) => setTimeout(res, 500));
-      return { id: `new_${Date.now()}`, ...newDashboard };
+    mutationFn: (newDashboard: { name: string; layout?: string; isPublic?: boolean }) =>
+      apiClient.post<DashboardConfig>('/api/v1/dashboards', {
+        name: newDashboard.name,
+        layout: newDashboard.layout ?? 'grid',
+        isPublic: newDashboard.isPublic ?? false,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
     },
+  });
+};
+
+export const useUpdateDashboard = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...updates }: { id: string; name?: string; layout?: string }) =>
+      apiClient.put<DashboardConfig>(`/api/v1/dashboards/${id}`, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboards'] });
     },
@@ -41,11 +51,19 @@ export const useCreateDashboard = () => {
 export const useDeleteDashboard = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (dashboardId: string) => {
-      console.warn('useDeleteDashboard mutationFn not implemented', dashboardId);
-      await new Promise((res) => setTimeout(res, 500));
-      return { success: true };
+    mutationFn: (dashboardId: string) => apiClient.delete(`/api/v1/dashboards/${dashboardId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
     },
+  });
+};
+
+// Marks the dashboard public and returns it with a stable shareUrl token.
+export const useShareDashboard = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dashboardId: string) =>
+      apiClient.post<SharedDashboardResponse>(`/api/v1/dashboards/${dashboardId}/share`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboards'] });
     },

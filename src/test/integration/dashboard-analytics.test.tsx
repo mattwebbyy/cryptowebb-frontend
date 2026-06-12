@@ -1,16 +1,14 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import configureStore from 'redux-mock-store';
 
 import { AuthProvider } from '../../hooks/useAuth';
 
 // Mock the chart components to avoid Highcharts complexity in tests
-jest.mock('../../components/charts/LineChart', () => ({
+vi.mock('../../components/charts/LineChart', () => ({
   LineChart: ({ data, title }: { data: any[]; title: string }) => (
     <div data-testid="line-chart">
       <h3>{title}</h3>
@@ -19,7 +17,7 @@ jest.mock('../../components/charts/LineChart', () => ({
   ),
 }));
 
-jest.mock('../../components/charts/BarChart', () => ({
+vi.mock('../../components/charts/BarChart', () => ({
   BarChart: ({ data, title }: { data: any[]; title: string }) => (
     <div data-testid="bar-chart">
       <h3>{title}</h3>
@@ -29,45 +27,30 @@ jest.mock('../../components/charts/BarChart', () => ({
 }));
 
 // Mock API clients
-jest.mock('../../api/chartApi', () => ({
-  fetchChartData: jest.fn(),
+vi.mock('../../api/chartApi', () => ({
+  fetchChartData: vi.fn(),
 }));
 
-jest.mock('../../api/dashboardApi', () => ({
-  fetchDashboardConfig: jest.fn(),
-  saveDashboardConfig: jest.fn(),
+vi.mock('../../api/dashboardApi', () => ({
+  fetchDashboardConfig: vi.fn(),
+  saveDashboardConfig: vi.fn(),
 }));
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
 // Mock fetch for auth
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
-const mockStore = configureStore([]);
-
-const createTestWrapper = (initialState = {}) => {
-  const store = mockStore({
-    matrix: {
-      speed: 50,
-      density: 1,
-      glitchIntensity: 1,
-      theme: {
-        primaryColor: '#33ff33',
-        backgroundColor: '#000000',
-      },
-    },
-    ...initialState,
-  });
-
+const createTestWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -76,15 +59,13 @@ const createTestWrapper = (initialState = {}) => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/analytics']}>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </MemoryRouter>
-      </QueryClientProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/analytics']}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 };
 
@@ -194,7 +175,7 @@ const MockAnalyticsDashboard = () => {
 
 describe('Dashboard Analytics Integration Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Mock authenticated user
     localStorageMock.getItem.mockImplementation((key) => {
@@ -204,7 +185,7 @@ describe('Dashboard Analytics Integration Tests', () => {
       return null;
     });
 
-    (fetch as jest.Mock).mockResolvedValue({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
         user: {
@@ -218,12 +199,12 @@ describe('Dashboard Analytics Integration Tests', () => {
     });
 
     // Suppress console logs
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Dashboard Rendering and Navigation', () => {

@@ -13,8 +13,8 @@ describe('Alert', () => {
 
     const alert = screen.getByRole('alert');
     expect(alert).toBeInTheDocument();
-    expect(alert.className).toContain('border-teal-600');
-    expect(alert.className).toContain('bg-teal-50');
+    expect(alert.className).toContain('border-primary');
+    expect(alert.className).toContain('bg-primary/10');
     expect(screen.getByRole('heading', { level: 5, name: /heads up/i })).toBeInTheDocument();
     expect(screen.getByText(/something informative/i)).toBeInTheDocument();
   });

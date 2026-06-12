@@ -51,7 +51,8 @@ export const STRIPE_CONFIG = {
         'Standard Support',
         'Up to 3 Team Members',
       ],
-      basePrice: 29,
+      // Divide by 50 for testnet crypto payments, normal price for production/Stripe
+      basePrice: import.meta.env.VITE_BASE_PAY_TESTNET === 'true' ? Math.round(29 / 50) : 29,
     },
     pro: {
       name: 'Pro',
@@ -63,7 +64,8 @@ export const STRIPE_CONFIG = {
         'Up to 10 Team Members',
         'Custom Domain',
       ],
-      basePrice: 99,
+      // Divide by 50 for testnet crypto payments, normal price for production/Stripe
+      basePrice: import.meta.env.VITE_BASE_PAY_TESTNET === 'true' ? Math.round(99 / 50) : 99,
       popular: true,
     },
     enterprise: {
@@ -76,7 +78,8 @@ export const STRIPE_CONFIG = {
         'Up to 100 Team Members',
         'Custom Domain',
       ],
-      basePrice: 299,
+      // Divide by 50 for testnet crypto payments, normal price for production/Stripe
+      basePrice: import.meta.env.VITE_BASE_PAY_TESTNET === 'true' ? Math.round(299 / 50) : 299,
     },
   } as Record<string, PlanDetails>,
   discounts: {

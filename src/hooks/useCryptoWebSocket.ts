@@ -1,5 +1,6 @@
 // src/hooks/useCryptoWebSocket.ts
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { WS_BASE_URL } from '@/lib/config';
 
 interface WebSocketMessage {
   type: string;
@@ -50,17 +51,11 @@ export const useCryptoWebSocket = (
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const subscribedMetricsRef = useRef<Set<number>>(new Set());
 
-  // Get WebSocket URL - adjust based on your backend configuration
   const getWebSocketUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = process.env.NODE_ENV === 'development' 
-      ? 'localhost:8080' 
-      : window.location.host;
-    
     if (metricId) {
-      return `${protocol}//${host}/api/v1/ws/metrics/${metricId}/live`;
+      return `${WS_BASE_URL}/api/v1/ws/metrics/${metricId}/live`;
     }
-    return `${protocol}//${host}/api/v1/ws/live`;
+    return `${WS_BASE_URL}/api/v1/ws/live`;
   }, [metricId]);
 
   const connect = useCallback(() => {
@@ -134,7 +129,7 @@ export const useCryptoWebSocket = (
         onError?.(error);
       };
 
-      wsRef.current.onclose = (event) => {
+      wsRef.current.onclose = (_event) => {
         setIsConnected(false);
         onDisconnect?.();
 

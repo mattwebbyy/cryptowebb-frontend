@@ -5,8 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { Helmet } from 'react-helmet-async';
@@ -37,6 +36,12 @@ interface CodeProps {
   className?: string;
   children?: React.ReactNode;
 }
+
+const headingId = (children: React.ReactNode) =>
+  children
+    ?.toString()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-');
 
 function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -115,27 +120,28 @@ function BlogPost() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-matrix-green"></div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div
+          className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent"
+          role="status"
+          aria-label="Loading post"
+        />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="min-h-screen pt-24 px-4">
-        <Card className="max-w-4xl mx-auto bg-black/90 border border-matrix-green p-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-mono text-matrix-green">Post not found</h2>
-            <p className="mt-2 text-gray-400">The blog post you're looking for doesn't exist.</p>
-            <Link
-              to="/blog"
-              className="mt-4 inline-block text-matrix-green hover:text-matrix-green/80 font-mono"
-            >
-              ← Return to blog list
-            </Link>
-          </div>
-        </Card>
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <div className="rounded-xl border border-border bg-surface p-10 text-center max-w-md">
+          <h2 className="text-xl font-semibold tracking-tight">Post not found</h2>
+          <p className="mt-2 text-text-secondary">
+            The blog post you&apos;re looking for doesn&apos;t exist.
+          </p>
+          <Link to="/blog" className="mt-4 inline-block text-primary hover:underline">
+            ← Back to blog
+          </Link>
+        </div>
       </div>
     );
   }
@@ -145,6 +151,7 @@ function BlogPost() {
     month: 'long',
     day: 'numeric',
   });
+
   return (
     <>
       <Helmet>
@@ -160,146 +167,155 @@ function BlogPost() {
         ))}
       </Helmet>
 
-      <div className="min-h-screen pt-24 px-4 pb-12">
+      <div className="min-h-screen pt-24 px-6 pb-16">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-7xl mx-auto"
+          transition={{ duration: 0.4 }}
+          className="max-w-6xl mx-auto"
         >
           {/* Hero Image Section */}
           {post.image_url && (
-            <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
-              <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="relative w-full h-[360px] mb-10 rounded-2xl overflow-hidden border border-border">
+              <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8">
-                <h1 className="text-5xl font-mono text-white mb-4">{post.title}</h1>
-                <div className="flex items-center gap-4 text-gray-300">
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">{post.title}</h1>
+                <div className="flex items-center gap-4 text-sm text-text-secondary">
                   <div className="flex items-center gap-2">
-                    <Clock size={16} />
+                    <Clock size={14} aria-hidden="true" />
                     {formattedDate}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Tag size={16} />
-                    {post.tags.join(', ')}
-                  </div>
+                  {post.tags.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Tag size={14} aria-hidden="true" />
+                      {post.tags.join(', ')}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
           <div className="flex flex-row-reverse gap-8">
-            {/* Table of Contents - Now on the right */}
+            {/* Table of Contents */}
             {tableOfContents.length > 0 && (
               <div className="hidden lg:block w-64 shrink-0">
                 <div className="sticky top-24">
-                  <Card className="bg-black/90 border border-matrix-green p-4">
-                    <div className="flex items-center gap-2 mb-4 text-matrix-green font-mono">
-                      <List size={16} />
-                      Contents
+                  <nav
+                    aria-label="Table of contents"
+                    className="rounded-xl border border-border bg-surface p-4"
+                  >
+                    <div className="flex items-center gap-2 mb-3 text-sm font-medium">
+                      <List size={14} aria-hidden="true" />
+                      On this page
                     </div>
-                    <nav className="space-y-1">
+                    <div className="space-y-0.5">
                       {tableOfContents.map(({ id, title, level }) => (
                         <a
                           key={id}
                           href={`#${id}`}
-                          className={`block text-sm ${level > 1 ? 'pl-' + (level - 1) * 2 : ''} ${
+                          className={`block text-sm py-1 transition-colors ${
+                            level > 1 ? `pl-${(level - 1) * 2}` : ''
+                          } ${
                             activeSection === id
-                              ? 'text-matrix-green'
-                              : 'text-gray-400 hover:text-matrix-green/80'
-                          } transition-colors duration-200 py-1`}
+                              ? 'text-primary'
+                              : 'text-text-secondary hover:text-text'
+                          }`}
                         >
                           {title}
                         </a>
                       ))}
-                    </nav>
-                  </Card>
+                    </div>
+                  </nav>
                 </div>
               </div>
             )}
 
-            {/* Main Content - Now on the left */}
-            <Card className="flex-1 bg-black/90 border border-matrix-green p-8">
+            {/* Main Content */}
+            <div className="flex-1 min-w-0 rounded-2xl border border-border bg-surface p-6 md:p-10">
               {!post.image_url && (
                 <>
-                  <h1 className="text-4xl font-mono text-matrix-green mb-4">{post.title}</h1>
-                  <div className="flex items-center gap-4 text-gray-400 mb-8">
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                    {post.title}
+                  </h1>
+                  <div className="flex items-center gap-4 text-sm text-text-secondary mb-8">
                     <div className="flex items-center gap-2">
-                      <Clock size={16} />
+                      <Clock size={14} aria-hidden="true" />
                       {formattedDate}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Tag size={16} />
-                      {post.tags.join(', ')}
-                    </div>
+                    {post.tags.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Tag size={14} aria-hidden="true" />
+                        {post.tags.join(', ')}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
 
               {user?.role === 'admin' && (
                 <div className="flex justify-end mb-6">
-                  <Link to={`/dashboard/blog/edit/${post.id}`}>
-                    <Button className="bg-matrix-green hover:bg-matrix-green/80 text-black font-mono">
-                      Edit Post
+                  <Link to={`/settings/blog/edit/${post.id}`}>
+                    <Button variant="outline" size="sm">
+                      Edit post
                     </Button>
                   </Link>
                 </div>
               )}
 
-              <article className="prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none">
+              <article className="max-w-none">
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
-                  className="text-gray-300"
                   components={{
                     h1: ({ node, ...props }) => (
                       <h1
-                        id={props.children
-                          ?.toString()
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, '-')}
-                        className="text-matrix-green font-mono text-3xl mt-8 mb-4"
+                        id={headingId(props.children)}
+                        className="text-2xl md:text-3xl font-bold tracking-tight mt-10 mb-4 scroll-mt-24"
                         {...props}
                       />
                     ),
                     h2: ({ node, ...props }) => (
                       <h2
-                        id={props.children
-                          ?.toString()
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, '-')}
-                        className="text-matrix-green font-mono text-2xl mt-6 mb-3"
+                        id={headingId(props.children)}
+                        className="text-xl md:text-2xl font-bold tracking-tight mt-8 mb-3 scroll-mt-24"
                         {...props}
                       />
                     ),
                     h3: ({ node, ...props }) => (
                       <h3
-                        id={props.children
-                          ?.toString()
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, '-')}
-                        className="text-matrix-green font-mono text-xl mt-4 mb-2"
+                        id={headingId(props.children)}
+                        className="text-lg md:text-xl font-semibold tracking-tight mt-6 mb-2 scroll-mt-24"
                         {...props}
                       />
                     ),
-                    p: ({ node, ...props }) => <p className="text-gray-300 mb-4" {...props} />,
+                    p: ({ node, ...props }) => (
+                      <p className="text-text-secondary leading-relaxed mb-4" {...props} />
+                    ),
                     a: ({ node, ...props }) => (
                       <a
-                        className="text-matrix-green hover:text-matrix-green/80 underline"
+                        className="text-primary hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
                         {...props}
                       />
                     ),
                     ul: ({ node, ...props }) => (
-                      <ul className="list-disc list-inside mb-4 text-gray-300" {...props} />
+                      <ul
+                        className="list-disc pl-6 mb-4 text-text-secondary space-y-1"
+                        {...props}
+                      />
                     ),
                     ol: ({ node, ...props }) => (
-                      <ol className="list-decimal list-inside mb-4 text-gray-300" {...props} />
+                      <ol
+                        className="list-decimal pl-6 mb-4 text-text-secondary space-y-1"
+                        {...props}
+                      />
                     ),
-                    li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                    li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
                     blockquote: ({ node, ...props }) => (
                       <blockquote
-                        className="border-l-4 border-matrix-green pl-4 my-4 italic text-gray-400"
+                        className="border-l-2 border-primary pl-4 my-4 italic text-text-secondary"
                         {...props}
                       />
                     ),
@@ -307,7 +323,7 @@ function BlogPost() {
                       if (inline) {
                         return (
                           <code
-                            className="bg-black/50 text-matrix-green px-1 rounded font-mono"
+                            className="bg-surface-2 text-primary px-1.5 py-0.5 rounded text-[0.9em] font-mono"
                             {...props}
                           >
                             {children}
@@ -315,8 +331,8 @@ function BlogPost() {
                         );
                       }
                       return (
-                        <div className="w-full overflow-x-auto bg-black/50 rounded-lg border border-matrix-green/30">
-                          <code className="block text-matrix-green p-4 font-mono" {...props}>
+                        <div className="w-full overflow-x-auto bg-surface-2 rounded-lg border border-border my-4">
+                          <code className="block p-4 font-mono text-sm" {...props}>
                             {children}
                           </code>
                         </div>
@@ -324,32 +340,31 @@ function BlogPost() {
                     },
                     pre: ({ node, ...props }) => (
                       <pre
-                        className="w-full overflow-x-auto bg-black/50 border border-matrix-green p-4 rounded-lg mb-4"
+                        className="w-full overflow-x-auto bg-surface-2 border border-border p-0 rounded-lg mb-4 [&>div]:my-0 [&>div]:border-0"
                         {...props}
                       />
                     ),
                     img: ({ node, ...props }) => (
                       <img
-                        className="max-w-full h-auto rounded-lg border border-matrix-green/50"
+                        className="max-w-full h-auto rounded-lg border border-border"
+                        loading="lazy"
                         {...props}
                       />
                     ),
-                    hr: ({ node, ...props }) => (
-                      <hr className="border-matrix-green/30 my-8" {...props} />
-                    ),
+                    hr: ({ node, ...props }) => <hr className="border-border my-8" {...props} />,
                     table: ({ node, ...props }) => (
                       <div className="overflow-x-auto mb-4">
-                        <table className="min-w-full border border-matrix-green/30" {...props} />
+                        <table className="min-w-full border border-border text-sm" {...props} />
                       </div>
                     ),
                     th: ({ node, ...props }) => (
                       <th
-                        className="border border-matrix-green/30 p-2 bg-matrix-green/10 text-matrix-green font-mono"
+                        className="border border-border p-2 bg-surface-2 font-semibold text-left"
                         {...props}
                       />
                     ),
                     td: ({ node, ...props }) => (
-                      <td className="border border-matrix-green/30 p-2 text-gray-300" {...props} />
+                      <td className="border border-border p-2 text-text-secondary" {...props} />
                     ),
                   }}
                 >
@@ -358,45 +373,47 @@ function BlogPost() {
               </article>
 
               {/* Tags */}
-              <div className="mt-8 pt-8 border-t border-matrix-green/30">
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 rounded text-sm font-mono bg-matrix-green/20 text-matrix-green"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              {post.tags.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-border">
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Related Posts */}
               {relatedPosts.length > 0 && (
-                <div className="mt-12 pt-8 border-t border-matrix-green/30">
-                  <h2 className="text-2xl font-mono text-matrix-green mb-6">Related Posts</h2>
-                  <div className="grid md:grid-cols-3 gap-6">
+                <div className="mt-12 pt-8 border-t border-border">
+                  <h2 className="text-xl font-semibold tracking-tight mb-6">Related posts</h2>
+                  <div className="grid md:grid-cols-3 gap-5">
                     {relatedPosts.map((relatedPost) => (
                       <Link key={relatedPost.id} to={`/blog/${relatedPost.slug}`} className="group">
-                        <Card className="h-full bg-black/50 border border-matrix-green/50 hover:border-matrix-green transition-colors duration-200">
+                        <div className="h-full rounded-xl border border-border bg-surface-2 overflow-hidden transition-colors hover:border-primary/30">
                           {relatedPost.image_url && (
-                            <div className="h-48 overflow-hidden">
+                            <div className="h-36 overflow-hidden">
                               <img
                                 src={relatedPost.image_url}
-                                alt={relatedPost.title}
+                                alt=""
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             </div>
                           )}
                           <div className="p-4">
-                            <h3 className="text-lg font-mono text-matrix-green mb-2">
+                            <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">
                               {relatedPost.title}
                             </h3>
-                            <p className="text-sm text-gray-400 line-clamp-2">
+                            <p className="mt-1 text-xs text-text-secondary line-clamp-2">
                               {relatedPost.meta_desc}
                             </p>
                           </div>
-                        </Card>
+                        </div>
                       </Link>
                     ))}
                   </div>
@@ -404,28 +421,19 @@ function BlogPost() {
               )}
 
               {/* Navigation */}
-              <div className="mt-12 pt-8 border-t border-matrix-green/30 flex justify-between items-center">
+              <div className="mt-12 pt-6 border-t border-border flex justify-between items-center">
                 <Link
                   to="/blog"
-                  className="flex items-center gap-2 text-matrix-green hover:text-matrix-green/80 font-mono group"
+                  className="flex items-center gap-1.5 text-sm text-primary hover:underline group"
                 >
-                  <ChevronLeft className="transition-transform group-hover:-translate-x-1" />
-                  Back to blog list
+                  <ChevronLeft
+                    className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                  Back to blog
                 </Link>
-                <div className="flex gap-4">
-                  {user?.role === 'admin' && (
-                    <Link to={`/dashboard/blog/edit/${post.id}`}>
-                      <Button
-                        variant="outline"
-                        className="border-matrix-green text-matrix-green hover:bg-matrix-green/20"
-                      >
-                        Edit Post
-                      </Button>
-                    </Link>
-                  )}
-                </div>
               </div>
-            </Card>
+            </div>
           </div>
         </motion.div>
       </div>

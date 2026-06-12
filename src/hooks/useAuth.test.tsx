@@ -1,18 +1,18 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { jest, describe, it, expect, beforeEach, afterAll } from '@jest/globals';
+import { vi, describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { AuthProvider, useAuth } from './useAuth';
 import { AuthResponse } from '../types/types';
 
 // Mock fetch globally
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
@@ -20,8 +20,8 @@ Object.defineProperty(window, 'localStorage', {
 
 // Mock console.log and console.error to avoid test output
 const consoleSpy = {
-  log: jest.spyOn(console, 'log').mockImplementation(() => {}),
-  error: jest.spyOn(console, 'error').mockImplementation(() => {}),
+  log: vi.spyOn(console, 'log').mockImplementation(() => {}),
+  error: vi.spyOn(console, 'error').mockImplementation(() => {}),
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -30,9 +30,9 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useAuth Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
-    (fetch as jest.Mock).mockResolvedValue({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ user: { id: '1', email: 'test@example.com' } }),
     });
@@ -46,7 +46,7 @@ describe('useAuth Hook', () => {
   it('should throw error when used outside AuthProvider', () => {
     // Suppress console.error for this test since we expect an error
     const originalError = console.error;
-    console.error = jest.fn();
+    console.error = vi.fn();
 
     expect(() => {
       renderHook(() => useAuth());
@@ -79,7 +79,7 @@ describe('useAuth Hook', () => {
     };
 
     localStorageMock.getItem.mockReturnValue(mockToken);
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ user: mockUser }),
     });
@@ -170,7 +170,7 @@ describe('useAuth Hook', () => {
     const mockToken = 'invalid-token';
     localStorageMock.getItem.mockReturnValue(mockToken);
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
       status: 401,
     });
@@ -205,9 +205,6 @@ describe('useAuth Hook', () => {
       }
     };
 
-    // Simulate an error during login (e.g., after storing tokens)
-    const originalLogin = result.current.login;
-    
     try {
       await act(async () => {
         await result.current.login(mockAuthData);
@@ -224,7 +221,7 @@ describe('useAuth Hook', () => {
     const mockToken = 'mock-token';
     localStorageMock.getItem.mockReturnValue(mockToken);
 
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    (fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -254,7 +251,7 @@ describe('useAuth Hook', () => {
     const mockToken = 'mock-token';
     localStorageMock.getItem.mockReturnValue(mockToken);
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ /* malformed - no user field */ }),
     });

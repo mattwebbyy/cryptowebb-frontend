@@ -1,11 +1,23 @@
 // src/lib/axios.ts
-import axios, { AxiosError } from 'axios';
-import { toast } from 'react-toastify';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { toast } from 'sonner';
+import { API_BASE_URL } from '@/lib/config';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+/**
+ * The response interceptor below unwraps `response.data`, so callers receive
+ * the API payload directly. This interface reflects that at the type level.
+ */
+export interface ApiClient {
+  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+}
 
-export const apiClient = axios.create({
-  baseURL: API_URL,
+const instance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -14,7 +26,7 @@ export const apiClient = axios.create({
 });
 
 // Request Interceptor: Inject Authorization Token
-apiClient.interceptors.request.use(
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token && config.headers && !config.headers.Authorization) {
@@ -29,13 +41,17 @@ apiClient.interceptors.request.use(
 );
 
 // Response Interceptor: Handle common errors and return data directly
-apiClient.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => {
     // Return payload directly so callers receive the decoded data structure
     return response.data;
   },
   (error: AxiosError | Error) => {
     let errorMessage = 'An unexpected error occurred';
+    // Only surface toasts for user-initiated writes; background reads
+    // (React Query fetches) report errors through their own UI states.
+    const method = (axios.isAxiosError(error) && error.config?.method) || 'get';
+    const shouldToast = method.toLowerCase() !== 'get';
 
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
@@ -57,11 +73,13 @@ apiClient.interceptors.response.use(
             window.location.href = '/login';
           }
         }, 1500);
+        toast.error(errorMessage);
       } else if (status === 403) {
         errorMessage = 'Permission denied.';
+        if (shouldToast) toast.error(errorMessage);
+      } else if (shouldToast) {
+        toast.error(errorMessage);
       }
-
-      toast.error(errorMessage);
 
       const enhancedError = error;
       enhancedError.message = errorMessage;
@@ -71,7 +89,7 @@ apiClient.interceptors.response.use(
     if (axios.isAxiosError(error) && error.request) {
       console.error('API No Response Error:', error.request);
       errorMessage = 'Network error or server unavailable.';
-      toast.error(errorMessage);
+      if (shouldToast) toast.error(errorMessage);
       const enhancedError = error;
       enhancedError.message = errorMessage;
       return Promise.reject(enhancedError);
@@ -79,8 +97,10 @@ apiClient.interceptors.response.use(
 
     console.error('API Request Setup Error:', error.message);
     errorMessage = `Request setup failed: ${error.message}`;
-    toast.error(errorMessage);
+    if (shouldToast) toast.error(errorMessage);
     const genericError = new Error(errorMessage);
     return Promise.reject(genericError);
   }
 );
+
+export const apiClient = instance as unknown as ApiClient;

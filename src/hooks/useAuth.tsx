@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import * as React from 'react';
 import { AuthResponse } from '../types/types';
+import { API_BASE_URL } from '@/lib/config';
 
 interface User {
   id: string;
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const fetchUserInfo = useCallback(
     async (token: string) => {
       try {
-        const response = await fetch('http://localhost:8080/api/v1/users/me', {
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/json',

@@ -51,9 +51,9 @@ export interface AlertFormData {
 
 // Alert status display helpers
 export const getAlertStatusColor = (alert: Alert): string => {
-  if (!alert.isActive) return 'text-gray-500';
-  if (alert.lastTriggered) return 'text-red-400';
-  return 'text-matrix-green';
+  if (!alert.isActive) return 'text-text-secondary';
+  if (alert.lastTriggered) return 'text-warning';
+  return 'text-success';
 };
 
 export const getAlertStatusText = (alert: Alert): string => {

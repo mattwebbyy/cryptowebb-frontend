@@ -1,4 +1,6 @@
 export interface AuthResponse {
+  message?: string;
+  error?: string;
   token: string;
   refreshToken: string;
   type: string;

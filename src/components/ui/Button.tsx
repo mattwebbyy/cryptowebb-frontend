@@ -4,7 +4,7 @@ import { forwardRef, ReactNode } from 'react';
 import { clsx } from 'clsx'; // Or your cn utility if preferred
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'variant'> {
-  variant?: 'default' | 'outline' | 'ghost' | 'primary' | 'gradient' | 'glass';
+  variant?: 'default' | 'outline' | 'ghost' | 'primary' | 'gradient' | 'glass' | 'destructive';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isLoading?: boolean;
   children: ReactNode;
@@ -22,6 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       primary: 'bg-primary text-white border border-primary hover:bg-primary/90 shadow-sm hover:shadow-md',
       gradient: 'bg-gradient-to-r from-primary to-secondary text-white border-0 hover:shadow-lg hover:shadow-primary/25 hover:scale-105',
       glass: 'glass-morphism text-text hover:bg-primary/10 hover:text-primary border border-border/30',
+      destructive: 'bg-error text-white border border-error hover:bg-error/90 shadow-sm hover:shadow-md',
     };
 
     const sizes = {

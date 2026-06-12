@@ -1,29 +1,29 @@
 // src/pages/NotFound.tsx
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-[70vh] flex items-center justify-center px-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.4 }}
         className="text-center"
       >
-        <h1 className="text-6xl mb-4 glitch-text" data-text="404">
-          404
-        </h1>
-        <p className="text-2xl mb-8">SYSTEM ERROR: Path Not Found</p>
-        <div className="space-y-4">
-          <p className="text-matrix-green/70">
-            The requested path has been disconnected from the Matrix.
-          </p>
-          <Link
-            to="/"
-            className="matrix-button inline-block hover:bg-matrix-green hover:text-black transition-colors"
-          >
-            RETURN TO MAINFRAME
+        <p className="text-sm font-mono text-text-secondary">404</p>
+        <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Page not found</h1>
+        <p className="mt-4 max-w-md mx-auto text-text-secondary leading-relaxed">
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        </p>
+        <div className="mt-8">
+          <Link to="/">
+            <Button variant="primary" size="lg">
+              <ArrowLeft className="mr-2 w-4 h-4" aria-hidden="true" />
+              Back to home
+            </Button>
           </Link>
         </div>
       </motion.div>

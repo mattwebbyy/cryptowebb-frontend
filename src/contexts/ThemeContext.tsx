@@ -2,7 +2,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export type ThemeMode = 'dark' | 'light';
-export type ThemeVariant = 'matrix' | 'minimal' | 'cyber';
+// 'default' is the modern analytics look; 'matrix' is the legacy green
+// hacker theme, kept as an opt-in easter egg.
+export type ThemeVariant = 'default' | 'matrix';
 
 export interface ThemeConfig {
   mode: ThemeMode;
@@ -22,7 +24,7 @@ interface ThemeContextType {
 
 const defaultTheme: ThemeConfig = {
   mode: 'dark',
-  variant: 'matrix',
+  variant: 'default',
   matrixIntensity: 'medium',
   animations: true,
   reducedMotion: false,
@@ -44,15 +46,21 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
+const normalizeVariant = (variant: unknown): ThemeVariant =>
+  variant === 'matrix' ? 'matrix' : 'default';
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeConfig>(() => {
-    // Load theme from localStorage on initialization
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem(THEME_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
-          return { ...defaultTheme, ...parsed };
+          return {
+            ...defaultTheme,
+            ...parsed,
+            variant: normalizeVariant(parsed.variant),
+          };
         }
       } catch (error) {
         console.warn('Failed to load theme from localStorage:', error);
@@ -64,14 +72,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const setTheme = (newTheme: Partial<ThemeConfig>) => {
     setThemeState(prev => {
       const updated = { ...prev, ...newTheme };
-      
-      // Save to localStorage
+
       try {
         localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(updated));
       } catch (error) {
         console.warn('Failed to save theme to localStorage:', error);
       }
-      
+
       return updated;
     });
   };
@@ -89,40 +96,35 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     if (typeof document === 'undefined') return;
 
     const root = document.documentElement;
-    
-    // Remove existing theme classes
+
     root.classList.remove(
-      'dark', 'light', // Tailwind classes
+      'dark', 'light',
       'theme-dark', 'theme-light',
-      'variant-matrix', 'variant-minimal', 'variant-cyber',
+      'variant-default', 'variant-matrix',
       'intensity-low', 'intensity-medium', 'intensity-high',
       'animations-enabled', 'animations-disabled',
       'motion-reduced'
     );
 
-    // Apply Tailwind dark mode class
     if (theme.mode === 'dark') {
       root.classList.add('dark');
     }
-    
-    // Apply custom theme classes
+
     root.classList.add(`theme-${theme.mode}`);
     root.classList.add(`variant-${theme.variant}`);
     root.classList.add(`intensity-${theme.matrixIntensity}`);
     root.classList.add(theme.animations ? 'animations-enabled' : 'animations-disabled');
-    
+
     if (theme.reducedMotion) {
       root.classList.add('motion-reduced');
     }
 
-    // Set CSS custom properties for dynamic theming
     const styles = getThemeStyles(theme);
     Object.entries(styles).forEach(([property, value]) => {
       root.style.setProperty(property, value);
     });
   };
 
-  // Apply theme on mount and when theme changes
   useEffect(() => {
     applyTheme();
   }, [theme]);
@@ -133,7 +135,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-switch if user hasn't manually set a preference
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
       if (!stored) {
         setTheme({ mode: e.matches ? 'dark' : 'light' });
@@ -153,7 +154,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       setTheme({ reducedMotion: e.matches });
     };
 
-    // Set initial value
     setTheme({ reducedMotion: mediaQuery.matches });
 
     mediaQuery.addEventListener('change', handleChange);
@@ -175,105 +175,136 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   );
 };
 
+interface Palette {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  surface: string;
+  surface2: string;
+  text: string;
+  textSecondary: string;
+  border: string;
+  error: string;
+  warning: string;
+  success: string;
+}
+
+// Categorical ramp for chart series; distinct from the UI accent so series
+// never blend into interactive chrome.
+const CHART_RAMP = ['#8b5cf6', '#22d3ee', '#f59e0b', '#ec4899', '#10b981', '#3b82f6', '#f97316', '#e879f9'];
+
+const palettes: Record<ThemeMode, Record<ThemeVariant, Palette>> = {
+  dark: {
+    default: {
+      primary: '#8b5cf6',       // violet-500 accent
+      secondary: '#6366f1',     // indigo-500
+      accent: '#a78bfa',        // violet-400
+      background: '#09090b',    // zinc-950
+      surface: '#111113',
+      surface2: '#18181b',      // zinc-900
+      text: '#fafafa',
+      textSecondary: '#a1a1aa', // zinc-400
+      border: '#27272a',        // zinc-800
+      error: '#ef4444',
+      warning: '#f59e0b',
+      success: '#22c55e',
+    },
+    matrix: {
+      primary: '#33ff33',
+      secondary: '#00ff00',
+      accent: '#66ff66',
+      background: '#000000',
+      surface: '#001100',
+      surface2: '#002200',
+      text: '#33ff33',
+      textSecondary: '#22aa22',
+      border: '#1a5a1a',
+      error: '#ff3333',
+      warning: '#ffaa33',
+      success: '#33ff33',
+    },
+  },
+  light: {
+    default: {
+      primary: '#7c3aed',       // violet-600
+      secondary: '#4f46e5',     // indigo-600
+      accent: '#8b5cf6',
+      background: '#fafafa',
+      surface: '#ffffff',
+      surface2: '#f4f4f5',      // zinc-100
+      text: '#18181b',
+      textSecondary: '#52525b', // zinc-600
+      border: '#e4e4e7',        // zinc-200
+      error: '#dc2626',
+      warning: '#d97706',
+      success: '#16a34a',
+    },
+    matrix: {
+      primary: '#0d7377',
+      secondary: '#14a085',
+      accent: '#40a69f',
+      background: '#fafefe',
+      surface: '#ffffff',
+      surface2: '#f0fdfa',
+      text: '#1a202c',
+      textSecondary: '#4a5568',
+      border: '#e2e8f0',
+      error: '#e53e3e',
+      warning: '#dd6b20',
+      success: '#38a169',
+    },
+  },
+};
+
 // Theme styles generator
 function getThemeStyles(theme: ThemeConfig): Record<string, string> {
   const { mode, variant, matrixIntensity } = theme;
+  const colors = palettes[mode][variant] ?? palettes[mode].default;
 
-  // Base colors
-  const colors = {
-    dark: {
-      matrix: {
-        primary: '#33ff33',      // Matrix green
-        secondary: '#00ff00',    // Bright green
-        accent: '#66ff66',       // Light green
-        background: '#000000',   // Pure black
-        surface: '#001100',      // Very dark green
-        text: '#33ff33',         // Matrix green text
-        textSecondary: '#22aa22', // Dimmer green
-        border: '#1a5a1a',       // Green border
-        error: '#ff3333',        // Red
-        warning: '#ffaa33',      // Orange
-        success: '#33ff33',      // Green
-      },
-      minimal: {
-        primary: '#00ff88',      // Cyan-green
-        secondary: '#44ffaa',    // Light cyan-green
-        accent: '#88ffcc',       // Very light cyan
-        background: '#0a0a0a',   // Near black
-        surface: '#1a1a1a',      // Dark gray
-        text: '#00ff88',         // Cyan-green text
-        textSecondary: '#44aa77', // Dimmer cyan
-        border: '#2a4a3a',       // Gray-green border
-        error: '#ff4444',        // Red
-        warning: '#ffbb44',      // Orange
-        success: '#00ff88',      // Cyan-green
-      },
-    },
-    light: {
-      matrix: {
-        primary: '#0d7377',      // Teal
-        secondary: '#14a085',    // Medium teal
-        accent: '#40a69f',       // Light teal
-        background: '#fafefe',   // Very light teal-tinted white
-        surface: '#ffffff',      // Pure white
-        text: '#1a202c',         // Dark gray
-        textSecondary: '#4a5568', // Medium gray
-        border: '#e2e8f0',       // Light gray border
-        error: '#e53e3e',        // Red
-        warning: '#dd6b20',      // Orange
-        success: '#38a169',      // Green
-      },
-      minimal: {
-        primary: '#0d7377',      // Teal
-        secondary: '#14a085',    // Medium teal
-        accent: '#40a69f',       // Light teal
-        background: '#fafafa',   // Light gray
-        surface: '#ffffff',      // Pure white
-        text: '#1a1a1a',         // Dark gray
-        textSecondary: '#4a5568', // Medium gray
-        border: '#e2e8f0',       // Light border
-        error: '#e53e3e',        // Red
-        warning: '#dd6b20',      // Orange
-        success: '#38a169',      // Green
-      },
-    },
-  };
-
-  const themeColors = colors[mode][variant] || colors[mode].matrix;
-
-  // Intensity adjustments for matrix effects
   const intensity = {
     low: { opacity: '0.6', blur: '1px', glow: '2px' },
     medium: { opacity: '0.8', blur: '2px', glow: '4px' },
     high: { opacity: '1.0', blur: '3px', glow: '8px' },
   }[matrixIntensity];
 
-  return {
-    '--color-primary': themeColors.primary,
-    '--color-secondary': themeColors.secondary,
-    '--color-accent': themeColors.accent,
-    '--color-background': themeColors.background,
-    '--color-surface': themeColors.surface,
-    '--color-text': themeColors.text,
-    '--color-text-secondary': themeColors.textSecondary,
-    '--color-border': themeColors.border,
-    '--color-error': themeColors.error,
-    '--color-warning': themeColors.warning,
-    '--color-success': themeColors.success,
-    
-    // Matrix-specific effects
+  const styles: Record<string, string> = {
+    '--color-primary': colors.primary,
+    '--color-secondary': colors.secondary,
+    '--color-accent': colors.accent,
+    '--color-background': colors.background,
+    '--color-surface': colors.surface,
+    '--color-surface-2': colors.surface2,
+    '--color-text': colors.text,
+    '--color-text-secondary': colors.textSecondary,
+    '--color-border': colors.border,
+    '--color-error': colors.error,
+    '--color-warning': colors.warning,
+    '--color-success': colors.success,
+
+    // Financial deltas
+    '--color-gain': mode === 'dark' ? '#22c55e' : '#16a34a',
+    '--color-loss': mode === 'dark' ? '#ef4444' : '#dc2626',
+
+    // Matrix-specific effects (only consumed under variant-matrix)
     '--matrix-opacity': intensity.opacity,
     '--matrix-blur': intensity.blur,
     '--matrix-glow': intensity.glow,
-    
+
     // Computed colors with opacity variations
-    '--color-primary-10': `${themeColors.primary}1a`,
-    '--color-primary-20': `${themeColors.primary}33`,
-    '--color-primary-30': `${themeColors.primary}4d`,
-    '--color-primary-50': `${themeColors.primary}80`,
-    '--color-primary-70': `${themeColors.primary}b3`,
-    '--color-primary-90': `${themeColors.primary}e6`,
+    '--color-primary-10': `${colors.primary}1a`,
+    '--color-primary-20': `${colors.primary}33`,
+    '--color-primary-30': `${colors.primary}4d`,
+    '--color-primary-50': `${colors.primary}80`,
+    '--color-primary-70': `${colors.primary}b3`,
+    '--color-primary-90': `${colors.primary}e6`,
   };
+
+  CHART_RAMP.forEach((color, i) => {
+    styles[`--chart-${i + 1}`] = variant === 'matrix' && i === 0 ? colors.primary : color;
+  });
+
+  return styles;
 }
 
 export default ThemeProvider;

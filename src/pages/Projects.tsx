@@ -37,7 +37,7 @@ const Projects = () => {
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto"
       >
-        <h1 className="text-4xl mb-8 text-center text-teal-600 dark:text-matrix-green">PROJECTS</h1>
+        <h1 className="text-4xl mb-8 text-center text-primary">PROJECTS</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {projects.map((project) => (
             <motion.div
@@ -47,13 +47,13 @@ const Projects = () => {
               transition={{ delay: project.id * 0.2 }}
             >
               <Card className="h-full">
-                <h2 className="text-2xl mb-4 text-teal-600 dark:text-matrix-green">{project.title}</h2>
-                <p className="mb-4 text-teal-600/80 dark:text-matrix-green/80">{project.description}</p>
+                <h2 className="text-2xl mb-4 text-primary">{project.title}</h2>
+                <p className="mb-4 text-text-secondary">{project.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 text-sm border border-teal-600/50 dark:border-matrix-green/50 rounded-sm text-teal-600/80 dark:text-matrix-green/80"
+                      className="px-3 py-1 text-sm border border-primary/50 rounded-sm text-text-secondary"
                     >
                       {tag}
                     </span>

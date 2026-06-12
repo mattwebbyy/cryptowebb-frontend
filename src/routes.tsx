@@ -1,5 +1,5 @@
 // src/routes.tsx
-import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
+import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { MatrixLoader } from '@/components/ui/MatrixLoader'; // Using '@/' alias as in your example
 import PricingPage from './pages/PricingPage';
@@ -10,6 +10,7 @@ import TrialPage from './pages/TrialPage';
 
 // --- Marketing / Public Pages ---
 const Home = lazy(() => import('./pages/Home'));
+const DesignPlayground = lazy(() => import('./pages/DesignPlayground'));
 const About = lazy(() => import('./pages/About'));
 const Projects = lazy(() => import('./pages/Projects'));
 const Contact = lazy(() => import('./pages/Contact'));
@@ -43,6 +44,16 @@ const AlertsPage = lazy(() => import('./pages/alerts/AlertsPage'));
 const LiveCryptoPage = lazy(() => import('./pages/live-crypto/LiveCryptoPage'));
 const PortfolioPage = lazy(() => import('./pages/portfolio/PortfolioPage'));
 const ApiDocumentation = lazy(() => import('./pages/docs/ApiDocumentation'));
+const BlockchainDashboard = lazy(() => import('./pages/blockchain/BlockchainDashboard'));
+const IndexerDashboard = lazy(() => import('./pages/analytics/IndexerDashboard'));
+
+// --- Shared / Embedded Dashboards (public, no auth) ---
+const PublicDashboard = lazy(() => import('./pages/shared/PublicDashboard'));
+const EmbedDashboard = lazy(() => import('./pages/shared/EmbedDashboard'));
+
+// --- Payment Pages ---
+const CryptoPaymentSuccess = lazy(() => import('./pages/payment/CryptoPaymentSuccess'));
+const CryptoPaymentCancel = lazy(() => import('./pages/payment/CryptoPaymentCancel'));
 
 // --- Not Found Page ---
 const NotFound = lazy(() => import('./pages/NotFound')); // Assuming you have this page
@@ -57,6 +68,7 @@ export function Routes() {
       <RouterRoutes>
         {/* Marketing pages */}
         <Route path="/" element={<Home />} />
+        <Route path="/design" element={<DesignPlayground />} />
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/contact" element={<Contact />} />
@@ -97,7 +109,17 @@ export function Routes() {
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/live-crypto" element={<LiveCryptoPage />} />
+        <Route path="/tokens" element={<BlockchainDashboard />} />
+        <Route path="/blockchain" element={<IndexerDashboard />} />
         <Route path="/docs" element={<ApiDocumentation />} />
+
+        {/* Shared dashboard routes (public) */}
+        <Route path="/shared/:shareToken" element={<PublicDashboard />} />
+        <Route path="/embed/:shareToken" element={<EmbedDashboard />} />
+
+        {/* Payment Routes */}
+        <Route path="/payment/crypto/success" element={<CryptoPaymentSuccess />} />
+        <Route path="/payment/crypto/cancel" element={<CryptoPaymentCancel />} />
 
         {/* Not Found Route */}
         <Route path="*" element={<NotFound />} />

@@ -1,14 +1,9 @@
 // src/features/alerts/components/AlertForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { 
-  Alert, 
-  AlertFormData, 
-  AlertCondition, 
-  AlertFrequency, 
-  NotificationMethod 
-} from '../types';
+import { Input, Label, Select, Textarea } from '@/components/ui/Input';
+import { Alert, AlertFormData } from '../types';
 import { useCreateAlert, useUpdateAlert } from '../api/alertsApi';
 
 interface AlertFormProps {
@@ -16,6 +11,13 @@ interface AlertFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
+
+const FieldError = ({ id, message }: { id: string; message?: string }) =>
+  message ? (
+    <p id={id} className="text-error text-sm mt-1" role="alert">
+      {message}
+    </p>
+  ) : null;
 
 const AlertForm: React.FC<AlertFormProps> = ({ alert, onSuccess, onCancel }) => {
   const createAlertMutation = useCreateAlert();
@@ -46,7 +48,7 @@ const AlertForm: React.FC<AlertFormProps> = ({ alert, onSuccess, onCancel }) => 
       newErrors.threshold = 'Threshold must be a valid number';
     }
 
-    if (formData.notificationMethod === 'WEBHOOK' && !formData.webhookURL.trim()) {
+    if (formData.notificationMethod === 'WEBHOOK' && !formData.webhookURL?.trim()) {
       newErrors.webhookURL = 'Webhook URL is required for webhook notifications';
     }
 
@@ -76,18 +78,16 @@ const AlertForm: React.FC<AlertFormProps> = ({ alert, onSuccess, onCancel }) => 
         threshold: Number(formData.threshold),
         frequency: formData.frequency,
         notificationMethod: formData.notificationMethod,
-        webhookURL: formData.webhookURL.trim() || undefined,
-        message: formData.message.trim() || undefined,
+        webhookURL: formData.webhookURL?.trim() || undefined,
+        message: formData.message?.trim() || undefined,
       };
 
       if (alert) {
-        // Update existing alert
         await updateAlertMutation.mutateAsync({
           alertId: alert.id,
           updates: alertData,
         });
       } else {
-        // Create new alert
         await createAlertMutation.mutateAsync(alertData);
       }
 
@@ -97,170 +97,143 @@ const AlertForm: React.FC<AlertFormProps> = ({ alert, onSuccess, onCancel }) => 
     }
   };
 
-  const handleInputChange = (
-    field: keyof AlertFormData,
-    value: string
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear error for this field
+  const handleInputChange = (field: keyof AlertFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const isLoading = createAlertMutation.isPending || updateAlertMutation.isPending;
 
   return (
-    <Card className="p-6 border border-matrix-green/30">
-      <h3 className="text-lg font-mono text-matrix-green mb-6">
-        {alert ? 'Edit Alert' : 'Create New Alert'}
+    <Card className="p-6" hover={false}>
+      <h3 className="text-lg font-semibold tracking-tight mb-6">
+        {alert ? 'Edit alert' : 'Create alert'}
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Metric ID */}
         <div>
-          <label className="block text-sm font-medium text-matrix-green mb-2">
-            Metric ID *
-          </label>
-          <input
+          <Label htmlFor="alert-metric-id">Metric ID</Label>
+          <Input
+            id="alert-metric-id"
             type="text"
             value={formData.metricID}
             onChange={(e) => handleInputChange('metricID', e.target.value)}
-            className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green placeholder-matrix-green/50 focus:outline-none focus:border-matrix-green"
             placeholder="e.g., btc_price, eth_volume"
-            disabled={!!alert} // Don't allow changing metric ID when editing
+            disabled={!!alert} // Metric can't change when editing
+            aria-invalid={!!errors.metricID}
+            aria-describedby={errors.metricID ? 'alert-metric-id-error' : undefined}
           />
-          {errors.metricID && (
-            <p className="text-red-400 text-sm mt-1">{errors.metricID}</p>
-          )}
+          <FieldError id="alert-metric-id-error" message={errors.metricID} />
         </div>
 
         {/* Condition and Threshold */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-matrix-green mb-2">
-              Condition *
-            </label>
-            <select
+            <Label htmlFor="alert-condition">Condition</Label>
+            <Select
+              id="alert-condition"
               value={formData.condition}
               onChange={(e) => handleInputChange('condition', e.target.value)}
-              className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green focus:outline-none focus:border-matrix-green"
             >
               <option value="ABOVE">Above (&gt;)</option>
               <option value="BELOW">Below (&lt;)</option>
               <option value="EQUALS">Equals (=)</option>
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-matrix-green mb-2">
-              Threshold *
-            </label>
-            <input
+            <Label htmlFor="alert-threshold">Threshold</Label>
+            <Input
+              id="alert-threshold"
               type="number"
               step="any"
               value={formData.threshold}
               onChange={(e) => handleInputChange('threshold', e.target.value)}
-              className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green placeholder-matrix-green/50 focus:outline-none focus:border-matrix-green"
               placeholder="0.00"
+              aria-invalid={!!errors.threshold}
+              aria-describedby={errors.threshold ? 'alert-threshold-error' : undefined}
             />
-            {errors.threshold && (
-              <p className="text-red-400 text-sm mt-1">{errors.threshold}</p>
-            )}
+            <FieldError id="alert-threshold-error" message={errors.threshold} />
           </div>
         </div>
 
         {/* Frequency */}
         <div>
-          <label className="block text-sm font-medium text-matrix-green mb-2">
-            Frequency *
-          </label>
-          <select
+          <Label htmlFor="alert-frequency">Frequency</Label>
+          <Select
+            id="alert-frequency"
             value={formData.frequency}
             onChange={(e) => handleInputChange('frequency', e.target.value)}
-            className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green focus:outline-none focus:border-matrix-green"
           >
             <option value="ONCE">Once</option>
             <option value="DAILY">Daily</option>
             <option value="WEEKLY">Weekly</option>
-          </select>
+          </Select>
         </div>
 
         {/* Notification Method */}
         <div>
-          <label className="block text-sm font-medium text-matrix-green mb-2">
-            Notification Method *
-          </label>
-          <select
+          <Label htmlFor="alert-method">Notification method</Label>
+          <Select
+            id="alert-method"
             value={formData.notificationMethod}
             onChange={(e) => handleInputChange('notificationMethod', e.target.value)}
-            className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green focus:outline-none focus:border-matrix-green"
           >
             <option value="EMAIL">Email</option>
             <option value="SMS">SMS</option>
-            <option value="PUSH">Push Notification</option>
+            <option value="PUSH">Push notification</option>
             <option value="WEBHOOK">Webhook</option>
-          </select>
+          </Select>
         </div>
 
         {/* Webhook URL (conditional) */}
         {formData.notificationMethod === 'WEBHOOK' && (
           <div>
-            <label className="block text-sm font-medium text-matrix-green mb-2">
-              Webhook URL *
-            </label>
-            <input
+            <Label htmlFor="alert-webhook">Webhook URL</Label>
+            <Input
+              id="alert-webhook"
               type="url"
               value={formData.webhookURL}
               onChange={(e) => handleInputChange('webhookURL', e.target.value)}
-              className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green placeholder-matrix-green/50 focus:outline-none focus:border-matrix-green"
               placeholder="https://your-webhook-endpoint.com/alerts"
+              aria-invalid={!!errors.webhookURL}
+              aria-describedby={errors.webhookURL ? 'alert-webhook-error' : undefined}
             />
-            {errors.webhookURL && (
-              <p className="text-red-400 text-sm mt-1">{errors.webhookURL}</p>
-            )}
+            <FieldError id="alert-webhook-error" message={errors.webhookURL} />
           </div>
         )}
 
         {/* Custom Message */}
         <div>
-          <label className="block text-sm font-medium text-matrix-green mb-2">
-            Custom Message (Optional)
-          </label>
-          <textarea
+          <Label htmlFor="alert-message">
+            Custom message <span className="text-text-secondary font-normal">(optional)</span>
+          </Label>
+          <Textarea
+            id="alert-message"
             value={formData.message}
             onChange={(e) => handleInputChange('message', e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 bg-black/50 border border-matrix-green/50 rounded text-matrix-green placeholder-matrix-green/50 focus:outline-none focus:border-matrix-green resize-vertical"
             placeholder="Custom message to include in the alert notification..."
           />
         </div>
 
         {/* Form Actions */}
         <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onCancel}
-            disabled={isLoading}
-            className="text-matrix-green hover:bg-matrix-green/10"
-          >
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="bg-matrix-green text-black hover:bg-matrix-green/80"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border border-black border-t-transparent rounded-full animate-spin" />
-                {alert ? 'Updating...' : 'Creating...'}
-              </div>
-            ) : (
-              alert ? 'Update Alert' : 'Create Alert'
-            )}
+          <Button type="submit" variant="primary" disabled={isLoading}>
+            {isLoading
+              ? alert
+                ? 'Updating…'
+                : 'Creating…'
+              : alert
+                ? 'Update alert'
+                : 'Create alert'}
           </Button>
         </div>
       </form>

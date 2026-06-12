@@ -210,7 +210,7 @@ export const useEnhancedWallet = () => {
       });
 
       // Convert from Wei to ETH
-      const ethBalance = parseInt(balance, 16) / 1e18;
+      const ethBalance = parseInt(balance as string, 16) / 1e18;
       return ethBalance.toString();
     } catch (error) {
       console.error('Error fetching ETH balance:', error);

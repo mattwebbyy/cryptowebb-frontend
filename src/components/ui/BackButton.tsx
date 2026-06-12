@@ -6,7 +6,7 @@ const BackButton = () => {
   return (
     <button
       onClick={() => navigate('/')}
-      className="fixed top-4 left-4 z-50 bg-black text-matrix-green px-4 py-2 border border-matrix-green rounded"
+      className="fixed top-4 left-4 z-50 bg-black text-primary px-4 py-2 border border-primary rounded"
     >
       Back
     </button>

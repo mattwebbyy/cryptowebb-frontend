@@ -19,7 +19,7 @@ type Profile = {
   lastName: string;
   avatarUrl?: string;
   bio?: string;
-  lastLogin?: string;
+  lastLogin?: string | null;
   createdAt?: string;
 };
 

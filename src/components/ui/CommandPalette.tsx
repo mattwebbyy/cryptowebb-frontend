@@ -17,7 +17,6 @@ import {
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
-import { getModifierSymbol } from '@/hooks/useKeyboardShortcuts';
 
 interface Command {
   id: string;
@@ -225,42 +224,62 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-background/70 backdrop-blur-sm z-50"
         onClick={onClose}
       />
       
       {/* Command Palette */}
-      <div className="fixed top-1/4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl mx-4 z-50">
-        <Card className="bg-black/95 border border-matrix-green/50 shadow-2xl shadow-matrix-green/20">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        className="fixed top-[15vh] left-1/2 -translate-x-1/2 w-[40rem] max-w-[calc(100vw-2rem)] z-50"
+      >
+        <Card className="bg-surface border border-border shadow-2xl overflow-hidden" hover={false}>
           {/* Header */}
-          <div className="p-4 border-b border-matrix-green/30">
+          <div className="px-4 py-1 border-b border-border">
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-matrix-green/60" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search commands, navigate to pages..."
-                  className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-matrix-green placeholder-matrix-green/50 focus:outline-none text-lg"
+                  className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-text placeholder:text-text-secondary/60 focus:outline-none text-base"
+                  role="combobox"
+                  aria-expanded="true"
+                  aria-controls="command-palette-list"
+                  aria-activedescendant={
+                    filteredCommands[selectedIndex]
+                      ? `command-option-${filteredCommands[selectedIndex].id}`
+                      : undefined
+                  }
+                  aria-autocomplete="list"
                 />
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="text-matrix-green/60 hover:text-matrix-green"
+                className="text-text-secondary hover:text-text"
+                aria-label="Close command palette"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
 
           {/* Commands */}
-          <div className="max-h-96 overflow-y-auto">
+          <div
+            id="command-palette-list"
+            role="listbox"
+            aria-label="Commands"
+            className="max-h-96 overflow-y-auto"
+          >
             {filteredCommands.length === 0 ? (
-              <div className="p-8 text-center text-matrix-green/60">
+              <div className="p-8 text-center text-text-secondary">
                 <Search className="w-8 h-8 mx-auto mb-3 opacity-50" />
                 <p>No commands found</p>
                 <p className="text-sm mt-1">Try a different search term</p>
@@ -269,38 +288,39 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
               <div className="p-2">
                 {Object.entries(groupedCommands).map(([category, commands]) => (
                   <div key={category} className="mb-4 last:mb-0">
-                    <h3 className="text-xs font-semibold text-matrix-green/60 uppercase tracking-wider px-3 py-2">
+                    <h3 className="text-[11px] font-medium text-text-secondary/70 uppercase tracking-wider px-3 py-2">
                       {category}
                     </h3>
                     <div className="space-y-1">
-                      {commands.map((command, index) => {
+                      {commands.map((command) => {
                         const globalIndex = filteredCommands.indexOf(command);
                         const isSelected = globalIndex === selectedIndex;
                         
                         return (
                           <button
                             key={command.id}
+                            id={`command-option-${command.id}`}
+                            role="option"
+                            aria-selected={isSelected}
                             onClick={() => handleCommandClick(command)}
-                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-150 ${
-                              isSelected
-                                ? 'bg-matrix-green/20 border border-matrix-green/50'
-                                : 'hover:bg-matrix-green/10 border border-transparent'
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors duration-150 ${
+                              isSelected ? 'bg-primary/10' : 'hover:bg-surface-2'
                             }`}
                           >
-                            <div className="flex-shrink-0 text-matrix-green/70">
+                            <div className={`flex-shrink-0 ${isSelected ? "text-primary" : "text-text-secondary"}`}>
                               {command.icon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-matrix-green font-medium">
+                              <div className="text-sm text-text font-medium">
                                 {command.label}
                               </div>
                               {command.description && (
-                                <div className="text-xs text-matrix-green/60 truncate">
+                                <div className="text-xs text-text-secondary truncate">
                                   {command.description}
                                 </div>
                               )}
                             </div>
-                            <ArrowRight className="w-4 h-4 text-matrix-green/40 flex-shrink-0" />
+                            <ArrowRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? "text-primary" : "text-text-secondary/40"}`} />
                           </button>
                         );
                       })}
@@ -312,19 +332,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t border-matrix-green/30 bg-black/50">
-            <div className="flex items-center justify-between text-xs text-matrix-green/60">
+          <div className="px-4 py-2.5 border-t border-border bg-surface-2/50">
+            <div className="flex items-center justify-between text-[11px] text-text-secondary">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-1 bg-matrix-green/10 border border-matrix-green/30 rounded text-xs">↑↓</kbd>
+                  <kbd>↑↓</kbd>
                   Navigate
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-1 bg-matrix-green/10 border border-matrix-green/30 rounded text-xs">↵</kbd>
+                  <kbd>↵</kbd>
                   Select
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-1 bg-matrix-green/10 border border-matrix-green/30 rounded text-xs">Esc</kbd>
+                  <kbd>esc</kbd>
                   Close
                 </span>
               </div>

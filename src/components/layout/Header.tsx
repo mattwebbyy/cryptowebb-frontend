@@ -1,23 +1,29 @@
-// src/components/Header.tsx
+// src/components/layout/Header.tsx — app topbar (logo · nav · search · theme · auth)
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { useState, useEffect } from 'react';
-import { Menu, X, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
 import { CommandPalette } from '@/components/ui/CommandPalette';
-import { RESPONSIVE_CLASSES } from '@/config/responsive';
+import { Button } from '@/components/ui/Button';
+
+const baseNavLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
+const authenticatedFeatureLinks = ['portfolio', 'alerts', 'live-crypto', 'tokens', 'docs'];
+const authenticatedPlatformLinks = ['settings', 'analytics'];
+
+const linkLabel = (path: string) => path.replace('-', ' ');
+
 export const Header = () => {
   const location = useLocation();
   const { isAuthenticated, user, logout, isLoading } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-  // Global keyboard shortcuts - MUST be before any conditional returns
+  // Cmd+K / Ctrl+K opens the command palette — must register before any returns
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Cmd+K or Ctrl+K to open command palette
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
         setCommandPaletteOpen(true);
@@ -28,146 +34,145 @@ export const Header = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Close the mobile menu on navigation
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   if (isLoading) {
-    return <div className="fixed top-0 w-full z-50 backdrop-blur-sm h-20" />;
+    return <div className="fixed top-0 w-full z-50 h-16 bg-background/80 backdrop-blur border-b border-border" />;
   }
 
-  // Organize navigation links properly
-  const baseNavLinks = ['about', 'projects', 'blog', 'contact', 'pricing'];
-  const authenticatedFeatureLinks = ['portfolio', 'alerts', 'live-crypto', 'docs'];
-  const authenticatedPlatformLinks = ['settings', 'analytics'];
-  
-  // All navigation links for desktop
-  const allNavLinks = isAuthenticated 
-    ? [...baseNavLinks, ...authenticatedFeatureLinks, ...authenticatedPlatformLinks] 
+  const allNavLinks = isAuthenticated
+    ? [...baseNavLinks, ...authenticatedFeatureLinks, ...authenticatedPlatformLinks]
     : baseNavLinks;
 
-  // Using Tailwind's dark: modifier instead of custom logic
+  const isActive = (path: string) =>
+    location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`);
+
+  const navLinkClass = (path: string) =>
+    `capitalize text-sm transition-colors duration-150 rounded-md px-2 py-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+      isActive(path)
+        ? 'text-text font-semibold'
+        : 'text-text-secondary hover:text-text'
+    }`;
 
   return (
-    <header className="fixed top-0 w-full z-[60] backdrop-blur-sm">
-      <nav className="container mx-auto px-4 py-4 max-w-full">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <Link to="/" className="text-teal-600 dark:text-matrix-green text-xl font-bold">
-            Cryptowebb
-          </Link>
+    <header className="fixed top-0 w-full z-[60] bg-background/80 backdrop-blur border-b border-border">
+      <nav className="mx-auto px-4 h-16 flex items-center gap-4 max-w-screen-2xl" aria-label="Main navigation">
+        {/* Logo */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-text text-lg font-bold tracking-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md"
+        >
+          <span className="w-2.5 h-2.5 rounded-sm bg-primary" aria-hidden="true" />
+          CryptoWebb
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {/* Navigation Links */}
-            <div className="flex gap-6">
-              {allNavLinks.map((path) => (
-                <motion.div key={path} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link
-                    to={`/${path}`}
-                    className={`${location.pathname === `/${path}` 
-                      ? 'text-teal-600 dark:text-matrix-green font-bold' 
-                      : 'text-teal-500/70 dark:text-matrix-green/70 hover:text-teal-600 dark:hover:text-matrix-green font-semibold'
-                    } transition-colors duration-200 capitalize ${path === 'analytics' ? 'flex items-center gap-1' : ''}`}
-                  >
-                    {path === 'analytics' && <LayoutDashboard size={16} />}
-                    {path}
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Global Search */}
-            <GlobalSearch 
-              onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-              className="ml-4"
-            />
-          </div>
-
-          {/* Desktop Auth Links */}
-          <div className="hidden md:flex gap-4 items-center">
-            {/* Theme Toggle */}
-            <ThemeToggle variant="simple" size="md" />
-            
-            {isAuthenticated ? (
-              <>
-                {user && <span className="text-white">Hello, {user.firstName || user.email}</span>}
-                <button 
-                  onClick={logout} 
-                  className="text-teal-500/70 dark:text-matrix-green/70 hover:text-teal-600 dark:hover:text-matrix-green transition-colors duration-200"
-                  title="Log out"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-2">
-                <Link
-                  to="/login"
-                  className="text-sm px-4 py-1.5 border border-teal-600 dark:border-matrix-green bg-black/50 dark:bg-black/50 hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 flex items-center gap-2 text-teal-600 dark:text-matrix-green"
-                >
-                  <span className="w-2 h-2 bg-teal-600 dark:bg-matrix-green rounded-full animate-pulse" />
-                  INITIALIZE
-                </Link>
-                <Link
-                  to="/register"
-                  className="text-sm px-4 py-1.5 border border-teal-600/50 dark:border-matrix-green/50 hover:border-teal-600 dark:hover:border-matrix-green bg-black/30 dark:bg-black/30 hover:bg-teal-600/10 dark:hover:bg-matrix-green/10 transition-all duration-300 text-teal-600 dark:text-matrix-green"
-                >
-                  REQUEST ACCESS
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-teal-600 dark:text-matrix-green"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-1 ml-4 min-w-0 overflow-x-auto">
+          {allNavLinks.map((path) => (
+            <Link key={path} to={`/${path}`} className={navLinkClass(path)}>
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                {path === 'analytics' && <LayoutDashboard size={15} aria-hidden="true" />}
+                {linkLabel(path)}
+              </span>
+            </Link>
+          ))}
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="md:hidden fixed top-[80px] left-4 right-4 z-[70] max-h-[calc(100vh-100px)] overflow-y-auto"
-            >
-              <div className="py-3 bg-white/95 dark:bg-black/[0.98] border border-teal-600/50 dark:border-matrix-green/50 rounded-lg backdrop-blur-md shadow-2xl">
-                {/* Theme Toggle for Mobile */}
-                <div className="flex justify-center pb-3 border-b border-teal-600/40 dark:border-matrix-green/40 mx-3">
-                  <ThemeToggle variant="simple" size="sm" showLabel={false} />
-                </div>
-                
-                {/* Compact Grid Layout for All Navigation */}
-                <div className="p-3 space-y-3">
-                  {/* Platform Links - 2x3 Grid */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
-                      Platform
-                    </h4>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {baseNavLinks.map((path) => (
-                        <Link
-                          key={path}
-                          to={`/${path}`}
-                          className={`text-center transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center text-xs font-medium border bg-white/80 dark:bg-black/80 ${
-                            location.pathname === `/${path}` 
-                              ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
-                              : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
-                          }`}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {path}
-                        </Link>
-                      ))}
-                    </div>
+        <div className="hidden md:block flex-1" />
+
+        {/* Search */}
+        <div className="hidden md:block">
+          <GlobalSearch onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
+        </div>
+
+        {/* Desktop auth + theme */}
+        <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle variant="simple" size="md" />
+
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-text-secondary max-w-[12rem] truncate">
+                {user?.firstName || user?.email}
+              </span>
+              <Button variant="ghost" size="sm" onClick={logout} title="Log out">
+                <LogOut size={15} className="mr-1.5" aria-hidden="true" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Sign in</Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="primary" size="sm">Get started</Button>
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="lg:hidden ml-auto text-text p-2 rounded-md hover:bg-surface-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            id="mobile-menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="lg:hidden fixed top-16 left-0 right-0 z-[70] max-h-[calc(100vh-5rem)] overflow-y-auto border-b border-border bg-surface shadow-lg"
+          >
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <ThemeToggle variant="simple" size="sm" showLabel={false} />
+                {isAuthenticated && (
+                  <span className="text-sm text-text-secondary truncate">
+                    {user?.firstName || user?.email?.split('@')[0]}
+                  </span>
+                )}
+              </div>
+
+              <nav aria-label="Mobile navigation" className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                    Platform
+                  </h4>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {baseNavLinks.map((path) => (
+                      <Link
+                        key={path}
+                        to={`/${path}`}
+                        className={`capitalize text-sm rounded-md px-3 py-2.5 border transition-colors ${
+                          isActive(path)
+                            ? 'bg-primary/10 border-primary/40 text-text font-medium'
+                            : 'border-border text-text-secondary hover:text-text hover:bg-surface-2'
+                        }`}
+                      >
+                        {linkLabel(path)}
+                      </Link>
+                    ))}
                   </div>
-                  
-                  {/* Features Navigation */}
-                  {isAuthenticated && (
-                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
-                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
+                </div>
+
+                {isAuthenticated && (
+                  <>
+                    <div>
+                      <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
                         Features
                       </h4>
                       <div className="grid grid-cols-2 gap-1.5">
@@ -175,24 +180,20 @@ export const Header = () => {
                           <Link
                             key={path}
                             to={`/${path}`}
-                            className={`transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center gap-1.5 text-xs font-medium border bg-white/80 dark:bg-black/80 ${
-                              location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`)
-                                ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
-                                : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
+                            className={`capitalize text-sm rounded-md px-3 py-2.5 border transition-colors ${
+                              isActive(path)
+                                ? 'bg-primary/10 border-primary/40 text-text font-medium'
+                                : 'border-border text-text-secondary hover:text-text hover:bg-surface-2'
                             }`}
-                            onClick={() => setIsMenuOpen(false)}
                           >
-                            <span className="font-medium">{path.replace('-', ' ')}</span>
+                            {linkLabel(path)}
                           </Link>
                         ))}
                       </div>
                     </div>
-                  )}
-                  
-                  {/* Platform Navigation */}
-                  {isAuthenticated && (
-                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
-                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
+
+                    <div>
+                      <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
                         Account
                       </h4>
                       <div className="grid grid-cols-2 gap-1.5">
@@ -200,71 +201,43 @@ export const Header = () => {
                           <Link
                             key={path}
                             to={`/${path}`}
-                            className={`transition-colors duration-200 py-2.5 px-2 capitalize rounded-md min-h-[40px] flex items-center justify-center gap-1.5 text-xs font-medium border bg-white/80 dark:bg-black/80 ${
-                              location.pathname === `/${path}` || location.pathname.startsWith(`/${path}/`)
-                                ? 'text-teal-700 dark:text-matrix-green bg-teal-600/25 dark:bg-matrix-green/25 border-teal-600/60 dark:border-matrix-green/60'
-                                : 'border-teal-600/30 dark:border-matrix-green/30 text-teal-600 dark:text-matrix-green hover:text-teal-700 dark:hover:text-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 hover:border-teal-600/50 dark:hover:border-matrix-green/50'
+                            className={`capitalize text-sm rounded-md px-3 py-2.5 border transition-colors ${
+                              isActive(path)
+                                ? 'bg-primary/10 border-primary/40 text-text font-medium'
+                                : 'border-border text-text-secondary hover:text-text hover:bg-surface-2'
                             }`}
-                            onClick={() => setIsMenuOpen(false)}
                           >
-                            <LayoutDashboard size={12} className="text-teal-600 dark:text-matrix-green" />
-                            <span className="font-medium">{path}</span>
+                            {linkLabel(path)}
                           </Link>
                         ))}
                       </div>
                     </div>
-                  )}
-                  {/* Authentication Section */}
-                  {!isAuthenticated ? (
-                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
-                      <h4 className="text-xs font-semibold text-teal-600 dark:text-matrix-green uppercase tracking-wider mb-2 text-center">
-                        Access
-                      </h4>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <Link
-                          to="/login"
-                          className="text-xs px-2 py-2.5 border border-teal-600 dark:border-matrix-green bg-white/80 dark:bg-black/80 hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium text-teal-600 dark:text-matrix-green"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          INITIALIZE
-                        </Link>
-                        <Link
-                          to="/register"
-                          className="text-xs px-2 py-2.5 border border-teal-600/50 dark:border-matrix-green/50 hover:border-teal-600 dark:hover:border-matrix-green hover:bg-teal-600/15 dark:hover:bg-matrix-green/15 bg-white/80 dark:bg-black/80 transition-all duration-300 rounded-md text-center min-h-[40px] flex items-center justify-center font-medium text-teal-600 dark:text-matrix-green"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          ACCESS
-                        </Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="pt-2 border-t border-teal-600/40 dark:border-matrix-green/40">
-                      <div className="px-2 py-1.5 text-white text-xs bg-teal-600/15 dark:bg-matrix-green/15 rounded-md mb-2 text-center">
-                        {user?.firstName || user?.email?.split('@')[0]}
-                      </div>
-                      <button
-                        onClick={() => {
-                          logout();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full px-2 py-2.5 text-teal-600 dark:text-matrix-green hover:bg-teal-600/20 dark:hover:bg-matrix-green/20 transition-all duration-300 rounded-md min-h-[40px] flex items-center justify-center border border-teal-600/40 dark:border-matrix-green/40 font-medium text-xs bg-white/80 dark:bg-black/80"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+                  </>
+                )}
+
+                {isAuthenticated ? (
+                  <Button variant="outline" className="w-full" onClick={logout}>
+                    <LogOut size={15} className="mr-2" aria-hidden="true" />
+                    Logout
+                  </Button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link to="/login" className="contents">
+                      <Button variant="outline" className="w-full">Sign in</Button>
+                    </Link>
+                    <Link to="/register" className="contents">
+                      <Button variant="primary" className="w-full">Get started</Button>
+                    </Link>
+                  </div>
+                )}
+              </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Command Palette */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-      />
+      <CommandPalette isOpen={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
     </header>
   );
 };

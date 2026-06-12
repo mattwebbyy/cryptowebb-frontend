@@ -54,7 +54,7 @@ export const FloatingIcons = () => {
       {icons.map((icon) => (
         <div
           key={icon.id}
-          className="absolute text-2xl opacity-30 text-matrix-green animate-float"
+          className="absolute text-2xl opacity-30 text-primary animate-float"
           style={
             {
               left: `${Math.max(0, Math.min(icon.x, window.innerWidth - 50))}px`,

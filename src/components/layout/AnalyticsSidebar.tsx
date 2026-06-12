@@ -8,12 +8,7 @@ import {
   Settings,
   ChevronRight,
   ArrowLeft,
-  Bell,
-  Zap,
   Command,
-  Wallet,
-  BookOpen,
-  Cog,
 } from 'lucide-react';
 import { useDataMetricsList } from '@/features/dataMetrics/api/useDataMetrics';
 import type { DataMetric } from '@/types/metricsData';
@@ -129,7 +124,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
      border border-border hover:border-primary/50`;
 
   const getMobileNavClass = () =>
-    `flex items-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50`;
+    `flex items-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-border bg-surface-2 text-text-secondary hover:text-text hover:bg-surface-2/80 hover:border-primary/40`;
 
   // Animation classes
   const getContentClass = () =>
@@ -203,7 +198,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
             <MatrixLoader />
           </div>
         ) : errorMetrics ? (
-          <div className="p-3 text-red-400 text-sm text-center bg-red-900/10 rounded-lg border border-red-500/20">
+          <div className="p-3 text-error text-sm text-center bg-error/10 rounded-lg border border-error/20">
             Error loading metrics.
           </div>
         ) : Object.keys(categorizedMetrics).length > 0 ? (
@@ -309,7 +304,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
         ${isMobile ? 'fixed left-0 top-0 z-[60] border-r-0 shadow-2xl h-screen max-h-screen' : 'relative'}
       `}
     >
-      <div className={isMobile ? 'flex-1 bg-black/[0.98] p-0 overflow-hidden flex flex-col' : getContentClass()}>
+      <div className={isMobile ? 'flex-1 bg-background p-0 overflow-hidden flex flex-col' : getContentClass()}>
         {isMobile ? (
           // Mobile compact layout
           <div className="p-3 space-y-3 flex-1 flex flex-col overflow-hidden">
@@ -369,7 +364,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                           // Note: We don't have a close function here, but the parent will handle it
                         }
                       }}
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50"
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all duration-200 min-h-[40px] text-xs font-medium border border-border bg-surface-2 text-text-secondary hover:text-text hover:bg-surface-2/80 hover:border-primary/40"
                       title={`${category} - ${Array.isArray(metrics) ? metrics.length : 0} metrics`}
                     >
                       <BarChart4 size={12} />
@@ -401,7 +396,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                         onClick={() => {
                           handleMetricSelect(metric.MetricID);
                         }}
-                        className="flex items-start gap-2 py-3 px-3 rounded-md transition-all duration-200 min-h-[48px] text-xs font-medium border border-primary/30 bg-black/50 text-text-secondary hover:text-primary hover:bg-primary/15 hover:border-primary/50 text-left active:scale-95"
+                        className="flex items-start gap-2 py-3 px-3 rounded-md transition-all duration-200 min-h-[48px] text-xs font-medium border border-border bg-surface-2 text-text-secondary hover:text-text hover:bg-surface-2/80 hover:border-primary/40 text-left active:scale-95"
                         title={metric.Description}
                         style={{
                           animationDelay: `${index * 50}ms`,

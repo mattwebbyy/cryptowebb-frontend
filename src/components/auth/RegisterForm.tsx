@@ -1,9 +1,11 @@
 // src/components/auth/RegisterForm.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/Button';
+import { Input, Label } from '@/components/ui/Input';
+import { API_BASE_URL } from '@/lib/config';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -14,13 +16,15 @@ export const RegisterForm = () => {
     lastName: '',
   });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -32,93 +36,117 @@ export const RegisterForm = () => {
         throw new Error(data.error || 'Registration failed');
       }
 
-      // Display a success toast notification
-      toast.success('Registered successfully!', {
+      toast.success('Account created — welcome aboard!', {
         position: 'top-right',
-        autoClose: 3000, // 3 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        duration: 3000,
       });
 
-      // Redirect to login after a slight delay to let the toast show
       setTimeout(() => {
         navigate('/login');
       }, 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-md w-full p-6 border border-primary bg-surface/30"
+      transition={{ duration: 0.3 }}
+      className="w-full max-w-md mx-auto"
     >
-      <h2 className="text-2xl mb-6 text-center text-primary">Initialize New Account</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="rounded-2xl border border-border bg-surface p-8 shadow-xl shadow-black/10">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
+          <p className="mt-1.5 text-sm text-text-secondary">
+            Start exploring on-chain analytics in minutes
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="register-first-name">First name</Label>
+              <Input
+                id="register-first-name"
+                type="text"
+                placeholder="Ada"
+                autoComplete="given-name"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="register-last-name">Last name</Label>
+              <Input
+                id="register-last-name"
+                type="text"
+                placeholder="Lovelace"
+                autoComplete="family-name"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
           <div>
-            <input
-              type="text"
-              placeholder="First Name"
-              className="w-full p-2 bg-surface border border-primary text-primary"
-              value={formData.firstName}
-              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+            <Label htmlFor="register-email">Email</Label>
+            <Input
+              id="register-email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
             />
           </div>
+
           <div>
-            <input
-              type="text"
-              placeholder="Last Name"
-              className="w-full p-2 bg-surface border border-primary text-primary"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+            <Label htmlFor="register-password">Password</Label>
+            <Input
+              id="register-password"
+              type="password"
+              placeholder="At least 6 characters"
+              autoComplete="new-password"
+              minLength={6}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
             />
           </div>
-        </div>
 
-        <div>
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-2 bg-surface border border-primary text-primary"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-        </div>
+          {error && (
+            <div
+              role="alert"
+              className="text-sm text-error p-3 rounded-lg border border-error/40 bg-error/10"
+            >
+              {error}
+            </div>
+          )}
 
-        <div>
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-2 bg-surface border border-primary text-primary"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          />
-        </div>
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+            disabled={isSubmitting}
+            isLoading={isSubmitting}
+          >
+            Create account
+          </Button>
+        </form>
 
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full p-2 bg-primary text-background font-bold hover:bg-primary-90"
-          type="submit"
-        >
-          Initialize System Access
-        </motion.button>
-      </form>
-
-      <div className="mt-4 text-center">
-        <button
-          onClick={() => navigate('/login')}
-          className="text-primary hover:text-primary-70"
-        >
-          Return to Login
-        </button>
+        <p className="mt-6 text-center text-sm text-text-secondary">
+          Already have an account?{' '}
+          <Link to="/login" className="text-primary hover:underline font-medium">
+            Sign in
+          </Link>
+        </p>
       </div>
     </motion.div>
   );

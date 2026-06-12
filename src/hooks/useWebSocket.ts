@@ -1,6 +1,6 @@
 // src/hooks/useWebSocket.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 interface WebSocketOptions {
   onOpen?: (event: Event) => void;
@@ -84,7 +84,6 @@ export const useWebSocket = <T = any>(
       );
       isConnecting.current = false; // Connection attempt ended (successfully or not)
       setIsConnected(false);
-      const currentWs = ws.current; // Capture current ref before setting to null
       ws.current = null; // Ensure ws ref is cleared
       onClose?.(event);
 
@@ -100,7 +99,7 @@ export const useWebSocket = <T = any>(
         if (event.code !== 1000) {
           // Don't toast on normal closure
           toast.error(`WebSocket connection lost. Max reconnect attempts reached.`, {
-            autoClose: 7000,
+            duration: 7000,
           });
         }
       }
@@ -156,7 +155,7 @@ export const useWebSocket = <T = any>(
       ws.current.send(message);
     } else {
       console.warn('WebSocket: Attempted to send message, but connection is not open.');
-      toast.warn('WebSocket is not connected. Message not sent.');
+      toast.warning('WebSocket is not connected. Message not sent.');
     }
   }, []);
 

@@ -16,7 +16,7 @@ describe('Skeleton', () => {
     expect(element).toBeTruthy();
     expect(element.style.width).toBe('120px');
     expect(element.style.height).toBe('2rem');
-    expect(element.className).toContain('bg-matrix-green/20');
+    expect(element.className).toContain('bg-primary/20');
     expect(element.className).toContain('animate-bounce');
     expect(element.className).not.toContain('rounded');
     expect(element.className).toContain('custom');

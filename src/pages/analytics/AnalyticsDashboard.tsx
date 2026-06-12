@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import ChartRenderer, { ChartRendererRef } from '@/features/charts/components/chartRenderer';
 import { Plus, Settings, BarChart3 } from 'lucide-react';
@@ -6,7 +6,7 @@ import DashboardEditorModal from '@/components/analytics/DashboardEditorModal';
 // Ensure these CSS files are imported correctly and accessible
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
-import { debounce } from 'lodash';
+import { debounce } from '@/lib/utils';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -202,7 +202,7 @@ const AnalyticsDashboard = () => {
     (
       _currentRglLayout: Layout[], // The layout array *after* resize
       _oldItem: Layout, // Item layout *before* resize
-      resizedItem: Layout // Item layout *after* resize
+      _resizedItem: Layout // Item layout *after* resize
     ) => {
       // Update dimensions accurately after resize operation completes
       updateGridItemDimensions();
@@ -271,7 +271,7 @@ const AnalyticsDashboard = () => {
 
   // Handler for saving dashboard from modal (create or update)
   const handleSaveDashboard = (dashboardDataFromModal: any) => {
-    const newRawLayout = (dashboardDataFromModal.layout || []) as Omit<DashboardLayoutItem, 'i'>[]; // Assume modal provides basic items
+    const newRawLayout = (dashboardDataFromModal.layout || []) as (Omit<DashboardLayoutItem, 'i'> & { i?: string })[]; // Assume modal provides basic items
     const newDashboardId = dashboard?.id || `dashboard-${Date.now()}`;
 
     // Ensure layout items have unique IDs and basic grid props
@@ -319,9 +319,9 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <div className={`h-full flex flex-col text-text relative ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/70'}`}>
+    <div className={`h-full flex flex-col text-text relative ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}>
       {/* Background overlay with theme awareness */}
-      <div className={`absolute inset-0 ${theme.mode === 'light' ? 'bg-white/80' : 'bg-black/70'}`}></div>
+      <div className={`absolute inset-0 ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}></div>
       
       {/* Modern Header - Mobile Responsive */}
       <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 md:p-6 border-b border-border/30 flex-shrink-0 glass-morphism gap-4">

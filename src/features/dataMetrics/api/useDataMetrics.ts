@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import type { AxiosResponse } from 'axios';
 import { apiClient } from '@/lib/axios';
 import type {
   DataMetric,
@@ -25,7 +24,9 @@ interface MetricsListResponse {
  * Expects: { metrics: DataMetric[] }
  */
 const fetchDataMetricsList = async (): Promise<DataMetric[]> => {
-  const response = await apiClient.get<MetricsListResponse>(`${API_DATA_BASE_URL}/metrics`);
+  const response = await apiClient.get<MetricsListResponse & { data?: unknown }>(
+    `${API_DATA_BASE_URL}/metrics`
+  );
   
   // Handle different response structures
   let data: MetricsListResponse | DataMetric[] | unknown;
@@ -119,7 +120,9 @@ const isDataMetricInfo = (obj: unknown): obj is DataMetricInfo => {
  * Expects: DataMetricInfo
  */
 const fetchDataMetricInfo = async (metricId: string): Promise<DataMetricInfo> => {
-  const response = await apiClient.get<DataMetricInfo>(`${API_DATA_BASE_URL}/metrics/${metricId}/info`);
+  const response = await apiClient.get<DataMetricInfo & { data?: DataMetricInfo }>(
+    `${API_DATA_BASE_URL}/metrics/${metricId}/info`
+  );
   
   // Handle the response structure with proper type checking
   if (response && response.data) {
@@ -157,23 +160,67 @@ export const useDataMetricInfo = (metricId: string | null) => {
  * @param metricId - The ID of the metric.
  * @param granularity - The granularity for the timeseries data (blocks, hours, days).
  */
+/**
+ * Columnar timeseries payload returned by the bucketed (default) backend path.
+ * Parallel arrays keep large responses small; normalized to points client-side.
+ */
+export interface TimeseriesColumnarResponse {
+  meta: {
+    metricId: number;
+    granularity: string;
+    bucketSeconds: number;
+    agg: string;
+    points: number;
+  };
+  t: number[];
+  v: (number | null)[];
+  min?: (number | null)[];
+  max?: (number | null)[];
+}
+
+const isColumnarResponse = (obj: unknown): obj is TimeseriesColumnarResponse => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    Array.isArray((obj as { t?: unknown }).t) &&
+    Array.isArray((obj as { v?: unknown }).v)
+  );
+};
+
+const columnarToPoints = (columnar: TimeseriesColumnarResponse): TimeseriesDataPoint[] => {
+  return columnar.t.reduce<TimeseriesDataPoint[]>((points, timestamp, i) => {
+    const value = columnar.v[i];
+    if (value !== null && value !== undefined) {
+      points.push({ timestamp, value });
+    }
+    return points;
+  }, []);
+};
+
 const fetchDataMetricTimeseries = async (
   metricId: string,
-  granularity: GranularityOption = 'days'
+  granularity: GranularityOption = 'days',
+  targetPoints: number = 1500
 ): Promise<TimeseriesDataPoint[]> => {
-  const response = await apiClient.get<TimeseriesApiResponse>(
+  const response = await apiClient.get<TimeseriesApiResponse | TimeseriesColumnarResponse>(
     `${API_DATA_BASE_URL}/metrics/${metricId}/timeseries`,
     {
       params: {
-        granularity: granularity
+        granularity: granularity,
+        target_points: targetPoints
       }
     }
   );
-  
-  // Handle the response structure with proper type checking
+
+  // Bucketed/columnar response (default backend path)
+  if (isColumnarResponse(response)) {
+    return columnarToPoints(response);
+  }
+
+  // Legacy structures (raw path, older backends)
   let data: TimeseriesApiResponse | TimeseriesDataPoint[] | unknown;
-  
-  if (response && response.data) {
+
+  if (response && 'data' in response && response.data) {
     data = response.data;
   } else if (response && typeof response === 'object') {
     data = response;
@@ -214,17 +261,20 @@ const fetchDataMetricTimeseries = async (
  */
 export const useDataMetricTimeseries = (
   metricId: string | null,
-  granularity: GranularityOption = 'days'
+  granularity: GranularityOption = 'days',
+  options?: { targetPoints?: number }
 ) => {
+  const targetPoints = options?.targetPoints ?? 1500;
   return useQuery<TimeseriesDataPoint[], Error>({
-    queryKey: ['dataMetricTimeseries', metricId, granularity],
+    queryKey: ['dataMetricTimeseries', metricId, granularity, targetPoints],
     queryFn: () => {
       if (!metricId) {
         return Promise.reject(new Error("Metric ID is required for timeseries."));
       }
-      return fetchDataMetricTimeseries(metricId, granularity);
+      return fetchDataMetricTimeseries(metricId, granularity, targetPoints);
     },
     enabled: !!metricId,
+    placeholderData: (previous) => previous,
     retry: 2,
   });
 };

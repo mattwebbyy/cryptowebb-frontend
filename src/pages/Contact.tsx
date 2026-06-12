@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Mail, MessageSquare, Clock, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Input, Textarea, Label } from '@/components/ui/Input';
+import { API_BASE_URL } from '@/lib/config';
+
 interface ContactFormData {
   name: string;
   email: string;
@@ -17,8 +21,6 @@ interface ApiResponse {
 }
 
 const Contact = () => {
-  // Using Tailwind's dark: modifier instead of custom theme logic
-
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -28,16 +30,14 @@ const Contact = () => {
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
     setErrorMessage('');
 
     try {
-      const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
-      console.log('Using API URL:', API_URL); // Debug log
-
-      const response = await fetch(`${API_URL}/api/v1/contact`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,16 +46,12 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
 
-      // Remove credentials: 'include' since we don't need it for this public endpoint
-
       const textResponse = await response.text();
-      console.log('Raw response:', textResponse);
 
       let data: ApiResponse;
       try {
         data = JSON.parse(textResponse);
-      } catch (parseError) {
-        console.error('Failed to parse response:', textResponse);
+      } catch {
         throw new Error('Server returned an invalid response');
       }
 
@@ -78,115 +74,161 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4 pb-12">
+    <div className="min-h-[calc(100vh-4rem)] px-4 py-12 md:py-20">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-2xl mx-auto"
+        transition={{ duration: 0.35 }}
+        className="max-w-5xl mx-auto"
       >
-        <Card className="p-8 px-24 bg-white/90 dark:bg-black/90 border-teal-600 dark:border-matrix-green">
-          <h1 className="text-4xl mb-8 text-center text-teal-600 dark:text-matrix-green font-mono">CONTACT</h1>
-
-          {status === 'error' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-6 p-4 border border-red-500 text-red-500 bg-red-500/10 dark:bg-black/50 font-mono"
-            >
-              {errorMessage}
-            </motion.div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-16 items-start">
+          {/* Info panel */}
+          <div className="space-y-6 lg:pt-6">
             <div>
-              <label htmlFor="name" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                maxLength={100}
-                placeholder="Your name"
-              />
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Get in touch</h1>
+              <p className="mt-3 text-text-secondary text-base leading-relaxed">
+                Questions about plans, the API, or anything else? Send us a message and
+                we&rsquo;ll get back to you within one business day.
+              </p>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                maxLength={100}
-                placeholder="your.email@example.com"
-              />
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-4 h-4 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Email us</div>
+                  <div className="text-sm text-text-secondary">
+                    Use the form — it goes straight to the team.
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="w-4 h-4 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Support</div>
+                  <div className="text-sm text-text-secondary">
+                    Include your account email for billing or API issues.
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-4 h-4 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Response time</div>
+                  <div className="text-sm text-text-secondary">Typically within 24 hours.</div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div>
-              <label htmlFor="subject" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono"
-                value={formData.subject}
-                onChange={handleChange}
-                required
-                maxLength={200}
-                placeholder="Message subject"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="message" className="block mb-2 text-teal-600 dark:text-matrix-green font-mono">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={5}
-                className="w-full bg-white/70 dark:bg-black/50 border-teal-600 dark:border-matrix-green p-2 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:focus:ring-matrix-green text-teal-600 dark:text-matrix-green font-mono resize-none"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                maxLength={5000}
-                placeholder="Your message here..."
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={status === 'submitting'}
-              className="w-full bg-teal-600 dark:bg-matrix-green hover:bg-teal-600/80 dark:hover:bg-matrix-green/80 text-white dark:text-black font-mono transition-colors duration-200"
-            >
-              {status === 'submitting' ? 'SENDING...' : 'SEND MESSAGE'}
-            </Button>
-
-            {status === 'success' && (
+          {/* Form */}
+          <Card className="p-6 md:p-8" hover={false}>
+            {status === 'success' ? (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 p-4 border border-teal-600 dark:border-matrix-green text-teal-600 dark:text-matrix-green bg-teal-600/10 dark:bg-black/50 font-mono text-center"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-12 text-center"
               >
-                <p>Message sent successfully!</p>
-                <p className="text-sm mt-2">We'll get back to you soon.</p>
+                <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-6 h-6 text-success" aria-hidden="true" />
+                </div>
+                <h2 className="text-xl font-semibold">Message sent</h2>
+                <p className="mt-2 text-sm text-text-secondary">
+                  Thanks for reaching out — we&rsquo;ll get back to you soon.
+                </p>
+                <Button variant="outline" className="mt-6" onClick={() => setStatus('idle')}>
+                  Send another message
+                </Button>
               </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {status === 'error' && (
+                  <div
+                    role="alert"
+                    className="p-3 rounded-lg border border-error/40 bg-error/10 text-error text-sm"
+                  >
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      maxLength={100}
+                      placeholder="Your name"
+                      autoComplete="name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      maxLength={100}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="subject">Subject</Label>
+                  <Input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    maxLength={200}
+                    placeholder="What's this about?"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    rows={6}
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    maxLength={5000}
+                    placeholder="Tell us how we can help…"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={status === 'submitting'}
+                  isLoading={status === 'submitting'}
+                  className="w-full sm:w-auto"
+                >
+                  Send message
+                </Button>
+              </form>
             )}
-          </form>
-        </Card>
+          </Card>
+        </div>
       </motion.div>
     </div>
   );

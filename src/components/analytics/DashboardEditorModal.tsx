@@ -1,14 +1,15 @@
 // src/components/analytics/DashboardEditorModal.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, LineChart, BarChart, PieChart, Hash, Table, Gauge } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { X, LineChart, BarChart, PieChart, Hash, Table, Gauge } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface DashboardEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newLayout: any[]) => void;
+  onSave: (dashboard: { name: string; description: string; layout: any[] }) => void;
   initialLayout?: any[];
+  initialDashboard?: unknown;
   isEditing?: boolean;
 }
 
@@ -93,7 +94,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-background/80 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -151,7 +152,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                       <button
                         key={chart.id}
                         onClick={() => addChart(chart.id)}
-                        className="p-3 border border-primary/30 rounded bg-black/50 hover:bg-primary/10 hover:border-primary/60 flex items-center gap-2"
+                        className="p-3 border border-border rounded-lg bg-surface-2 hover:bg-primary/10 hover:border-primary/40 flex items-center gap-2"
                       >
                         <chart.icon className="h-5 w-5 text-primary" />
                         <span className="text-primary">{chart.name}</span>
@@ -173,7 +174,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                       {selectedCharts.map((chart) => (
                         <div
                           key={chart.i}
-                          className="p-3 border border-primary/30 rounded bg-black/50 flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
+                          className="p-3 border border-border rounded-lg bg-surface-2 flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
                         >
                           <div className="flex items-center gap-2 flex-1">
                             {/* Icon based on chart type */}
@@ -196,14 +197,14 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                                 type="checkbox"
                                 checked={chart.isLive}
                                 onChange={() => toggleLiveData(chart.i)}
-                                className="rounded border-primary/50 bg-black/50 text-primary focus:ring-primary"
+                                className="rounded border-border bg-surface-2 text-primary focus:ring-primary/40"
                               />
                               <span className="text-primary/70">Live Data</span>
                             </label>
 
                             <button
                               onClick={() => removeChart(chart.i)}
-                              className="p-1 text-red-400 hover:text-red-300"
+                              className="p-1 text-error hover:text-error/80"
                               title="Remove chart"
                             >
                               <X size={16} />
@@ -230,7 +231,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                       value={dashboardName}
                       onChange={(e) => setDashboardName(e.target.value)}
                       placeholder="Enter dashboard name"
-                      className="w-full p-2 bg-black/50 border border-primary/50 rounded text-primary focus:border-primary focus:outline-none"
+                      className="w-full p-2 rounded-lg bg-surface-2 border border-border text-sm text-text focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
@@ -241,7 +242,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                       onChange={(e) => setDashboardDesc(e.target.value)}
                       placeholder="Enter dashboard description"
                       rows={4}
-                      className="w-full p-2 bg-black/50 border border-primary/50 rounded text-primary focus:border-primary focus:outline-none resize-none"
+                      className="w-full p-2 rounded-lg bg-surface-2 border border-border text-sm text-text focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 resize-none"
                     ></textarea>
                   </div>
 

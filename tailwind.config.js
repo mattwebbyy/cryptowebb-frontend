@@ -31,7 +31,10 @@ export default {
         secondary: 'var(--color-secondary)',
         accent: 'var(--color-accent)',
         background: 'var(--color-background)',
-        surface: 'var(--color-surface)',
+        surface: {
+          DEFAULT: 'var(--color-surface)',
+          2: 'var(--color-surface-2)',
+        },
         text: {
           DEFAULT: 'var(--color-text)',
           secondary: 'var(--color-text-secondary)',
@@ -40,6 +43,18 @@ export default {
         error: 'var(--color-error)',
         warning: 'var(--color-warning)',
         success: 'var(--color-success)',
+        gain: 'var(--color-gain)',
+        loss: 'var(--color-loss)',
+        chart: {
+          1: 'var(--chart-1)',
+          2: 'var(--chart-2)',
+          3: 'var(--chart-3)',
+          4: 'var(--chart-4)',
+          5: 'var(--chart-5)',
+          6: 'var(--chart-6)',
+          7: 'var(--chart-7)',
+          8: 'var(--chart-8)',
+        },
         // Opacity variations
         'primary-10': 'var(--color-primary-10)',
         'primary-20': 'var(--color-primary-20)',
@@ -49,7 +64,11 @@ export default {
         'primary-90': 'var(--color-primary-90)',
       },
       fontFamily: {
-        mono: ['Courier New', 'monospace'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Courier New', 'monospace'],
+      },
+      borderRadius: {
+        DEFAULT: 'var(--radius)',
       },
       animation: {
         'matrix-rain': 'matrix-rain 20s linear infinite',

@@ -4,10 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
+import { Input, Label, Textarea } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import MDEditor from '@uiw/react-md-editor';
 
 interface BlogPost {
@@ -147,116 +147,113 @@ export default function BlogEditor() {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4" data-color-mode="dark">
+    <div className="min-h-screen pt-6 px-2" data-color-mode="dark">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.4 }}
       >
-        <Card className="max-w-4xl mx-auto bg-black/90 border border-matrix-green p-6">
-          <h1 className="text-3xl font-mono text-matrix-green mb-8">
-            {isEditing ? 'Edit Blog Post' : 'Create New Blog Post'}
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold tracking-tight mb-8">
+            {isEditing ? 'Edit blog post' : 'Create blog post'}
           </h1>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-matrix-green font-mono mb-2">Title</label>
-              <input
+              <Label htmlFor="blog-title">Title</Label>
+              <Input
+                id="blog-title"
                 type="text"
                 name="title"
                 value={post.title}
                 onChange={handleChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">
-                Content (Markdown Supported)
-              </label>
-              <div className="markdown-editor-wrapper">
+              <Label htmlFor="blog-content">
+                Content <span className="text-text-secondary font-normal">(Markdown)</span>
+              </Label>
+              <div className="rounded-lg overflow-hidden border border-border">
                 <MDEditor
                   value={post.content}
                   onChange={handleContentChange}
                   preview="edit"
                   height={400}
-                  className="bg-black/50 border border-matrix-green"
-                  style={{
-                    backgroundColor: 'transparent',
-                  }}
+                  textareaProps={{ id: 'blog-content' }}
+                  style={{ backgroundColor: 'transparent' }}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">Image URL</label>
-              <input
+              <Label htmlFor="blog-image">Image URL</Label>
+              <Input
+                id="blog-image"
                 type="url"
                 name="image_url"
                 value={post.image_url}
                 onChange={handleChange}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
               />
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">
-                Tags (comma-separated)
-              </label>
-              <input
+              <Label htmlFor="blog-tags">
+                Tags <span className="text-text-secondary font-normal">(comma-separated)</span>
+              </Label>
+              <Input
+                id="blog-tags"
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
                 placeholder="crypto, trading, tutorial"
               />
             </div>
 
             <div>
-              <label className="block text-matrix-green font-mono mb-2">Meta Description</label>
-              <textarea
+              <Label htmlFor="blog-meta">Meta description</Label>
+              <Textarea
+                id="blog-meta"
                 name="meta_desc"
                 value={post.meta_desc}
                 onChange={handleChange}
                 rows={3}
-                className="w-full bg-black/50 border border-matrix-green p-2 text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/50"
               />
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <input
+                id="blog-publish"
                 type="checkbox"
                 name="is_published"
                 checked={post.is_published}
                 onChange={(e) => setPost((prev) => ({ ...prev, is_published: e.target.checked }))}
-                className="mr-2 bg-black/50 border-matrix-green text-matrix-green focus:ring-matrix-green"
+                className="h-4 w-4 rounded border-border bg-surface-2 text-primary focus:ring-primary/40"
               />
-              <label className="text-matrix-green font-mono">Publish immediately</label>
+              <label htmlFor="blog-publish" className="text-sm">
+                Publish immediately
+              </label>
             </div>
 
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                onClick={() => navigate('/blog')}
-                className="bg-black/50 hover:bg-black/70 text-matrix-green border border-matrix-green font-mono"
-              >
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="ghost" onClick={() => navigate('/blog')}>
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-matrix-green hover:bg-matrix-green/80 text-black font-mono"
+                variant="primary"
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
                 {createMutation.isPending || updateMutation.isPending
-                  ? 'Saving...'
+                  ? 'Saving…'
                   : isEditing
-                    ? 'Update Post'
-                    : 'Create Post'}
+                    ? 'Update post'
+                    : 'Create post'}
               </Button>
             </div>
           </form>
-        </Card>
+        </div>
       </motion.div>
     </div>
   );

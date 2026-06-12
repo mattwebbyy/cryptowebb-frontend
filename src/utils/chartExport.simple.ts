@@ -125,6 +125,23 @@ export class ChartExporter {
     }
   }
 
+  static generateFilename(base: string, format: string = 'png'): string {
+    return generateExportFilename(base, undefined, format);
+  }
+
+  // Extracts series data from a Highcharts chart and downloads it as CSV.
+  static async downloadChartDataAsCSV(chart: any, filename: string = 'chart-data'): Promise<void> {
+    const series: any[] = chart?.series ?? [];
+    const rows: Record<string, unknown>[] = [];
+    series.forEach((s) => {
+      (s.points ?? []).forEach((p: any, i: number) => {
+        rows[i] = rows[i] ?? { x: p.x };
+        rows[i][s.name ?? 'value'] = p.y;
+      });
+    });
+    return this.exportToCSV(rows, filename);
+  }
+
   // Matrix-themed export options
   static getMatrixTheme(): Partial<ExportOptions> {
     return {

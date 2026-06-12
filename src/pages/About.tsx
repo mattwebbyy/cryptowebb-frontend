@@ -1,178 +1,158 @@
 // src/pages/About.tsx
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/Card'; // Use your existing Card component
-import { TypeAnimation } from 'react-type-animation';
-import React from 'react';
-// Shiba ASCII Art Component
-const ShibaAsciiArt = () => {
-  const art = `
-                      ▄       ▄
-                    ▌▒█     ▄▀▒▌
-                    ▌▒▒█   ▄▀▒▒▒▐
-                   ▐▄▀▒▒▀▀▀▀▄▄▄▀▒▒▒▒▒▐
-                 ▄▄▀▒░▒▒▒▒▒▒▒▒▒█▒▒▄█▒▐
-               ▄▀▒▒▒░░░▒▒▒░░░▒▒▒▀██▀▒▌
-              ▐▒▒▒▄▄▒▒▒▒░░░▒▒▒▒▒▒▒▀▄▒▒▌
-              ▌░░▌█▀▒▒▒▒▒▄▀█▄▒▒▒▒▒▒▒█▒▐
-             ▐░░░▒▒▒▒▒▒▒▒▌██▀▒▒░░░▒▒▒▀▄▌
-             ▌░▒▄██▄▒▒▒▒▒▒▒▒▒░░░░░░▒▒▒▒▌
-            ▌▒▀▐▄█▄█▌▄░▀▒▒░░░░░░░░░░▒▒▒▐
-           ▐▒▒▐▀▐▀▒░▄▄▒▄▒▒▒▒▒▒░▒░▒░▒▒▒▒▌
-           ▐▒▒▒▀▀▄▄▒▒▒▄▒▒▒▒▒▒▒▒░▒░▒░▒▒▐
-            ▌▒▒▒▒▒▒▀▀▀▒▒▒▒▒▒░▒░▒░▒░▒▒▒▌
-            ▐▒▒▒▒▒▒▒▒▒▒▒▒▒▒░▒░▒░▒▒▄▒▒▐
-             ▀▄▒▒▒▒▒▒▒▒▒▒▒░▒░▒░▒▄▒▒▒▒▌
-               ▀▄▒▒▒▒▒▒▒▒▒▒▄▄▄▀▒▒▒▒▄▀
-                 ▀▄▄▄▄▄▄▀▀▀▒▒▒▒▒▄▄▀
-                     ▒▒▒▒▒▒▒▒▒▒▀▀
+import { Link } from 'react-router-dom';
+import { ArrowRight, Database, Gauge, Layers, Radio, ShieldCheck, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
-
-
-[ SYSTEM_INFO // NODE_AB84 ]
-
- > Connection Status:  SECURE [TLSv1.3]
- > Data Integrity:     VERIFIED [SHA-256]
- > Node Uptime:        481d 11h 07m 52s
- > Core Temp:          31.8°C
- > Access Level:       USER_AUTHENTICATED
- +------------------------------------------+
- |   Initializing analysis protocols...     |
- |   Data streams synchronizing...          |
- |   Awaiting operator input.               |
- +------------------------------------------+
-`;
-
-  return (
-    <motion.pre
-      variants={itemVariants} // Use variants from parent
-      className="text-xs font-mono text-teal-600/90 dark:text-matrix-green/90 overflow-x-auto whitespace-pre leading-tight mb-6 bg-teal-600/10 dark:bg-black/20 p-3 rounded border border-teal-600/30 dark:border-matrix-green/30 shadow-inner shadow-teal-600/10 dark:shadow-matrix-green/10 text-center"
-    >
-      {art}
-    </motion.pre>
-  );
+const fadeUp = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
 };
 
-// Matrix System Info ASCII Art Component
-const MatrixSystemInfoArt = () => {
-  const art = `
-
-
-`;
-  return (
-    <motion.pre
-      variants={itemVariants} // Use variants from parent
-      className="text-xs md:text-sm font-mono text-matrix-green/80 overflow-x-auto whitespace-pre leading-relaxed mt-8 mb-6 bg-black/30 p-4 rounded-md border border-matrix-green/30 shadow-inner shadow-matrix-green/10"
-    >
-      {art}
-    </motion.pre>
-  );
-};
-
-// Animation variants defined once
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1, // Adjust stagger timing
-      delayChildren: 0.2,
-    },
+const principles = [
+  {
+    icon: Radio,
+    title: 'Straight from the chain',
+    description:
+      'We index directly from archive nodes — no third-party data vendors in the middle. What you see is what the chain recorded.',
   },
-};
+  {
+    icon: Gauge,
+    title: 'Speed is a feature',
+    description:
+      'Columnar payloads, server-side aggregation, and aggressive caching keep every chart interactive, even across years of history.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Verifiable by design',
+    description:
+      'Every data point links back to blocks and transactions you can verify yourself. No black boxes, no unexplained numbers.',
+  },
+  {
+    icon: Layers,
+    title: 'One platform, whole stack',
+    description:
+      'Dashboards, alerts, portfolio tracking, and a developer API share the same real-time pipeline — build once, use everywhere.',
+  },
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
+const stack = [
+  { label: 'Indexing', value: 'Erigon archive nodes + custom decoders' },
+  { label: 'Storage', value: 'ClickHouse for timeseries, PostgreSQL for app data' },
+  { label: 'Serving', value: 'Go API with Redis caching and WebSocket streams' },
+  { label: 'Interface', value: 'React with real-time charting' },
+];
 
 const About = () => {
-  // Using Tailwind's dark: modifier instead of custom theme logic
-  
-  // Define the full sequence of text for height calculation and animation
-  const fullTextSequence = [
-    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.",
-    'This terminal provides high-fidelity insights derived from complex data streams across the digital ether.',
-    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.`,
-    `Data integrity is paramount; all feeds are cross-referenced and validated against decentralized oracles.`,
-    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.`,
-    `Remember, the data flows constantly; adapt or be deprecated.`,
-  ].join('\n'); // Join with newlines to mimic final structure
-
-  // Create the sequence array for TypeAnimation
-  const animationSequence = [
-    'Welcome, operator.',
-    1000,
-    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.",
-    1000,
-    "Welcome, operator. You've accessed the informational node for the CRYPTOWEBB Analysis Core.\nThis terminal provides high-fidelity insights derived from complex data streams across the digital ether.",
-    2000,
-    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.`,
-    1500,
-    `Our architecture leverages quantum entanglement processors (simulated) and neural network heuristics\nto decode market volatility, identify subterranean trends, and project potential futures within the cryptocurrency landscape.\nData integrity is paramount; all feeds are cross-referenced and validated against decentralized oracles.`,
-    2500,
-    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.`,
-    1500,
-    `Navigate the available dashboards and data sources using the sidebar matrix. Configure your parameters,\nvisualize the flow, and extract the signal from the noise.\nRemember, the data flows constantly; adapt or be deprecated.`,
-    5000,
-  ];
-
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 px-4 pb-12">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="w-full max-w-4xl"
-      >
-        <Card className="bg-white/90 dark:bg-black/80 border-teal-600 dark:border-matrix-green border-2 shadow-lg shadow-teal-600/20 dark:shadow-matrix-green/20 text-teal-600 dark:text-matrix-green font-mono backdrop-blur-sm p-6 md:p-8 overflow-hidden">
-          {/* Title */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-3xl md:text-4xl font-bold tracking-wider text-center border-b border-teal-600/30 dark:border-matrix-green/30 pb-4 mb-6"
-          >
-            ABOUT THE SYSTEM
-          </motion.h1>
+    <div className="relative overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -top-40 h-[32rem] opacity-50"
+        style={{
+          background:
+            'radial-gradient(36rem 18rem at 50% 0%, var(--color-primary-20), transparent 70%)',
+        }}
+      />
 
-          {/* Shiba ASCII Art */}
-          <ShibaAsciiArt />
+      {/* Hero */}
+      <section className="relative max-w-3xl mx-auto px-6 pt-20 md:pt-28 pb-16 text-center">
+        <motion.span
+          {...fadeUp}
+          transition={{ duration: 0.4 }}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-secondary"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+          About CryptoWebb
+        </motion.span>
 
-          {/* Content Section Wrapper with Min Height */}
-          <motion.div
-            variants={itemVariants}
-            // Set min-height to prevent card resize. Adjust value as needed.
-            // Tailwind classes like min-h-[200px] or min-h-[16rem] can work.
-            // Or use inline style for precise pixel values.
-            // We'll use an arbitrary class here, adjust the value based on final text height.
-            className="space-y-4 text-teal-600/70 dark:text-matrix-green/70 leading-relaxed text-sm md:text-base min-h-[180px] md:min-h-[150px]" // Example min-height
-          >
-            {/* Hidden text block to establish the full height needed */}
-            <p className="invisible h-0 overflow-hidden whitespace-pre-line" aria-hidden="true">
-              {fullTextSequence}
+        <motion.h1
+          {...fadeUp}
+          transition={{ duration: 0.4, delay: 0.05 }}
+          className="mt-6 text-3xl md:text-5xl font-bold tracking-tight leading-[1.15]"
+        >
+          Making on-chain data{' '}
+          <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+            actually usable
+          </span>
+        </motion.h1>
+
+        <motion.p
+          {...fadeUp}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="mt-6 text-base md:text-lg text-text-secondary leading-relaxed"
+        >
+          Blockchains publish everything and explain nothing. CryptoWebb exists to close that gap —
+          turning raw blocks, swaps, and transfers into dashboards, alerts, and APIs that traders,
+          funds, and builders can act on in real time.
+        </motion.p>
+      </section>
+
+      {/* Principles */}
+      <section className="relative max-w-6xl mx-auto px-6 pb-16">
+        <div className="grid sm:grid-cols-2 gap-5">
+          {principles.map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.35, delay: (index % 2) * 0.06 }}
+              className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-primary/30"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <item.icon className="w-5 h-5 text-primary" aria-hidden="true" />
+              </div>
+              <h2 className="mt-4 text-base font-semibold">{item.title}</h2>
+              <p className="mt-2 text-sm text-text-secondary leading-relaxed">{item.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Stack */}
+      <section className="relative border-y border-border bg-surface/50">
+        <div className="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-[1fr_1.5fr] gap-10 items-start">
+          <div>
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Database className="w-5 h-5 text-primary" aria-hidden="true" />
+            </div>
+            <h2 className="mt-4 text-2xl font-bold tracking-tight">How it&apos;s built</h2>
+            <p className="mt-3 text-text-secondary leading-relaxed">
+              The same pipeline powers everything — from the public dashboards to the developer API.
             </p>
+          </div>
+          <dl className="divide-y divide-border rounded-xl border border-border bg-surface overflow-hidden">
+            {stack.map((row) => (
+              <div key={row.label} className="grid sm:grid-cols-[8rem_1fr] gap-1 px-5 py-4">
+                <dt className="text-sm font-medium text-text-secondary">{row.label}</dt>
+                <dd className="text-sm">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
-            {/* Typing Animation */}
-            <TypeAnimation
-              sequence={animationSequence}
-              wrapper="div" // Use div to contain the paragraphs correctly
-              cursor={true}
-              repeat={0}
-              style={{ whiteSpace: 'pre-line', display: 'block' }}
-              speed={80} // Slightly slower typing
-              deletionSpeed={90}
-            />
-          </motion.div>
-
-          {/* Matrix System Info Art */}
-
-          {/* Footer line */}
-          <motion.p
-            variants={itemVariants}
-            className="text-teal-600/60 dark:text-matrix-green/60 text-xs md:text-sm border-t border-teal-600/30 dark:border-matrix-green/30 pt-4 mt-8"
-          >
-            // System Version: 3.14.1-GAMMA // Secure Connection Established // END_OF_TRANSMISSION
-          </motion.p>
-        </Card>
-      </motion.div>
+      {/* CTA */}
+      <section className="relative max-w-3xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">See it for yourself</h2>
+        <p className="mt-3 text-text-secondary">
+          Explore live dashboards on the free trial, or talk to us about what you&apos;re building.
+        </p>
+        <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link to="/trial">
+            <Button variant="primary" size="lg">
+              Start free trial
+              <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+            </Button>
+          </Link>
+          <Link to="/contact">
+            <Button variant="ghost" size="lg">
+              Contact us
+            </Button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };

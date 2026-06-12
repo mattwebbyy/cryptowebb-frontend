@@ -60,7 +60,7 @@ export const MatrixTerminalLoader: React.FC<{
       >
         {showText && (
           <h2
-            className={`${sizeClasses[size]} mb-4 font-mono text-teal-600 dark:text-matrix-green font-bold tracking-wider`}
+            className={`${sizeClasses[size]} mb-4 font-mono text-primary font-bold tracking-wider`}
             style={{ textShadow: '0 0 10px currentColor' }}
           >
             {text}
@@ -69,9 +69,9 @@ export const MatrixTerminalLoader: React.FC<{
         )}
 
         {/* Progress Bar */}
-        <div className={`w-64 ${progressBarHeight[size]} bg-gray-200 dark:bg-gray-800 border border-teal-600 dark:border-matrix-green relative overflow-hidden rounded-full`}>
+        <div className={`w-64 ${progressBarHeight[size]} bg-surface-2 border border-border relative overflow-hidden rounded-full`}>
           <motion.div
-            className={`absolute top-0 left-0 ${progressBarHeight[size]} bg-gradient-to-r from-teal-600 to-teal-400 dark:from-matrix-green dark:to-green-300 rounded-full`}
+            className={`absolute top-0 left-0 ${progressBarHeight[size]} bg-gradient-to-r from-primary to-accent rounded-full`}
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
             transition={{
@@ -82,7 +82,7 @@ export const MatrixTerminalLoader: React.FC<{
           />
           {/* Glowing effect */}
           <motion.div
-            className={`absolute top-0 left-0 ${progressBarHeight[size]} bg-white/50 rounded-full`}
+            className={`absolute top-0 left-0 ${progressBarHeight[size]} bg-primary/30 rounded-full`}
             initial={{ x: '-100%', width: '30%' }}
             animate={{ x: '350%' }}
             transition={{
@@ -94,7 +94,7 @@ export const MatrixTerminalLoader: React.FC<{
         </div>
 
         {/* Terminal Steps */}
-        <div className="mt-6 font-mono text-sm text-teal-600/70 dark:text-matrix-green/70 max-w-md">
+        <div className="mt-6 font-mono text-sm text-text-secondary max-w-md">
           <AnimatePresence mode="wait">
             <motion.p
               key={currentStep}
@@ -104,10 +104,10 @@ export const MatrixTerminalLoader: React.FC<{
               transition={{ duration: 0.3 }}
               className="flex items-center gap-2"
             >
-              <span className="text-teal-600 dark:text-matrix-green">&gt;</span>
+              <span className="text-primary">&gt;</span>
               {steps[currentStep]}
               <motion.span
-                className="inline-block w-2 h-4 bg-teal-600 dark:bg-matrix-green ml-1"
+                className="inline-block w-2 h-4 bg-primary ml-1"
                 animate={{ opacity: [1, 0, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               />
@@ -123,9 +123,8 @@ export const MatrixTerminalLoader: React.FC<{
 export const GlitchSpinner: React.FC<{ 
   size?: number;
   color?: string;
-}> = ({ 
-  size = 40,
-  color = 'currentColor'
+}> = ({
+  size = 40
 }) => {
   return (
     <div className="flex items-center justify-center">
@@ -135,14 +134,14 @@ export const GlitchSpinner: React.FC<{
       >
         {/* Main spinner */}
         <motion.div
-          className="absolute inset-0 border-2 border-transparent border-t-teal-600 dark:border-t-matrix-green rounded-full"
+          className="absolute inset-0 border-2 border-transparent border-t-primary rounded-full"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
         
         {/* Glitch effects */}
         <motion.div
-          className="absolute inset-0 border-2 border-transparent border-r-red-500 rounded-full"
+          className="absolute inset-0 border-2 border-transparent border-r-error rounded-full"
           animate={{ 
             rotate: 360,
             scale: [1, 1.1, 1],
@@ -157,7 +156,7 @@ export const GlitchSpinner: React.FC<{
         
         {/* Inner dot */}
         <motion.div
-          className="absolute top-1/2 left-1/2 w-2 h-2 bg-teal-600 dark:bg-matrix-green rounded-full transform -translate-x-1/2 -translate-y-1/2"
+          className="absolute top-1/2 left-1/2 w-2 h-2 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"
           animate={{ 
             scale: [0.8, 1.2, 0.8],
             opacity: [0.5, 1, 0.5]
@@ -180,7 +179,7 @@ export const SkeletonCard: React.FC<{
   imageHeight = 'h-48'
 }) => {
   return (
-    <div className="animate-pulse bg-white/90 dark:bg-black/90 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="animate-pulse bg-surface border border-border rounded-lg overflow-hidden">
       {showImage && (
         <div className={`${imageHeight} bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700`}>
           <motion.div
@@ -224,9 +223,9 @@ export const SkeletonTable: React.FC<{
   columns = 4
 }) => {
   return (
-    <div className="bg-white/90 dark:bg-black/90 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="bg-surface border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 p-4">
+      <div className="border-b border-border p-4">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {Array.from({ length: columns }).map((_, index) => (
             <div
@@ -250,7 +249,7 @@ export const SkeletonTable: React.FC<{
       
       {/* Rows */}
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={rowIndex} className="border-b border-gray-100 dark:border-gray-800 p-4 last:border-b-0">
+        <div key={rowIndex} className="border-b border-border p-4 last:border-b-0">
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {Array.from({ length: columns }).map((_, colIndex) => (
               <div
@@ -286,7 +285,7 @@ export const SkeletonChart: React.FC<{
   showLegend = true
 }) => {
   return (
-    <div className="bg-white/90 dark:bg-black/90 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+    <div className="bg-surface border border-border rounded-lg p-6">
       {/* Chart title */}
       <div className="h-6 w-1/3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded mb-6 relative overflow-hidden">
         <motion.div
@@ -305,7 +304,7 @@ export const SkeletonChart: React.FC<{
             stroke="currentColor"
             strokeWidth="2"
             fill="none"
-            className="text-teal-600 dark:text-matrix-green"
+            className="text-primary"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 2, repeat: Infinity }}
@@ -364,10 +363,10 @@ export const ProgressiveLoader: React.FC<{
             {/* Step indicator */}
             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
               index < currentStep 
-                ? 'bg-teal-600 dark:bg-matrix-green border-teal-600 dark:border-matrix-green text-white dark:text-black'
+                ? 'bg-primary border-primary text-white dark:text-black'
                 : index === currentStep
-                ? 'border-teal-600 dark:border-matrix-green text-teal-600 dark:text-matrix-green'
-                : 'border-gray-300 dark:border-gray-600 text-gray-400'
+                ? 'border-primary text-primary'
+                : 'border-border text-text-secondary/60'
             }`}>
               {index < currentStep ? '✓' : index + 1}
             </div>
@@ -376,23 +375,23 @@ export const ProgressiveLoader: React.FC<{
             <div className="flex-1">
               <div className={`text-sm font-medium ${
                 index <= currentStep 
-                  ? 'text-gray-800 dark:text-gray-200' 
-                  : 'text-gray-400 dark:text-gray-600'
+                  ? 'text-text' 
+                  : 'text-text-secondary/60'
               }`}>
                 {step.label}
               </div>
               
               {index === currentStep && (
                 <div className="mt-1">
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-teal-600 dark:bg-matrix-green rounded-full"
+                      className="h-full bg-primary rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${step.progress}%` }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div className="text-xs text-text-secondary mt-1">
                     {step.progress}%
                   </div>
                 </div>
@@ -421,7 +420,7 @@ export const FloatingActionLoader: React.FC<{
 
   return (
     <motion.div
-      className={`inline-flex items-center gap-2 ${sizeClasses[size]} bg-teal-600 dark:bg-matrix-green text-white dark:text-black rounded-lg font-mono`}
+      className={`inline-flex items-center gap-2 ${sizeClasses[size]} bg-primary text-white dark:text-black rounded-lg font-mono`}
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2 }}

@@ -33,24 +33,20 @@ const AlertsPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-black/50 text-primary">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-primary/30 flex-shrink-0">
+      <div className="flex items-center gap-4 p-4 border-b border-border flex-shrink-0">
         {viewMode !== 'list' && (
-          <Button
-            variant="ghost"
-            onClick={() => setViewMode('list')}
-            className="text-primary hover:bg-primary/10"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Alerts
+          <Button variant="ghost" onClick={() => setViewMode('list')}>
+            <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
+            Back to alerts
           </Button>
         )}
-        
-        <h1 className="text-2xl font-mono text-primary">
-          {viewMode === 'list' && 'Alerts Management'}
-          {viewMode === 'create' && 'Create New Alert'}
-          {viewMode === 'edit' && 'Edit Alert'}
+
+        <h1 className="text-xl font-semibold tracking-tight">
+          {viewMode === 'list' && 'Alerts'}
+          {viewMode === 'create' && 'Create alert'}
+          {viewMode === 'edit' && 'Edit alert'}
         </h1>
       </div>
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { AxiosError } from 'axios';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../lib/axios';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { SEO } from '../../components/SEO';
@@ -138,12 +138,12 @@ const ReferralsPage: React.FC = () => {
     e.preventDefault();
     // Platform is now defaulted and non-empty, so the main check is for code
     if (!user || !newCode.code) {
-      toast.warn('Referral Code is required.');
+      toast.warning('Referral Code is required.');
       return;
     }
     // Ensure platform is set (should be by default)
     if (!newCode.platform) {
-      toast.warn('Platform is required.'); // Should not happen with default
+      toast.warning('Platform is required.'); // Should not happen with default
       return;
     }
 
@@ -200,7 +200,7 @@ const ReferralsPage: React.FC = () => {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-2">
-                <label htmlFor="platform" className="block text-text font-medium mb-3">
+                <label htmlFor="platform" className="block mb-1.5 text-sm font-medium text-text">
                   Platform
                 </label>
                 <select
@@ -209,7 +209,7 @@ const ReferralsPage: React.FC = () => {
                   value={newCode.platform}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 cursor-pointer"
                 >
                   <option value="general">General</option>
                   {/* Future platforms can be added here */}
@@ -217,7 +217,7 @@ const ReferralsPage: React.FC = () => {
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="code" className="block text-text font-medium mb-3">
+                <label htmlFor="code" className="block mb-1.5 text-sm font-medium text-text">
                   Referral Code
                 </label>
                 <input
@@ -227,13 +227,13 @@ const ReferralsPage: React.FC = () => {
                   value={newCode.code}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text placeholder-text-secondary/50 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 backdrop-blur-sm"
+                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                   placeholder="Enter your unique referral code"
                 />
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="description" className="block text-text font-medium mb-3">
+                <label htmlFor="description" className="block mb-1.5 text-sm font-medium text-text">
                   Description (Optional)
                 </label>
                 <textarea
@@ -242,7 +242,7 @@ const ReferralsPage: React.FC = () => {
                   value={newCode.description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full p-4 bg-surface/80 border border-border/50 rounded-xl text-text placeholder-text-secondary/50 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 resize-none backdrop-blur-sm"
+                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 resize-none"
                   placeholder="e.g., 10% off trading fees, bonus rewards, etc."
                 />
               </div>
