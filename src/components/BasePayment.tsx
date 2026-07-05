@@ -105,7 +105,7 @@ const BasePayment: React.FC<BasePaymentProps> = ({
       console.log(`Initiating Base Pay payment: $${amount} USDC`);
 
       // Collect user information (optional)
-      const paymentConfig: any = {
+      const paymentConfig: Parameters<typeof pay>[0] = {
         amount,
         to: recipientAddress,
         testnet,
@@ -139,9 +139,9 @@ const BasePayment: React.FC<BasePaymentProps> = ({
 
       toast.info('Payment submitted. Waiting for confirmation...');
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Payment failed:', error);
-      const errorMessage = error.message || 'Payment failed';
+      const errorMessage = error instanceof Error ? error.message : 'Payment failed';
       setPaymentState({
         status: 'failed',
         paymentId: null,

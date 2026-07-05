@@ -11,18 +11,7 @@ import rehypeRaw from 'rehype-raw';
 import { Helmet } from 'react-helmet-async';
 import { ChevronLeft, Clock, Tag, List } from 'lucide-react';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  image_url: string;
-  tags: string[];
-  meta_desc: string;
-  is_published: boolean;
-  created_at: string;
-  author_id: string;
-}
+import type { BlogPost } from '@/types/api';
 
 interface TableOfContentsItem {
   id: string;

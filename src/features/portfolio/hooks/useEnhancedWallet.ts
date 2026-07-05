@@ -177,7 +177,20 @@ export const useEnhancedWallet = () => {
 
     try {
       // Create contract instance
-      const contract = new (window as any).web3.eth.Contract(ERC20_ABI, tokenAddress);
+      type LegacyWeb3Window = Window & {
+        web3: {
+          eth: {
+            Contract: new (
+              abi: unknown,
+              address: string
+            ) => { methods: { balanceOf: (a: string) => { call: () => Promise<string> } } };
+          };
+        };
+      };
+      const contract = new (window as unknown as LegacyWeb3Window).web3.eth.Contract(
+        ERC20_ABI,
+        tokenAddress
+      );
       
       // Get balance
       const balance = await contract.methods.balanceOf(walletAddress).call();
@@ -316,8 +329,8 @@ export const useEnhancedWallet = () => {
       tokenHoldings.sort((a, b) => b.value - a.value);
       
       setTokens(tokenHoldings);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch wallet tokens');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch wallet tokens');
       console.error('Enhanced wallet fetch error:', err);
     } finally {
       setIsLoading(false);

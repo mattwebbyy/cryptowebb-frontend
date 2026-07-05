@@ -42,7 +42,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // Add any specific TS/React rules here if needed
       '@typescript-eslint/no-unused-vars': 'warn', // Example: warn about unused vars
-      '@typescript-eslint/no-explicit-any': 'warn', // Example: warn about explicit 'any'
+      '@typescript-eslint/no-explicit-any': 'error', // enforced as of Phase 5 — keep the codebase any-free
     },
   },
   // IMPORTANT: Add Prettier config LAST to override other formatting rules

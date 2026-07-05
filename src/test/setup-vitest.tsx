@@ -56,13 +56,13 @@ vi.mock('framer-motion', async () => {
     return rest;
   };
 
-  const componentCache = new Map<string, React.FC<any>>();
+  const componentCache = new Map<string, React.FC<React.PropsWithChildren<Record<string, unknown>>>>();
   const motion = new Proxy(
     {},
     {
       get: (_target, tag: string) => {
         if (!componentCache.has(tag)) {
-          const Component = ({ children, ...props }: any) =>
+          const Component = ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
             React.createElement(tag, stripMotionProps(props), children);
           componentCache.set(tag, Component);
         }
@@ -73,7 +73,7 @@ vi.mock('framer-motion', async () => {
 
   return {
     motion,
-    AnimatePresence: ({ children }: any) => children,
+    AnimatePresence: ({ children }: React.PropsWithChildren) => children,
     useReducedMotion: () => false,
     useAnimation: () => ({ start: vi.fn(), stop: vi.fn(), set: vi.fn() }),
     useInView: () => true,

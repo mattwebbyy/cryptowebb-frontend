@@ -4,11 +4,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, LineChart, BarChart, PieChart, Hash, Table, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
+export interface ChartLayoutItem {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  chartType: string;
+  title: string;
+  isLive: boolean;
+}
+
 interface DashboardEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (dashboard: { name: string; description: string; layout: any[] }) => void;
-  initialLayout?: any[];
+  onSave: (dashboard: { name: string; description: string; layout: ChartLayoutItem[] }) => void;
+  initialLayout?: ChartLayoutItem[];
   initialDashboard?: unknown;
   isEditing?: boolean;
 }
@@ -30,7 +41,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
   isEditing = false,
 }) => {
   const [dashboardName, setDashboardName] = useState('');
-  const [selectedCharts, setSelectedCharts] = useState<any[]>(initialLayout);
+  const [selectedCharts, setSelectedCharts] = useState<ChartLayoutItem[]>(initialLayout);
   const [dashboardDesc, setDashboardDesc] = useState('');
   const [activeTab, setActiveTab] = useState<'charts' | 'settings'>('charts');
 
@@ -165,9 +176,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                   <h3 className="text-lg text-primary mb-2">Selected Charts</h3>
                   {selectedCharts.length === 0 ? (
                     <div className="p-6 text-center border border-dashed border-primary/30 rounded">
-                      <p className="text-primary/60">
-                        No charts added yet. Add charts from above.
-                      </p>
+                      <p className="text-primary/60">No charts added yet. Add charts from above.</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -177,12 +186,10 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
                           className="p-3 border border-border rounded-lg bg-surface-2 flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
                         >
                           <div className="flex items-center gap-2 flex-1">
-                            {/* Icon based on chart type */}
-                            {chartTypes.find((c) => c.id === chart.chartType)?.icon &&
-                              React.createElement(
-                                chartTypes.find((c) => c.id === chart.chartType)?.icon as any,
-                                { className: 'h-5 w-5 text-primary' }
-                              )}
+                            {(() => {
+                              const Icon = chartTypes.find((c) => c.id === chart.chartType)?.icon;
+                              return Icon ? <Icon className="h-5 w-5 text-primary" /> : null;
+                            })()}
                             <input
                               type="text"
                               value={chart.title}
@@ -262,10 +269,7 @@ const DashboardEditorModal: React.FC<DashboardEditorModalProps> = ({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSave}
-            className="bg-primary text-black hover:bg-primary/80"
-          >
+          <Button onClick={handleSave} className="bg-primary text-black hover:bg-primary/80">
             {isEditing ? 'Update Dashboard' : 'Create Dashboard'}
           </Button>
         </div>

@@ -9,7 +9,7 @@ import { AuthProvider } from '../../hooks/useAuth';
 
 // Mock the chart components to avoid Highcharts complexity in tests
 vi.mock('../../components/charts/LineChart', () => ({
-  LineChart: ({ data, title }: { data: any[]; title: string }) => (
+  LineChart: ({ data, title }: { data: unknown[]; title: string }) => (
     <div data-testid="line-chart">
       <h3>{title}</h3>
       <div>Data points: {data?.length || 0}</div>
@@ -18,7 +18,7 @@ vi.mock('../../components/charts/LineChart', () => ({
 }));
 
 vi.mock('../../components/charts/BarChart', () => ({
-  BarChart: ({ data, title }: { data: any[]; title: string }) => (
+  BarChart: ({ data, title }: { data: unknown[]; title: string }) => (
     <div data-testid="bar-chart">
       <h3>{title}</h3>
       <div>Data points: {data?.length || 0}</div>

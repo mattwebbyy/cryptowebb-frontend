@@ -8,23 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  image_url: string;
-  tags: string[];
-  meta_desc: string;
-  is_published: boolean;
-  created_at: string;
-  author_id: string;
-}
-
-interface BlogResponse {
-  posts: BlogPost[];
-  total: number;
-}
+import type { BlogPost, BlogListResponse } from '@/types/api';
 
 // Strip markdown syntax for a plain-text preview.
 const getContentPreview = (content: string) => {
@@ -102,10 +86,10 @@ const BlogCard = ({ post, index }: { post: BlogPost; index: number }) => (
 export default function BlogList() {
   const { user } = useAuth();
 
-  const { data, isLoading } = useQuery<BlogResponse>({
+  const { data, isLoading } = useQuery<BlogListResponse>({
     queryKey: ['blogs'],
     queryFn: async () => {
-      const response = await axios.get<BlogResponse>(
+      const response = await axios.get<BlogListResponse>(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog`
       );
       return response.data;

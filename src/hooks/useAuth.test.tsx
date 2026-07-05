@@ -2,7 +2,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { AuthProvider, useAuth } from './useAuth';
-import { AuthResponse } from '../types/types';
+import { AuthResponse } from '@/types/api';
 
 // Mock fetch globally
 global.fetch = vi.fn();

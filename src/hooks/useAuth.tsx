@@ -1,18 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { AuthResponse } from '../types/types';
+import { AuthResponse, User } from '@/types/api';
 import { API_BASE_URL } from '@/lib/config';
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  avatarUrl?: string;
-  bio?: string;
-  createdAt?: string;
-  lastLogin?: string | null;
-}
 
 interface AuthContextType {
   isAuthenticated: boolean;

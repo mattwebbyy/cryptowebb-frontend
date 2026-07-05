@@ -1,5 +1,5 @@
 // src/features/cipher/useTokenFilters.ts — search/filter/sort state for the token table.
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { RiskLevel, Token } from './types';
 
 export interface SortConfig {
@@ -18,13 +18,13 @@ export const useTokenFilters = (tokens: Token[]) => {
   const [filterMinHolders, setFilterMinHolders] = useState<number | null>(null);
   const [filterMinLiquidity, setFilterMinLiquidity] = useState<number | null>(null);
 
-  const handleSort = (key: keyof Token) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
+  // Stable identity so memoized table rows don't re-render on unrelated state.
+  const handleSort = useCallback((key: keyof Token) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev && prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  }, []);
 
   const sortedTokens = useMemo(() => {
     let filteredTokens = [...tokens];

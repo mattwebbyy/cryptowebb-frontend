@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import RGL, { WidthProvider, Layout } from 'react-grid-layout';
 import ChartRenderer, { ChartRendererRef } from '@/features/charts/components/chartRenderer';
 import { Plus, Settings, BarChart3 } from 'lucide-react';
-import DashboardEditorModal from '@/components/analytics/DashboardEditorModal';
+import DashboardEditorModal, { ChartLayoutItem } from '@/components/analytics/DashboardEditorModal';
 // Ensure these CSS files are imported correctly and accessible
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
@@ -127,31 +127,34 @@ const AnalyticsDashboard = () => {
   }, [layout, updateGridItemDimensions]); // Rerun if layout changes
 
   // Function to initialize layout with potentially missing grid properties (x, y, w, h)
-  const createInitialLayout = useCallback((items: DashboardLayoutItem[]): DashboardLayoutItem[] => {
-    // Responsive grid configuration
-    const cols = isMobile ? 1 : isTablet ? 2 : 12; // 1 column on mobile, 2 on tablet, 12 on desktop
-    const defaultWidth = isMobile ? 1 : isTablet ? 1 : 4; // Full width on mobile/tablet
-    const defaultHeight = isMobile ? 6 : isTablet ? 5 : 4; // Taller on mobile for better visibility
-    const itemsPerRow = Math.floor(cols / defaultWidth);
+  const createInitialLayout = useCallback(
+    (items: DashboardLayoutItem[]): DashboardLayoutItem[] => {
+      // Responsive grid configuration
+      const cols = isMobile ? 1 : isTablet ? 2 : 12; // 1 column on mobile, 2 on tablet, 12 on desktop
+      const defaultWidth = isMobile ? 1 : isTablet ? 1 : 4; // Full width on mobile/tablet
+      const defaultHeight = isMobile ? 6 : isTablet ? 5 : 4; // Taller on mobile for better visibility
+      const itemsPerRow = Math.floor(cols / defaultWidth);
 
-    return items.map((item, index) => {
-      // Ensure every item has a unique 'i'
-      const uniqueId = item.i || `chart-${Date.now()}-${index}`;
-      return {
-        ...item,
-        i: uniqueId,
-        // Assign position/size only if not already defined in the input item
-        x: item.x ?? (index % itemsPerRow) * defaultWidth,
-        y: item.y ?? Math.floor(index / itemsPerRow) * defaultHeight,
-        w: item.w || defaultWidth,
-        h: item.h || defaultHeight,
-        isDraggable: item.isDraggable !== undefined ? item.isDraggable : true,
-        isResizable: item.isResizable !== undefined ? item.isResizable : true,
-        // Reset static property if undefined
-        static: item.static === true ? true : false,
-      };
-    });
-  }, [isMobile, isTablet]); // Re-run when screen size changes
+      return items.map((item, index) => {
+        // Ensure every item has a unique 'i'
+        const uniqueId = item.i || `chart-${Date.now()}-${index}`;
+        return {
+          ...item,
+          i: uniqueId,
+          // Assign position/size only if not already defined in the input item
+          x: item.x ?? (index % itemsPerRow) * defaultWidth,
+          y: item.y ?? Math.floor(index / itemsPerRow) * defaultHeight,
+          w: item.w || defaultWidth,
+          h: item.h || defaultHeight,
+          isDraggable: item.isDraggable !== undefined ? item.isDraggable : true,
+          isResizable: item.isResizable !== undefined ? item.isResizable : true,
+          // Reset static property if undefined
+          static: item.static === true ? true : false,
+        };
+      });
+    },
+    [isMobile, isTablet]
+  ); // Re-run when screen size changes
 
   // Handler for when RGL reports a layout change (drag, resize)
   const onLayoutChange = (newRglLayout: Layout[]) => {
@@ -270,8 +273,16 @@ const AnalyticsDashboard = () => {
   }, [updateGridItemDimensions]); // Re-run if the update function identity changes
 
   // Handler for saving dashboard from modal (create or update)
-  const handleSaveDashboard = (dashboardDataFromModal: any) => {
-    const newRawLayout = (dashboardDataFromModal.layout || []) as (Omit<DashboardLayoutItem, 'i'> & { i?: string })[]; // Assume modal provides basic items
+  const handleSaveDashboard = (dashboardDataFromModal: {
+    name: string;
+    description: string;
+    layout: ChartLayoutItem[];
+  }) => {
+    // Modal items carry chartType as a plain string; the grid narrows it.
+    const newRawLayout = (dashboardDataFromModal.layout || []) as unknown as (Omit<
+      DashboardLayoutItem,
+      'i'
+    > & { i?: string })[];
     const newDashboardId = dashboard?.id || `dashboard-${Date.now()}`;
 
     // Ensure layout items have unique IDs and basic grid props
@@ -319,14 +330,21 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <div className={`h-full flex flex-col text-text relative ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}>
+    <div
+      className={`h-full flex flex-col text-text relative ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}
+    >
       {/* Background overlay with theme awareness */}
-      <div className={`absolute inset-0 ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}></div>
-      
+      <div
+        className={`absolute inset-0 ${theme.mode === 'light' ? 'bg-background/80' : 'bg-background/80'}`}
+      ></div>
+
       {/* Modern Header - Mobile Responsive */}
       <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 md:p-6 border-b border-border/30 flex-shrink-0 glass-morphism gap-4">
         <div className="space-y-1 flex-1 min-w-0">
-          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate pr-2" title={dashboard?.name}>
+          <h2
+            className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate pr-2"
+            title={dashboard?.name}
+          >
             {dashboard?.name || 'Analytics Dashboard'}
           </h2>
           <p className="text-xs md:text-sm text-text-secondary line-clamp-1">
@@ -361,17 +379,24 @@ const AnalyticsDashboard = () => {
           <div className="h-full flex flex-col items-center justify-center p-4 md:p-8">
             {/* Modern Empty State - Mobile Optimized */}
             <div className="text-center max-w-md w-full space-y-4 md:space-y-6">
-              <div className={`${isMobile ? 'w-16 h-16' : 'w-24 h-24'} glass-morphism rounded-3xl flex items-center justify-center mx-auto border border-primary/20 shadow-modern`}>
+              <div
+                className={`${isMobile ? 'w-16 h-16' : 'w-24 h-24'} glass-morphism rounded-3xl flex items-center justify-center mx-auto border border-primary/20 shadow-modern`}
+              >
                 <BarChart3 className={`${isMobile ? 'h-8 w-8' : 'h-12 w-12'} text-primary`} />
               </div>
-              
+
               <div className="space-y-2 md:space-y-3">
-                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-text`}>Create Your First Dashboard</h3>
-                <p className={`text-text-secondary leading-relaxed ${isMobile ? 'text-sm' : 'text-base'}`}>
-                  Build powerful analytics dashboards with customizable widgets and real-time data visualization.
+                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-text`}>
+                  Create Your First Dashboard
+                </h3>
+                <p
+                  className={`text-text-secondary leading-relaxed ${isMobile ? 'text-sm' : 'text-base'}`}
+                >
+                  Build powerful analytics dashboards with customizable widgets and real-time data
+                  visualization.
                 </p>
               </div>
-              
+
               <div className="space-y-3">
                 <button
                   onClick={handleCreateNewDashboard}
@@ -380,7 +405,7 @@ const AnalyticsDashboard = () => {
                   <Plus size={isMobile ? 18 : 20} />
                   <span>Create New Dashboard</span>
                 </button>
-                
+
                 <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-text-secondary`}>
                   Start with pre-built templates or create from scratch
                 </p>
@@ -389,7 +414,10 @@ const AnalyticsDashboard = () => {
           </div>
         ) : (
           // This container's size determines the width RGL receives via WidthProvider
-          <div ref={gridContainerRef} className={`h-full w-full ${isMobile ? 'p-2' : 'p-4'} overflow-auto`}>
+          <div
+            ref={gridContainerRef}
+            className={`h-full w-full ${isMobile ? 'p-2' : 'p-4'} overflow-auto`}
+          >
             <style>{`
                             /* Ensure RGL styles are loaded. These are additions/overrides */
                             .react-grid-layout {

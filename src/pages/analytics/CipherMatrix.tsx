@@ -1,5 +1,5 @@
 // src/pages/analytics/CipherMatrix.tsx — token surveillance screen, composed from features/cipher.
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useResponsive } from '@/hooks/useResponsive';
 import TokenDetailModal from '@/features/cipher/components/token-detail/TokenDetailModal';
 import { Token } from '@/features/cipher/types';
@@ -20,10 +20,10 @@ const CipherMatrix = () => {
 
   const { isMobile } = useResponsive();
 
-  const showTokenDetails = (token: Token) => {
+  const showTokenDetails = useCallback((token: Token) => {
     setSelectedToken(token);
     setIsTokenDetailOpen(true);
-  };
+  }, []);
 
   return (
     <div className="h-full flex flex-col">

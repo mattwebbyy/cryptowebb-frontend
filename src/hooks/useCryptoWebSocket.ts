@@ -5,7 +5,7 @@ import { WS_BASE_URL } from '@/lib/config';
 interface WebSocketMessage {
   type: string;
   metricId?: number;
-  data: any;
+  data: unknown;
   timestamp: string;
   error?: string;
 }
@@ -84,13 +84,14 @@ export const useCryptoWebSocket = (
           const message: WebSocketMessage = JSON.parse(event.data);
           
           switch (message.type) {
-            case 'live_data':
+            case 'live_data': {
               const liveDataPoint = message.data as LiveDataPoint;
               setLiveData(prev => ({
                 ...prev,
                 [liveDataPoint.metricId]: liveDataPoint
               }));
               break;
+            }
               
             case 'metric_info':
               // Received metric info
@@ -162,7 +163,7 @@ export const useCryptoWebSocket = (
     subscribedMetricsRef.current.clear();
   }, []);
 
-  const sendMessage = useCallback((message: any) => {
+  const sendMessage = useCallback((message: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {

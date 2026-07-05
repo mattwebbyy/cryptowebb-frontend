@@ -14,7 +14,7 @@ export interface ChartConfig {
   type: 'line' | 'bar' | 'pie' | 'number' | 'table' | 'gauge';
   datasourceId: string;
   query: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
   refreshRate?: number;
   isLive?: boolean;
   createdAt: string;
@@ -38,7 +38,7 @@ export interface DatasourceConfig {
   userId: string;
   name: string;
   type: 'postgres' | 'clickhouse';
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

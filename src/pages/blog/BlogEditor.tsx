@@ -10,14 +10,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import MDEditor from '@uiw/react-md-editor';
 
-interface BlogPost {
-  title: string;
-  content: string;
-  image_url: string;
-  tags: string[];
-  meta_desc: string;
-  is_published: boolean;
-}
+type BlogDraft = Pick<
+  import('@/types/api').BlogPost,
+  'title' | 'content' | 'image_url' | 'tags' | 'meta_desc' | 'is_published'
+>;
 
 export default function BlogEditor() {
   const navigate = useNavigate();
@@ -25,7 +21,7 @@ export default function BlogEditor() {
   const { user } = useAuth();
   const isEditing = Boolean(id);
 
-  const [post, setPost] = useState<BlogPost>({
+  const [post, setPost] = useState<BlogDraft>({
     title: '',
     content: '',
     image_url: '',
@@ -75,7 +71,7 @@ export default function BlogEditor() {
   }, [user, navigate]);
 
   const createMutation = useMutation({
-    mutationFn: async (newPost: BlogPost) => {
+    mutationFn: async (newPost: BlogDraft) => {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog`,
         newPost,
@@ -98,7 +94,7 @@ export default function BlogEditor() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updatedPost: BlogPost) => {
+    mutationFn: async (updatedPost: BlogDraft) => {
       const response = await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/${id}`,
         updatedPost,

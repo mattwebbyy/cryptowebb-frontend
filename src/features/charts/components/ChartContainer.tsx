@@ -17,8 +17,7 @@ import { useWebSocketImproved } from '@/hooks/useWebSocketImproved';
 import { ChartSkeleton } from '@/components/ui/Skeleton';
 import { Card } from '@/components/ui/Card';
 import { ChartErrorBoundary } from '@/components/ErrorBoundary';
-import { sanitizeFilename } from '@/utils/chartExport';
-import { ChartExporter } from '@/utils/chartExport';
+import { sanitizeFilename, exportToCSV } from '@/utils/chartExport';
 import { WS_BASE_URL } from '@/lib/config';
 import { ChartCanvas } from './ChartCanvas';
 import { NumberWidget, TableWidget, WidgetShell } from './widgets';
@@ -101,7 +100,7 @@ export const ChartRenderer = forwardRef<ChartRendererRef, ChartRendererProps>(
         exportChart: async (format, filename) => {
           const exportName = sanitizeFilename(filename || `${title || chartId}_${Date.now()}`);
           if (format === 'csv') {
-            await ChartExporter.exportToCSV(displayData as Record<string, unknown>[], exportName);
+            exportToCSV(displayData as Record<string, unknown>[], exportName);
             return;
           }
           const chart = chartInstanceRef.current;

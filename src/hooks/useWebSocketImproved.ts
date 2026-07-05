@@ -28,7 +28,7 @@ const DEFAULT_RECONNECT_ATTEMPTS = 5;
 const DEFAULT_HEARTBEAT_INTERVAL = 30000; // 30 seconds
 const DEFAULT_HEARTBEAT_TIMEOUT = 5000; // 5 seconds
 
-export const useWebSocketImproved = <T = any>(
+export const useWebSocketImproved = <T = unknown>(
   url: string | null,
   onMessage: (data: T) => void,
   options: WebSocketOptions = {}

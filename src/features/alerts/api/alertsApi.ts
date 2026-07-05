@@ -2,42 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/axios';
 
-// Types for alerts
-export interface Alert {
-  id: string;
-  userID: string;
-  metricID: string;
-  condition: 'ABOVE' | 'BELOW' | 'EQUALS';
-  threshold: number;
-  frequency: 'ONCE' | 'DAILY' | 'WEEKLY';
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastTriggered?: string;
-  notificationMethod: 'EMAIL' | 'SMS' | 'PUSH' | 'WEBHOOK';
-  webhookURL?: string;
-  message?: string;
-}
+import type { Alert, CreateAlertRequest, UpdateAlertRequest } from '../types';
 
-export interface CreateAlertRequest {
-  metricID: string;
-  condition: 'ABOVE' | 'BELOW' | 'EQUALS';
-  threshold: number;
-  frequency: 'ONCE' | 'DAILY' | 'WEEKLY';
-  notificationMethod: 'EMAIL' | 'SMS' | 'PUSH' | 'WEBHOOK';
-  webhookURL?: string;
-  message?: string;
-}
-
-export interface UpdateAlertRequest {
-  condition?: 'ABOVE' | 'BELOW' | 'EQUALS';
-  threshold?: number;
-  frequency?: 'ONCE' | 'DAILY' | 'WEEKLY';
-  isActive?: boolean;
-  notificationMethod?: 'EMAIL' | 'SMS' | 'PUSH' | 'WEBHOOK';
-  webhookURL?: string;
-  message?: string;
-}
+export type { Alert, CreateAlertRequest, UpdateAlertRequest };
 
 // API functions
 const fetchAlerts = async (): Promise<Alert[]> => {

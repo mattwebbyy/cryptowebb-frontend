@@ -22,17 +22,21 @@ export interface ApiParameter {
   example?: string;
 }
 
+// Documentation payloads are illustrative JSON blobs rendered with
+// JSON.stringify — they have no useful static shape beyond "JSON".
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 export interface ApiRequestBody {
   contentType: string;
-  schema: any;
-  example: any;
+  schema: JsonValue;
+  example: JsonValue;
 }
 
 export interface ApiResponse {
   status: number;
   description: string;
-  schema?: any;
-  example?: any;
+  schema?: JsonValue;
+  example?: JsonValue;
 }
 
 export interface ApiExample {
@@ -41,11 +45,11 @@ export interface ApiExample {
     url: string;
     method: string;
     headers?: Record<string, string>;
-    body?: any;
+    body?: JsonValue;
   };
   response: {
     status: number;
-    body: any;
+    body: JsonValue;
   };
 }
 

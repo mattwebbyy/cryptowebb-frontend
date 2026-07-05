@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { STRIPE_CONFIG } from '../config/stripe';
 import { useAuth } from '../hooks/useAuth';
-import { AuthResponse } from '../types/types';
+import { AuthResponse } from '@/types/api';
 import { Button } from '@/components/ui/Button';
 import { Input, Label } from '@/components/ui/Input';
 
