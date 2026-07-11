@@ -16,33 +16,34 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'font-medium transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants = {
-      default: 'bg-surface border border-border text-text hover:bg-primary/5 hover:border-primary/50 hover:text-primary',
-      outline: 'border border-border bg-transparent hover:bg-primary/5 text-text hover:border-primary/50 hover:text-primary',
-      ghost: 'border-transparent hover:bg-primary/5 text-text-secondary hover:text-primary',
-      primary: 'bg-primary text-white border border-primary hover:bg-primary/90 shadow-sm hover:shadow-md',
-      gradient: 'bg-gradient-to-r from-primary to-secondary text-white border-0 hover:shadow-lg hover:shadow-primary/25 hover:scale-105',
-      glass: 'glass-morphism text-text hover:bg-primary/10 hover:text-primary border border-border/30',
-      destructive: 'bg-error text-white border border-error hover:bg-error/90 shadow-sm hover:shadow-md',
+      default: 'bg-surface-2 border border-border text-text hover:border-text-secondary/50',
+      outline: 'border border-border bg-transparent text-text hover:bg-surface-2 hover:border-text-secondary/50',
+      ghost: 'border-transparent text-text-secondary hover:text-text hover:bg-surface-2',
+      primary: 'bg-primary text-white border border-primary hover:bg-secondary',
+      gradient: 'bg-primary text-white border border-primary hover:bg-secondary',
+      glass: 'bg-surface-2 border border-border text-text hover:border-text-secondary/50',
+      destructive: 'bg-error text-white border border-error hover:bg-error/90',
     };
 
     const sizes = {
-      xs: 'px-2.5 py-1.5 text-xs',
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-4 py-2.5 text-sm',
-      lg: 'px-6 py-3 text-base',
-      xl: 'px-8 py-4 text-lg',
+      xs: 'px-2 py-1 text-xs',
+      sm: 'px-2.5 py-1.5 text-[13px]',
+      md: 'px-3.5 py-2 text-sm',
+      lg: 'px-5 py-2.5 text-sm',
+      xl: 'px-6 py-3 text-base',
     };
 
+    // All roundings collapse toward the flat product look; names kept for
+    // call-site compatibility.
     const roundedStyles = {
       sm: 'rounded-sm',
       md: 'rounded-md',
-      lg: 'rounded-lg',
-      xl: 'rounded-xl',
+      lg: 'rounded-md',
+      xl: 'rounded-md',
       full: 'rounded-full',
     };
 
     const motionProps = {
-      whileHover: !isLoading && variant !== 'gradient' ? { scale: 1.02 } : undefined,
       whileTap: !isLoading ? { scale: 0.98 } : undefined,
     };
 

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
-import { Layout } from './components/layout/Layout';
 import { AuthProvider } from './hooks/useAuth';
 import { StripeProvider } from './components/providers/StripeProvider';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -30,9 +29,8 @@ function App() {
           <StripeProvider>
             <div className="app-container w-full overflow-x-hidden">
               <MatrixRainGate />
-              <Layout>
-                <Routes />
-              </Layout>
+              {/* Shells (marketing topbar vs product sidebar) are layout routes */}
+              <Routes />
               <Toaster position="bottom-right" richColors closeButton theme="dark" />
             </div>
           </StripeProvider>

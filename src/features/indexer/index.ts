@@ -3,3 +3,6 @@ export * from './types';
 
 // Export all API hooks
 export * from './api/useIndexerApi';
+
+// Shared indexer UI
+export * from './components/PriceStalenessBadge';

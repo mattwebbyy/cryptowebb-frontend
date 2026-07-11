@@ -14,7 +14,7 @@ describe('<Card />', () => {
     const { container } = render(<Card>Test content</Card>);
 
     const cardElement = container.firstChild as HTMLElement;
-    expect(cardElement).toHaveClass('rounded-xl', 'border');
+    expect(cardElement).toHaveClass('rounded-md', 'border');
   });
 
   it('should merge custom className with default classes', () => {
@@ -23,7 +23,7 @@ describe('<Card />', () => {
 
     const cardElement = container.firstChild as HTMLElement;
     expect(cardElement).toHaveClass(customClass);
-    expect(cardElement).toHaveClass('rounded-xl', 'border'); // Still has defaults
+    expect(cardElement).toHaveClass('rounded-md', 'border'); // Still has defaults
   });
 
   it('should pass style props correctly', () => {
@@ -70,7 +70,7 @@ describe('<Card />', () => {
 
     const cardElement = container.firstChild as HTMLElement;
     expect(cardElement).toHaveClass('class1', 'class2', 'class3');
-    expect(cardElement).toHaveClass('rounded-xl', 'border'); // Still has defaults
+    expect(cardElement).toHaveClass('rounded-md', 'border'); // Still has defaults
   });
 
   it('should override default classes when conflicting classes are provided', () => {
@@ -79,7 +79,7 @@ describe('<Card />', () => {
 
     const cardElement = container.firstChild as HTMLElement;
     expect(cardElement).toHaveClass('bg-red-500', 'p-2');
-    expect(cardElement).toHaveClass('rounded-xl'); // Defaults retained alongside custom classes (clsx)
+    expect(cardElement).toHaveClass('rounded-md'); // Defaults retained alongside custom classes (clsx)
   });
 
   it('should work with React fragments as children', () => {

@@ -1,169 +1,48 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink, useParams } from 'react-router-dom';
-import {
-  Home,
-  ChevronLeft,
-  Menu,
-} from 'lucide-react';
-import AnalyticsSidebar from '@/components/layout/AnalyticsSidebar';
-import { AnalyticsBreadcrumb } from '@/components/ui/Breadcrumb';
-import { useDataMetricInfo } from '@/features/dataMetrics/api/useDataMetrics';
+// src/pages/analytics/AnalyticsLayout.tsx — analytics workspace sub-layout.
+// Renders inside AppShell (which owns the sidebar/topbar); this adds only a
+// slim tab strip across the workspace sections.
+import React from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnalyticsErrorBoundary } from '@/components/ErrorBoundary';
-import { useResponsive } from '@/hooks/useResponsive';
-import { useKeyboardShortcuts, getModifierKey } from '@/hooks/useKeyboardShortcuts';
-import { CommandPalette } from '@/components/ui/CommandPalette';
 
-/**
- * Layout component for the analytics section.
- * Includes an animated sidebar for navigation and a main content area rendered via Outlet.
- */
+const tabs = [
+  { to: '/analytics', label: 'Dashboards', end: true },
+  { to: '/analytics/metrics', label: 'Metrics', end: false },
+  { to: '/analytics/datasources', label: 'Data sources', end: true },
+  { to: '/analytics/manage', label: 'Manage', end: true },
+];
+
 const AnalyticsLayout: React.FC = () => {
-  const { isMobile } = useResponsive();
-  // Using Tailwind's dark: modifier instead of custom theme logic
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile); // Start closed on mobile
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const { metricId } = useParams<{ metricId: string }>();
-  
-  // Fetch metric info for breadcrumb display
-  const { data: metricInfo } = useDataMetricInfo(metricId || null);
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  
-  // Keyboard shortcuts
-  useKeyboardShortcuts([
-    {
-      key: 'k',
-      [getModifierKey()]: true,
-      action: () => setCommandPaletteOpen(true),
-      description: 'Open command palette',
-      category: 'General',
-    },
-    {
-      key: 'b',
-      [getModifierKey()]: true,
-      action: toggleSidebar,
-      description: 'Toggle sidebar',
-      category: 'Navigation',
-    },
-    {
-      key: 'h',
-      [getModifierKey()]: true,
-      action: () => window.location.href = '/',
-      description: 'Go to home',
-      category: 'Navigation',
-    },
-  ]);
-
-  // Auto-close sidebar on mobile when navigating
-  React.useEffect(() => {
-    if (isMobile && sidebarOpen) {
-      // Close sidebar when route changes on mobile
-      const handleRouteChange = () => setSidebarOpen(false);
-      window.addEventListener('popstate', handleRouteChange);
-      return () => window.removeEventListener('popstate', handleRouteChange);
-    }
-  }, [isMobile, sidebarOpen]);
-
-  // Common NavLink class generation for header
-  const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center p-2 rounded-md whitespace-nowrap transition-all duration-200 ease-in-out transform hover:scale-105
-     ${isActive
-      ? 'bg-primary/20 text-primary font-semibold shadow-sm shadow-primary/50'
-      : 'text-text-secondary hover:bg-primary/10 hover:text-primary'
-    }`;
-
-  const handleMetricSelect = (metricId: number) => {
-    // Optional: Add any additional logic when a metric is selected
-    console.log(`Selected metric: ${metricId}`);
-  };
+  const location = useLocation();
+  // Metric chart pages get the Metrics tab highlighted
+  const onMetricPage = location.pathname.startsWith('/analytics/metrics/');
 
   return (
     <AnalyticsErrorBoundary>
-      <div className="h-screen w-full flex flex-col overflow-hidden text-text relative pt-20">
-        {/* Background overlay */}
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div>
-        
-        {/* Header Bar */}
-      <header className="relative z-10 glass-morphism border-b border-primary/30 p-3 flex items-center justify-between flex-shrink-0 shadow-modern">
-        <div className="flex items-center">
-          <button
-            onClick={toggleSidebar}
-            className={`
-              p-2 rounded-md text-primary focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary transition-all duration-200 ease-in-out transform hover:scale-110
-              ${sidebarOpen ? 'hover:bg-primary/20 dark:hover:bg-primary/20' : 'hover:bg-primary/15 dark:hover:bg-primary/15'}
-            `}
-            aria-label="Toggle sidebar"
-          >
-            <div className={`transition-transform duration-300 ${sidebarOpen ? 'rotate-0' : 'rotate-180'}`}>
-              {sidebarOpen ? <ChevronLeft size={22} /> : <Menu size={22} />}
-            </div>
-          </button>
-          <h1 className="ml-3 text-xl font-bold tracking-wider transition-all duration-300 hover:text-primary dark:hover:text-primary">
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              ANALYTICS PLATFORM
-            </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <NavLink to="/" className={getNavLinkClass({isActive: false})}>
-            <Home size={18} className="mr-2 transition-transform duration-200" /> 
-            <span className="transition-all duration-200">Home</span>
-          </NavLink>
-        </div>
-      </header>
-
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Mobile backdrop overlay */}
-        {isMobile && sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-background/70 z-[50] backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
-          />
-        )}
-
-        {/* Animated Sidebar with slide-out panels */}
-        <AnalyticsSidebar 
-          isOpen={sidebarOpen} 
-          onMetricSelect={(metricId) => {
-            handleMetricSelect(metricId);
-            // Auto-close sidebar on mobile after selection
-            if (isMobile) setSidebarOpen(false);
-          }}
-          isMobile={isMobile}
-          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-        />
-
-        {/* Main Content Area */}
-        <main 
-          className={`
-            relative z-10 flex-1 flex flex-col overflow-hidden
-            transition-all duration-300 ease-in-out
-          `}
+      <div className="mx-auto max-w-screen-2xl px-4 md:px-6">
+        <nav
+          className="flex items-center gap-1 border-b border-border -mx-4 md:-mx-6 px-4 md:px-6 overflow-x-auto"
+          aria-label="Analytics sections"
         >
-          {/* Breadcrumb Navigation */}
-          <div className="glass-morphism border-b border-primary/30 flex-shrink-0">
-            <div className="px-4 py-3">
-              <AnalyticsBreadcrumb 
-                metricName={metricInfo?.MetricName}
-                metricId={metricId}
-              />
-            </div>
-          </div>
-          
-          {/* Content Area - Let individual pages handle their own scrolling */}
-          <div className="flex-1 overflow-hidden">
-            <Outlet />
-          </div>
-        </main>
+          {tabs.map((tab) => (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.end}
+              className={({ isActive }) =>
+                `relative px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors border-b-2 -mb-px ${
+                  isActive || (tab.to === '/analytics/metrics' && onMetricPage)
+                    ? 'text-text font-medium border-primary'
+                    : 'text-text-secondary hover:text-text border-transparent'
+                }`
+              }
+            >
+              {tab.label}
+            </NavLink>
+          ))}
+        </nav>
+        <Outlet />
       </div>
-
-      {/* Command Palette */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-      />
-    </div>
     </AnalyticsErrorBoundary>
   );
 };

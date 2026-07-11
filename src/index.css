@@ -6,62 +6,65 @@
    ThemeContext sets these at runtime; the values here are the dark "default"
    variant so the first paint matches before React hydrates. */
 :root {
-  --color-primary: #8b5cf6;
-  --color-secondary: #6366f1;
-  --color-accent: #a78bfa;
-  --color-background: #09090b;
-  --color-surface: #111113;
-  --color-surface-2: #18181b;
-  --color-text: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-border: #27272a;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
-  --color-success: #22c55e;
-  --color-gain: #22c55e;
-  --color-loss: #ef4444;
+  --color-primary: #4c8dff;
+  --color-secondary: #3b6fd6;
+  --color-accent: #6ea8ff;
+  --color-background: #0d1117;
+  --color-surface: #12161d;
+  --color-surface-2: #1a212b;
+  --color-text: #e6edf3;
+  --color-text-secondary: #8d96a0;
+  --color-border: #232c38;
+  --color-error: #f6465d;
+  --color-warning: #d9a13c;
+  --color-success: #3fb68b;
+  --color-gain: #3fb68b;
+  --color-loss: #f6465d;
 
-  --chart-1: #8b5cf6;
-  --chart-2: #22d3ee;
-  --chart-3: #f59e0b;
-  --chart-4: #ec4899;
-  --chart-5: #10b981;
-  --chart-6: #3b82f6;
-  --chart-7: #f97316;
-  --chart-8: #e879f9;
+  --chart-1: #4c8dff;
+  --chart-2: #37b6c9;
+  --chart-3: #9a7bff;
+  --chart-4: #e8a13c;
+  --chart-5: #3fb68b;
+  --chart-6: #e0557e;
+  --chart-7: #c9a227;
+  --chart-8: #7ea1c4;
 
-  --radius: 8px;
+  --radius: 6px;
 
   /* Opacity variations */
-  --color-primary-10: #8b5cf61a;
-  --color-primary-20: #8b5cf633;
-  --color-primary-30: #8b5cf64d;
-  --color-primary-50: #8b5cf680;
-  --color-primary-70: #8b5cf6b3;
-  --color-primary-90: #8b5cf6e6;
+  --color-primary-10: #4c8dff1a;
+  --color-primary-20: #4c8dff33;
+  --color-primary-30: #4c8dff4d;
+  --color-primary-50: #4c8dff80;
+  --color-primary-70: #4c8dffb3;
+  --color-primary-90: #4c8dffe6;
 }
 
-/* Light theme overrides - Using Teal Colors */
+/* Light theme overrides — cool slate/blue */
 .theme-light {
-  --color-primary: #0d7377;
-  --color-secondary: #14a085;
-  --color-accent: #40a69f;
-  --color-background: #fafefe;
+  --color-primary: #2f6fed;
+  --color-secondary: #2456bd;
+  --color-accent: #4c8dff;
+  --color-background: #f7f9fb;
   --color-surface: #ffffff;
-  --color-text: #1a202c;
-  --color-text-secondary: #4a5568;
-  --color-border: #e2e8f0;
-  --color-error: #e53e3e;
-  --color-warning: #dd6b20;
-  --color-success: #38a169;
-  
+  --color-surface-2: #eef1f5;
+  --color-text: #1c2430;
+  --color-text-secondary: #5b6572;
+  --color-border: #d9e0e8;
+  --color-error: #dd3d4c;
+  --color-warning: #b57b1e;
+  --color-success: #1a9e6e;
+  --color-gain: #1a9e6e;
+  --color-loss: #dd3d4c;
+
   /* Opacity variations for light theme */
-  --color-primary-10: #0d73771a;
-  --color-primary-20: #0d737733;
-  --color-primary-30: #0d73774d;
-  --color-primary-50: #0d737780;
-  --color-primary-70: #0d7377b3;
-  --color-primary-90: #0d7377e6;
+  --color-primary-10: #2f6fed1a;
+  --color-primary-20: #2f6fed33;
+  --color-primary-30: #2f6fed4d;
+  --color-primary-50: #2f6fed80;
+  --color-primary-70: #2f6fedb3;
+  --color-primary-90: #2f6fede6;
 }
 
 /* Matrix easter-egg variant (dark) — the legacy green identity */
@@ -84,8 +87,8 @@ body {
   color: var(--color-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   font-feature-settings: 'cv11', 'ss01';
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
   overflow-y: auto;
   min-height: 100vh;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -102,9 +105,9 @@ body {
     line-height: 1.25;
     text-wrap: balance;
   }
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.125rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.1875rem; }
+  h3 { font-size: 1rem; }
 
   p {
     text-wrap: pretty;
@@ -238,50 +241,34 @@ html {
   --tw-prose-pre-border: var(--color-border);
 }
 
-/* Modern 2025 Utility Classes */
+/* Legacy utility names, redefined flat: no blur, no glow, no gradients.
+   Kept so older pages using these classes render as plain bordered surfaces. */
 .glass-morphism {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .theme-light .glass-morphism {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .shadow-modern {
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
+  box-shadow: none;
 }
 
 .shadow-modern-lg {
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.07),
-    0 10px 15px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .shadow-glow {
-  box-shadow: 0 0 20px rgba(var(--color-primary), 0.15);
+  box-shadow: none;
 }
 
 .gradient-border {
   position: relative;
   background: var(--color-surface);
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  border-radius: inherit;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  -webkit-mask-composite: xor;
+  border: 1px solid var(--color-border);
 }
 
 .text-balance {
@@ -382,8 +369,7 @@ html {
   .prose h2,
   .prose h3,
   .prose h4 {
-    color: var(--color-primary);
-    font-family: monospace;
+    color: var(--color-text);
   }
 
   .prose p {

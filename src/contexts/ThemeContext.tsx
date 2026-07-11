@@ -190,25 +190,25 @@ interface Palette {
   success: string;
 }
 
-// Categorical ramp for chart series; distinct from the UI accent so series
-// never blend into interactive chrome.
-const CHART_RAMP = ['#8b5cf6', '#22d3ee', '#f59e0b', '#ec4899', '#10b981', '#3b82f6', '#f97316', '#e879f9'];
+// Categorical ramp for chart series; blue-led to match the slate/blue UI,
+// distinct enough that series never blend into interactive chrome.
+const CHART_RAMP = ['#4c8dff', '#37b6c9', '#9a7bff', '#e8a13c', '#3fb68b', '#e0557e', '#c9a227', '#7ea1c4'];
 
 const palettes: Record<ThemeMode, Record<ThemeVariant, Palette>> = {
   dark: {
     default: {
-      primary: '#8b5cf6',       // violet-500 accent
-      secondary: '#6366f1',     // indigo-500
-      accent: '#a78bfa',        // violet-400
-      background: '#09090b',    // zinc-950
-      surface: '#111113',
-      surface2: '#18181b',      // zinc-900
-      text: '#fafafa',
-      textSecondary: '#a1a1aa', // zinc-400
-      border: '#27272a',        // zinc-800
-      error: '#ef4444',
-      warning: '#f59e0b',
-      success: '#22c55e',
+      primary: '#4c8dff',       // restrained financial blue
+      secondary: '#3b6fd6',
+      accent: '#6ea8ff',
+      background: '#0d1117',    // slate near-black
+      surface: '#12161d',
+      surface2: '#1a212b',
+      text: '#e6edf3',
+      textSecondary: '#8d96a0',
+      border: '#232c38',        // hairline
+      error: '#f6465d',
+      warning: '#d9a13c',
+      success: '#3fb68b',
     },
     matrix: {
       primary: '#33ff33',
@@ -227,18 +227,18 @@ const palettes: Record<ThemeMode, Record<ThemeVariant, Palette>> = {
   },
   light: {
     default: {
-      primary: '#7c3aed',       // violet-600
-      secondary: '#4f46e5',     // indigo-600
-      accent: '#8b5cf6',
-      background: '#fafafa',
+      primary: '#2f6fed',
+      secondary: '#2456bd',
+      accent: '#4c8dff',
+      background: '#f7f9fb',
       surface: '#ffffff',
-      surface2: '#f4f4f5',      // zinc-100
-      text: '#18181b',
-      textSecondary: '#52525b', // zinc-600
-      border: '#e4e4e7',        // zinc-200
-      error: '#dc2626',
-      warning: '#d97706',
-      success: '#16a34a',
+      surface2: '#eef1f5',
+      text: '#1c2430',
+      textSecondary: '#5b6572',
+      border: '#d9e0e8',
+      error: '#dd3d4c',
+      warning: '#b57b1e',
+      success: '#1a9e6e',
     },
     matrix: {
       primary: '#0d7377',
@@ -283,8 +283,8 @@ function getThemeStyles(theme: ThemeConfig): Record<string, string> {
     '--color-success': colors.success,
 
     // Financial deltas
-    '--color-gain': mode === 'dark' ? '#22c55e' : '#16a34a',
-    '--color-loss': mode === 'dark' ? '#ef4444' : '#dc2626',
+    '--color-gain': mode === 'dark' ? '#3fb68b' : '#1a9e6e',
+    '--color-loss': mode === 'dark' ? '#f6465d' : '#dd3d4c',
 
     // Matrix-specific effects (only consumed under variant-matrix)
     '--matrix-opacity': intensity.opacity,

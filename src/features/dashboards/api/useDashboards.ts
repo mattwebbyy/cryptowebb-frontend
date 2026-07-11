@@ -69,3 +69,38 @@ export const useShareDashboard = () => {
     },
   });
 };
+
+// --- Charts ---
+// Chart queries follow the backend contract:
+//   metric:<id> [granularity:<1m|5m|1h|1d|...>] [range:<24h|7d|30d|...>] [agg:<avg|last>]
+
+export interface CreateChartInput {
+  dashboardId: string;
+  name: string;
+  type: 'line' | 'bar' | 'pie' | 'number' | 'table';
+  datasourceId: string;
+  query: string;
+  isLive?: boolean;
+  position?: number;
+}
+
+export const useCreateChart = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ dashboardId, ...chart }: CreateChartInput) =>
+      apiClient.post(`/api/v1/dashboards/${dashboardId}/charts`, chart),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+    },
+  });
+};
+
+export const useDeleteChart = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (chartId: string) => apiClient.delete(`/api/v1/charts/${chartId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
+    },
+  });
+};

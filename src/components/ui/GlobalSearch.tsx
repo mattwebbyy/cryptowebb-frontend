@@ -10,11 +10,16 @@ interface GlobalSearchProps {
 }
 
 const quickSuggestions = [
+  { label: 'Token Launches', path: '/launches', keywords: ['launches', 'new', 'tokens', 'pairs', 'feed'] },
+  { label: 'Whale Feed', path: '/whales', keywords: ['whales', 'transfers', 'large', 'cex'] },
+  { label: 'Exchange Flows', path: '/flows', keywords: ['flows', 'exchange', 'deposits', 'withdrawals'] },
+  { label: 'Smart Money', path: '/smart-money', keywords: ['smart', 'money', 'traders', 'leaderboard'] },
+  { label: 'Network Status', path: '/status', keywords: ['status', 'sync', 'indexer', 'health'] },
   { label: 'Analytics Dashboard', path: '/analytics', keywords: ['analytics', 'dashboard', 'charts'] },
   { label: 'Live Crypto Feed', path: '/live-crypto', keywords: ['live', 'crypto', 'real-time', 'feed'] },
   { label: 'Data Sources', path: '/analytics/datasources', keywords: ['data', 'sources', 'connections'] },
   { label: 'Alerts', path: '/alerts', keywords: ['alerts', 'notifications', 'monitoring'] },
-  { label: 'Cipher Matrix', path: '/analytics/cipher-matrix', keywords: ['cipher', 'matrix', 'view'] },
+  { label: 'Portfolio', path: '/portfolio', keywords: ['portfolio', 'holdings', 'wallet'] },
   { label: 'Settings', path: '/settings', keywords: ['settings', 'profile', 'api'] },
   { label: 'Blog', path: '/blog', keywords: ['blog', 'posts', 'articles'] },
   { label: 'About', path: '/about', keywords: ['about', 'info', 'company'] },

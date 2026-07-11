@@ -1,20 +1,47 @@
-// Indexer API Types
+// Indexer API types — mirror the Go backend's proxy responses
+// (internal/services/indexer/client.go), which in turn mirror the live
+// blockchain-indexer wire format. Nullable upstream fields are `| null`:
+// fresh launches and un-backfilled ranges legitimately lack values.
 
-// Generic API Response wrapper
+// Backend proxy wraps every payload as { data: T }
 export interface APIResponse<T> {
   data: T;
   error?: string;
 }
 
-// Token Types
+// ---- Status & Prices ----
+
+export interface IndexerStatus {
+  latest_indexed_block: number;
+  latest_chain_block: number;
+  blocks_behind: number;
+  logs_count: number;
+  transfers_count: number;
+  swaps_count: number;
+  is_syncing: boolean;
+}
+
+export interface TokenPrice {
+  address: string;
+  price_usd: number;
+}
+
+export interface PriceData {
+  eth_usd: number;
+  as_of: number | null;
+  all: TokenPrice[];
+}
+
+// ---- Tokens ----
+
 export interface TokenInfo {
   address: string;
   name: string;
   symbol: string;
   decimals: number;
-  total_supply?: string;
-  price_usd?: number;
-  price_eth?: number;
+  price_usd?: number | null;
+  prices_as_of?: number | null;
+  transfer_count: number;
 }
 
 export interface TokenStats {
@@ -22,45 +49,86 @@ export interface TokenStats {
   name: string;
   symbol: string;
   decimals: number;
-  total_supply?: string;
+  total_supply: number | null;
   holder_count: number;
   transfer_count: number;
   swap_count_24h: number;
   volume_24h_usd: number;
-  price_usd: number;
-  price_eth: number;
-  market_cap_usd: number;
-  liquidity_usd: number;
+  price_usd: number | null;
+  price_eth: number | null;
+  market_cap_usd: number | null;
+  liquidity_usd: number | null;
   first_seen_block: number;
   first_seen_timestamp: number;
+  prices_as_of: number | null;
 }
 
 export interface TopToken {
   address: string;
-  symbol: string;
-  name: string;
   transfer_count: number;
-  price_usd?: number;
-  volume_24h_usd?: number;
 }
 
+/** Launch-feed row from /tokens/new */
 export interface NewToken {
+  token_address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  pair_address: string;
+  dex: string;
+  paired_with: string;
+  created_at: number;
+  age_minutes: number;
+  block_number: number;
+  swaps: number;
+  buys: number;
+  sells: number;
+  unique_buyers: number;
+  unique_sellers: number;
+  volume_usd: number | null;
+  holder_count: number | null;
+  liquidity_usd: number | null;
+  price_usd: number | null;
+  total_supply: number | null;
+  market_cap_usd: number | null;
+  deployer: string | null;
+  deployer_pct: number | null;
+  deployer_contracts: number | null;
+}
+
+export interface SearchResult {
   address: string;
   name: string;
   symbol: string;
   decimals: number;
-  pair_address: string;
-  paired_with: string;
-  dex: string;
-  initial_liquidity_eth: number;
-  initial_liquidity_usd: number;
-  block_number: number;
-  transaction_hash: string;
-  timestamp: number;
-  creator?: string;
 }
 
-// Portfolio Types
+export interface HolderInfo {
+  address: string;
+  balance: string;
+}
+
+export interface SocialLinks {
+  telegram: string | null;
+  twitter: string | null;
+  website: string | null;
+  github: string | null;
+  discord: string | null;
+}
+
+// ---- Transfers ----
+
+export interface TokenTransfer {
+  block_number: number;
+  tx_hash: string;
+  token: string;
+  from: string;
+  to: string;
+  value: string;
+}
+
+// ---- Portfolio & Address ----
+
 export interface Portfolio {
   address: string;
   eth_balance: string;
@@ -69,6 +137,7 @@ export interface Portfolio {
   tokens: PortfolioToken[];
   total_value_usd: number;
   token_count: number;
+  prices_as_of: number | null;
 }
 
 export interface PortfolioToken {
@@ -78,26 +147,127 @@ export interface PortfolioToken {
   decimals: number;
   balance: string;
   balance_formatted: number;
-  price_usd?: number;
-  value_usd?: number;
+  price_usd?: number | null;
+  value_usd?: number | null;
 }
 
-// Transfer Types
-export interface TokenTransfer {
+export interface AddressProfile {
+  address: string;
+  label: LabeledAddress | null;
+  eth_balance: number;
+  eth_value_usd: number;
+  first_seen_block: number | null;
+  last_active_block: number | null;
+  total_transfers_in: number;
+  total_transfers_out: number;
+  /** Placeholder upstream (always 0) until indexer Phase 4/5 — hide in UI */
+  total_swaps: number;
+  unique_tokens: number;
+  total_usd_volume: number;
+  is_contract: boolean;
+}
+
+// ---- Labels ----
+
+export interface LabeledAddress {
+  address: string;
+  name: string;
+  category: string;
+  subcategory: string | null;
+  tags: string[];
+  source: string;
+  confidence: number;
+}
+
+export interface LabelStats {
+  total_labels: number;
+  by_category: Record<string, number>;
+}
+
+// ---- Whales, Flows & Smart Money ----
+
+export interface WhaleTransfer {
   block_number: number;
   transaction_hash: string;
-  log_index: number;
   token_address: string;
+  token_symbol: string;
+  from_address: string;
+  to_address: string;
+  from_label: string | null;
+  to_label: string | null;
+  from_category: string;
+  to_category: string;
+  value_usd: number;
+  is_exchange_deposit: boolean;
+  is_exchange_withdrawal: boolean;
+}
+
+export interface ExchangeFlow {
+  exchange: string;
+  token_address: string;
+  token_symbol: string;
+  deposit_usd: number;
+  withdrawal_usd: number;
+  net_flow_usd: number;
+  tx_count: number;
+}
+
+export type SmartMoneyTier = 'whale' | 'serious' | 'active';
+
+export interface SmartMoneyWallet {
+  address: string;
+  label: string | null;
+  total_trades: number;
+  winning_trades: number;
+  win_rate: number;
+  total_pnl_usd: number;
+  avg_trade_size_usd: number;
+  score: number;
+  tier: SmartMoneyTier;
+}
+
+// ---- Macro metrics ----
+
+export interface MetricRow {
+  asset: string;
+  day: string;
+  value: number;
+}
+
+// ---- WS feed events (relayed by the backend hub) ----
+
+/** {"type":"new_token"} hub message payload */
+export interface NewTokenAlert {
+  token_address: string;
+  symbol: string;
+  name: string;
+  pair_address: string;
+  paired_with: string;
+  initial_liquidity_usd: number;
+  risk_score: number;
+  risk_level: string;
+  dex: string;
+  block_number: number;
+  transaction_hash: string;
+  timestamp: number;
+}
+
+/** {"type":"whale_alert"} hub message payload (authenticated clients only) */
+export interface WhaleAlert {
+  token_address: string;
+  symbol: string;
   from_address: string;
   to_address: string;
   value: string;
-  timestamp?: number;
-  token_symbol?: string;
-  token_name?: string;
-  value_usd?: number;
+  value_usd: number;
+  block_number: number;
+  transaction_hash: string;
+  alert_type: 'transfer' | 'swap' | 'liquidity_add' | 'liquidity_remove';
 }
 
-// P&L Types
+// ---- Upstream-stubbed shapes (P&L / indicators / TVL / DeFi stats) ----
+// These endpoints currently return 503 from our backend ("coming soon").
+
 export interface PnLSummary {
   address: string;
   total_realized_pnl: number;
@@ -130,7 +300,6 @@ export interface TokenPosition {
   total_sold: number;
 }
 
-// Indicator Types
 export interface TokenIndicators {
   token_address: string;
   block_number: number;
@@ -152,30 +321,6 @@ export interface TokenIndicators {
   health_score: number;
 }
 
-// Whale & Exchange Flow Types
-export interface WhaleTransfer {
-  block_number: number;
-  transaction_hash: string;
-  token_address: string;
-  token_symbol: string;
-  from_address: string;
-  to_address: string;
-  value: string;
-  value_usd: number;
-  from_label?: string;
-  to_label?: string;
-  timestamp: number;
-}
-
-export interface ExchangeFlow {
-  exchange: string;
-  inflow_usd: number;
-  outflow_usd: number;
-  net_flow_usd: number;
-  period: string;
-}
-
-// TVL Types
 export interface ProtocolTVL {
   protocol: string;
   category: string;
@@ -203,7 +348,6 @@ export interface PoolTVL {
   timestamp: number;
 }
 
-// DeFi Stats Types
 export interface DefiStats {
   day: string;
   total_transfers: number;
@@ -217,33 +361,41 @@ export interface DefiStats {
   exchange_outflow_usd: number;
 }
 
-// Status Types
-export interface IndexerStatus {
-  latest_block: number;
-  indexed_block: number;
-  log_count: number;
-  transfer_count: number;
-  swap_count: number;
-}
+// ---- Query Parameters ----
 
-export interface PriceData {
-  eth_price: number;
-  token_prices?: Record<string, number>;
-}
-
-// Query Parameters
 export interface TokensParams {
   limit?: number;
 }
 
+export type NewTokensSort = 'age' | 'liquidity' | 'swaps' | 'volume' | 'mcap';
+
 export interface NewTokensParams {
   limit?: number;
   hours?: number;
+  sort?: NewTokensSort;
+  min_liquidity_usd?: number;
 }
 
 export interface TransfersParams {
   limit?: number;
   offset?: number;
+}
+
+export interface WhalesParams {
+  hours?: number;
+  min_usd?: number;
+  limit?: number;
+}
+
+export interface ExchangeFlowsParams {
+  hours?: number;
+  exchange?: string;
+  token?: string;
+}
+
+export interface MetricParams {
+  asset?: string;
+  days?: number;
 }
 
 export interface TopTradersParams {
@@ -253,10 +405,6 @@ export interface TopTradersParams {
 
 export interface IndicatorHistoryParams {
   limit?: number;
-}
-
-export interface ExchangeFlowsParams {
-  hours?: number;
 }
 
 export interface DefiStatsHistoryParams {
@@ -270,24 +418,4 @@ export interface TokenHourlyStatsParams {
 export interface LabelsParams {
   category?: string;
   limit?: number;
-}
-
-// Address Profile
-export interface AddressProfile {
-  address: string;
-  eth_balance: string;
-  eth_balance_formatted: number;
-  total_value_usd: number;
-  token_count: number;
-  first_tx_block?: number;
-  last_tx_block?: number;
-  tx_count?: number;
-  labels?: string[];
-}
-
-// Wallet Label
-export interface WalletLabel {
-  address: string;
-  label: string;
-  category: string;
 }
