@@ -21,10 +21,48 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useFlag, setFlagOverride } from '@/lib/flags';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { Button } from '@/components/ui/Button';
+
+/**
+ * Demo-data indicator/toggle. Always visible while mock data is active (so
+ * generated numbers are never mistaken for chain data); in dev builds it's
+ * also shown as an off-state toggle. Reloads to clear cached queries.
+ */
+const DemoDataChip = () => {
+  const mockMode = useFlag('mockData');
+  if (!mockMode && !import.meta.env.DEV) return null;
+
+  const toggle = () => {
+    setFlagOverride('mockData', !mockMode);
+    window.location.reload();
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      title={
+        mockMode
+          ? 'Showing generated demo data — click to switch to live data'
+          : 'Switch to generated demo data (no backend needed)'
+      }
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+        mockMode
+          ? 'border-warning/50 bg-warning/10 text-warning hover:bg-warning/20'
+          : 'border-border text-text-secondary hover:text-text hover:bg-surface-2'
+      }`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${mockMode ? 'bg-warning' : 'bg-border'}`}
+        aria-hidden="true"
+      />
+      Demo data
+    </button>
+  );
+};
 
 interface NavItem {
   to: string;
@@ -188,6 +226,7 @@ export const AppShell = () => {
 
           <div className="flex-1" />
 
+          <DemoDataChip />
           <ThemeToggle variant="simple" size="sm" showLabel={false} />
 
           {!isLoading &&

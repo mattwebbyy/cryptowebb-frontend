@@ -30,7 +30,18 @@ Environment (`.env`):
 ```
 VITE_BACKEND_URL=http://localhost:8080
 VITE_STRIPE_PUBLIC_KEY=pk_test_...
+VITE_USE_MOCK_DATA=false   # true = generated indexer data, no backend needed
 ```
+
+### Demo data mode
+
+While the chain backfill is incomplete (or with no backend running at all), flip
+`VITE_USE_MOCK_DATA=true` — every indexer surface (launches, whales, flows, smart money,
+token/wallet pages, status) serves a deterministic generated dataset that honors all UI
+filters, and the live feeds tick with synthesized events. At runtime, the **Demo data**
+chip in the app topbar toggles it without a rebuild (localStorage override beats the env
+default; feature-flag plumbing lives in `src/lib/flags.ts`, generators in
+`src/features/indexer/mocks.ts`). The chip stays visible whenever demo data is active.
 
 ## Map
 

@@ -1,6 +1,8 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { apiClient } from '@/lib/axios';
+import { flagEnabled } from '@/lib/flags';
+import { ComingSoonError, mockLatency, resolveIndexerMock } from '../mocks';
 import {
   APIResponse,
   TokenInfo,
@@ -48,18 +50,26 @@ const BASE_PATH = '/api/v1/indexer';
 const SLOW_ENDPOINTS = ['/tokens/new', '/tokens/top'];
 
 // Generic fetch helper — goes through apiClient so the auth interceptor
-// covers the gated routes (whales/flows/smart-money/portfolio).
+// covers the gated routes (whales/flows/smart-money/portfolio). When the
+// mockData flag is on (VITE_USE_MOCK_DATA / runtime override), answers come
+// from the generated demo dataset instead of the backend.
 async function fetchFromIndexer<T>(endpoint: string, params?: object): Promise<T> {
+  if (flagEnabled('mockData')) {
+    await mockLatency();
+    return resolveIndexerMock(endpoint, params) as T;
+  }
   const timeout = SLOW_ENDPOINTS.some((p) => endpoint.startsWith(p)) ? 45_000 : undefined;
   const res = await apiClient.get<APIResponse<T>>(`${BASE_PATH}${endpoint}`, { params, timeout });
   return res.data;
 }
 
 /**
- * True when the backend answered 503 for an endpoint the indexer registers
- * but hasn't rebuilt yet (pnl/indicators/tvl/stats) — render "coming soon".
+ * True when an endpoint is registered but not live yet — the backend answers
+ * 503 for upstream-stubbed routes (pnl/indicators/tvl/stats), and mock mode
+ * throws ComingSoonError for the same routes. Render "coming soon".
  */
 export function isComingSoon(error: unknown): boolean {
+  if (error instanceof ComingSoonError) return true;
   return isAxiosError(error) && error.response?.status === 503;
 }
 
