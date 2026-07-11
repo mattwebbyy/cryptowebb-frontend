@@ -1,15 +1,18 @@
+// src/pages/settings/Settings.tsx — API key management.
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card } from '@/components/ui/Card';
+import { Link } from 'react-router-dom';
+import { Copy, Check, BookOpen, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { API_BASE_URL } from '@/lib/config';
 
 type APIKey = {
   id: string;
-  Name: string; // Keep original casing if that's what backend returns
+  Name: string;
   prefix: string;
   created_at: string;
-  ExpiresAt: string; // Keep original casing
+  ExpiresAt: string;
   last_used_at?: string;
 };
 
@@ -17,428 +20,274 @@ type APIKeyResponse = APIKey & {
   key: string; // Only present when first created
 };
 
+const inputClass =
+  'rounded-md bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 focus:outline-none focus:border-primary/60';
+
 const formatDate = (dateString: string | undefined | null): string => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    // Check if the date is valid after parsing
-    if (isNaN(date.getTime())) {
-      console.error('Invalid Date object created for:', dateString);
-      return 'Invalid Date';
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+  // The zero date means "never expires"
+  if (date.getTime() === 0) return 'Never';
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+};
+
+const authHeaders = () => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('Authentication token not found.');
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
+
+const fetchApiKeys = async (): Promise<APIKey[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    let errorMsg = 'Failed to fetch API keys';
+    try {
+      errorMsg = (await response.json())?.error || errorMsg;
+    } catch {
+      /* non-JSON body */
     }
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short',
-      timeZone: 'UTC', // Displaying in UTC as per original code
-    }).format(date);
-  } catch (e) {
-    console.error('Date formatting error:', e, dateString);
-    return 'Invalid Date';
+    throw new Error(errorMsg);
   }
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
 };
 
 const Settings = () => {
   const queryClient = useQueryClient();
   const [newKeyName, setNewKeyName] = useState('');
-  const [newKeyExpiry, setNewKeyExpiry] = useState('30'); // Default to 30 days
+  const [newKeyExpiry, setNewKeyExpiry] = useState('30');
   const [generatedKey, setGeneratedKey] = useState<APIKeyResponse | null>(null);
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const fetchApiKeys = async (): Promise<APIKey[]> => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Authentication token not found.');
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      let errorMsg = 'Failed to fetch API keys';
-      try {
-        const errorData = await response.json();
-        errorMsg = errorData?.error || errorMsg;
-      } catch (e) {
-        // Ignore if response is not JSON
-      }
-      throw new Error(errorMsg);
-    }
-
-    const data = await response.json();
-    console.log('Fetched API keys:', data); // Debug log
-    // Ensure data is an array, default to empty array if not
-    return Array.isArray(data) ? data : [];
-  };
-
-  const {
-    data: keys,
-    isLoading,
-    error: fetchError,
-  } = useQuery<APIKey[], Error>({
+  const { data: keys, isLoading, error: fetchError } = useQuery<APIKey[], Error>({
     queryKey: ['apiKeys'],
     queryFn: fetchApiKeys,
   });
 
-  const generateApiKey = async (payload: {
-    name: string;
-    expiresIn: number;
-  }): Promise<APIKeyResponse> => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Authentication token not found.');
-
-    console.log('Generating key with payload:', payload); // Debug log
-    // Ensure expiresIn is handled correctly, especially 'Never' (0)
-    const expiryInSeconds = payload.expiresIn > 0 ? payload.expiresIn * 24 * 3600 : 0;
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        name: payload.name,
-        expires_in: expiryInSeconds, // Send expiry in seconds
-      }),
-    });
-
-    if (!response.ok) {
-      let errorMsg = 'Failed to generate API key';
-      try {
-        const errorData = await response.json();
-        errorMsg = errorData?.error || errorMsg;
-      } catch (e) {
-        // Ignore if response is not JSON
-      }
-      throw new Error(errorMsg);
-    }
-
-    const data = await response.json();
-    console.log('Generated key response:', data); // Debug log
-    return data;
-  };
-
   const generateMutation = useMutation<APIKeyResponse, Error, { name: string; expiresIn: number }>({
-    mutationFn: generateApiKey,
+    mutationFn: async (payload) => {
+      const expiryInSeconds = payload.expiresIn > 0 ? payload.expiresIn * 24 * 3600 : 0;
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ name: payload.name, expires_in: expiryInSeconds }),
+      });
+      if (!response.ok) {
+        let errorMsg = 'Failed to generate API key';
+        try {
+          errorMsg = (await response.json())?.error || errorMsg;
+        } catch {
+          /* non-JSON body */
+        }
+        throw new Error(errorMsg);
+      }
+      return response.json();
+    },
     onSuccess: (data) => {
       setGeneratedKey(data);
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
       setNewKeyName('');
-      setNewKeyExpiry('30'); // Reset expiry dropdown
-      setCopySuccess(false); // Reset copy status
+      setNewKeyExpiry('30');
+      setCopied(false);
     },
-    onError: (error) => {
-      console.error('Generate API Key Error:', error.message);
-      // Optionally: display error to user using a toast notification or state variable
-    },
+    onError: (error) => toast.error(error.message),
   });
 
-  const revokeApiKey = async (keyId: string): Promise<void> => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Authentication token not found.');
-
-    console.log('Revoking key:', keyId); // Debug log
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys/${keyId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json', // Often not needed for DELETE, but can be included
-      },
-    });
-
-    if (!response.ok) {
-      let errorMsg = 'Failed to revoke API key';
-      try {
-        // Attempt to parse error only if response has content and indicates JSON
-        if (response.headers.get('content-type')?.includes('application/json')) {
-          const errorData = await response.json();
-          errorMsg = errorData?.error || errorMsg;
-        } else {
-          errorMsg = `${errorMsg} (Status: ${response.status})`;
-        }
-      } catch (e) {
-        errorMsg = `${errorMsg} (Status: ${response.status})`;
-      }
-      console.error('Revoke error response:', response.status, errorMsg); // Debug log
-      throw new Error(errorMsg);
-    }
-
-    // Check if response has content before trying to parse JSON
-    // For DELETE requests, often a 204 No Content is returned
-    if (response.status !== 204 && response.headers.get('content-length') !== '0') {
-      try {
-        return await response.json();
-      } catch (e) {
-        console.warn('Could not parse JSON response for DELETE, but status was OK.');
-        return; // Or handle as needed
-      }
-    }
-    // Return void or handle 204 No Content appropriately
-    return;
-  };
-
   const revokeMutation = useMutation<void, Error, string>({
-    mutationFn: revokeApiKey,
+    mutationFn: async (keyId) => {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/me/api-keys/${keyId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        let errorMsg = `Failed to revoke API key (${response.status})`;
+        try {
+          if (response.headers.get('content-type')?.includes('application/json')) {
+            errorMsg = (await response.json())?.error || errorMsg;
+          }
+        } catch {
+          /* non-JSON body */
+        }
+        throw new Error(errorMsg);
+      }
+    },
     onSuccess: () => {
-      console.log('Revoke successful, invalidating query.'); // Debug log
+      toast.success('API key revoked');
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
     },
-    onError: (error) => {
-      console.error('Revoke mutation error:', error.message); // Debug log
-      // Optionally: display error to user
-    },
+    onError: (error) => toast.error(error.message),
   });
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim()) {
-      alert('Please provide a name for the API key.'); // Simple validation
+      toast.error('Give the key a name');
       return;
     }
-    const expiresInDays = parseInt(newKeyExpiry, 10);
-    // Close the generated key display if a new one is requested
     setGeneratedKey(null);
     generateMutation.mutate({
       name: newKeyName.trim(),
-      expiresIn: expiresInDays,
+      expiresIn: parseInt(newKeyExpiry, 10),
     });
   };
 
   const handleCopyKey = async (key: string) => {
-    if (!navigator.clipboard) {
-      console.error('Clipboard API not available.');
-      // Fallback or error message
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(key);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
-    } catch (err) {
-      console.error('Failed to copy key:', err);
-      // Optionally display an error message to the user
-    }
+    await navigator.clipboard.writeText(key);
+    setCopied(true);
+    toast.success('API key copied');
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  // --- Render Logic ---
-
   return (
-    <>
-      <div className="space-y-2">
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">API Key Management</h2>
-        <p className="text-text-secondary text-lg">Securely manage your API keys and access tokens</p>
-      </div>
+    <div className="space-y-6">
+      {/* Create */}
+      <section className="rounded-md border border-border bg-surface">
+        <div className="px-5 pt-4 pb-3 border-b border-border flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold">Create API key</h2>
+            <p className="text-[13px] text-text-secondary mt-0.5">
+              Keys authenticate requests to the CryptoWebb API.
+            </p>
+          </div>
+          <Link
+            to="/docs"
+            className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text transition-colors shrink-0"
+          >
+            <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
+            API docs
+          </Link>
+        </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Generate New Key Section */}
-        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-            <h3 className="text-2xl font-bold text-text mb-8">Generate New API Key</h3>
+        <form onSubmit={handleGenerate} className="p-5 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={newKeyName}
+            onChange={(e) => setNewKeyName(e.target.value)}
+            placeholder="Key name, e.g. Production server"
+            aria-label="Key name"
+            className={`${inputClass} flex-1`}
+            required
+          />
+          <select
+            value={newKeyExpiry}
+            onChange={(e) => setNewKeyExpiry(e.target.value)}
+            aria-label="Expiration"
+            className={inputClass}
+          >
+            <option value="7">Expires in 7 days</option>
+            <option value="30">Expires in 30 days</option>
+            <option value="90">Expires in 90 days</option>
+            <option value="365">Expires in 1 year</option>
+            <option value="0">Never expires</option>
+          </select>
+          <Button type="submit" variant="primary" size="sm" disabled={generateMutation.isPending}>
+            {generateMutation.isPending ? 'Creating…' : 'Create key'}
+          </Button>
+        </form>
 
-            <form onSubmit={handleGenerate} className="space-y-8">
-              <div className="space-y-2">
-              <label htmlFor="keyName" className="block mb-1.5 text-sm font-medium text-text">
-                Key Name
-              </label>
-              <input
-                id="keyName"
-                type="text"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-                placeholder="e.g., My Development Key"
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                required
-              />
-              </div>
-
-              <div className="space-y-2">
-              <label htmlFor="keyExpiry" className="block mb-1.5 text-sm font-medium text-text">
-                Expiration Period
-              </label>
-              <select
-                id="keyExpiry"
-                value={newKeyExpiry}
-                onChange={(e) => setNewKeyExpiry(e.target.value)}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
-                <option value="7">7 Days</option>
-                <option value="30">30 Days</option>
-                <option value="90">90 Days</option>
-                <option value="365">1 Year</option>
-                <option value="0">Never Expires</option>
-              </select>
-              </div>
-
+        {generatedKey && (
+          <div className="mx-5 mb-5 rounded-md border border-warning/40 bg-warning/5 p-4">
+            <div className="flex items-center gap-2 text-[13px] font-medium text-warning mb-2">
+              <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+              Copy this key now — it won't be shown again.
+            </div>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 min-w-0 truncate rounded-md bg-surface-2 border border-border px-3 py-2 text-sm font-mono">
+                {generatedKey.key}
+              </code>
               <Button
-              type="submit"
-              disabled={generateMutation.isPending}
-              variant="gradient"
-              size="lg"
-              className="w-full"
-            >
-              {generateMutation.isPending ? 'Generating...' : 'Generate API Key'}
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopyKey(generatedKey.key)}
+                aria-label="Copy API key"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 text-success" aria-hidden="true" />
+                ) : (
+                  <Copy className="w-4 h-4" aria-hidden="true" />
+                )}
               </Button>
-            </form>
-
-          {/* Display Generated Key */}
-          {generateMutation.error && (
-            <div className="mt-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
-              Error generating key: {generateMutation.error.message}
             </div>
-          )}
+          </div>
+        )}
+      </section>
 
-          {generatedKey && (
-            <div className="mt-8 p-6 glass-morphism rounded-2xl border border-primary/30 animate-scale-in">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
-                <p className="text-text font-semibold">
-                  Your new API key has been generated
-                </p>
-              </div>
-              <p className="text-warning font-medium mb-4">
-                <strong>⚠️ Copy it now - it won't be shown again!</strong>
-              </p>
-              <div className="flex items-center gap-4">
-                <pre
-                  className="flex-1 p-4 bg-surface/80 rounded-xl text-primary
-                              font-mono text-sm overflow-x-auto border border-border/30
-                              backdrop-blur-sm"
-                  style={{ minWidth: 0 }}
-                >
-                  {generatedKey.key}
-                </pre>
-                <Button
-                  onClick={() => handleCopyKey(generatedKey.key)}
-                  variant={copySuccess ? 'primary' : 'outline'}
-                  size="sm"
-                  className="flex-shrink-0"
-                >
-                  {copySuccess ? '✓ Copied!' : 'Copy'}
-                </Button>
-              </div>
-            </div>
-          )}
-            </Card>
+      {/* Active keys */}
+      <section className="rounded-md border border-border bg-surface">
+        <div className="px-5 pt-4 pb-3 border-b border-border">
+          <h2 className="text-sm font-semibold">Active keys</h2>
+        </div>
 
-            {/* Existing API Keys Section */}
-        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-            <h3 className="text-2xl font-bold text-text mb-8">Active API Keys</h3>
+        {isLoading && (
+          <div className="px-5 py-8 text-center text-[13px] text-text-secondary">
+            Loading keys…
+          </div>
+        )}
 
-          {/* Loading State */}
-          {isLoading && (
-            <div className="text-text-secondary text-center py-4">Loading API keys...</div>
-          )}
+        {fetchError && (
+          <div className="px-5 py-8 text-center text-[13px] text-error">
+            {fetchError.message}
+          </div>
+        )}
 
-          {/* Fetch Error State */}
-          {fetchError && (
-            <div className="p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm text-center">
-              Error loading keys: {fetchError.message}
-            </div>
-          )}
+        {!isLoading && !fetchError && (!keys || keys.length === 0) && (
+          <div className="px-5 py-8 text-center text-[13px] text-text-secondary">
+            No API keys yet — create one above to start using the API.
+          </div>
+        )}
 
-          {/* Empty State (after loading, no error) */}
-          {!isLoading && !fetchError && (!keys || keys.length === 0) && (
-            <div className="text-text-secondary text-center py-4">No active API keys found.</div>
-          )}
-
-          {/* Revoke Error State */}
-          {revokeMutation.error && (
-            <div className="mt-4 mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
-              Error revoking key: {revokeMutation.error.message}
-            </div>
-          )}
-
-          {/* Display Keys (after loading, no error, keys exist) */}
-          {!isLoading && !fetchError && keys && keys.length > 0 && (
-            <div
-              className="space-y-4 max-h-[400px] overflow-y-auto pr-2"
-            >
-              {keys.map((key) => (
-                <div
-                  key={key.id}
-                  className="p-6 glass-morphism rounded-2xl border border-border/30
-                                hover:border-primary/50 hover:shadow-modern transition-all duration-300"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    {/* Key Details */}
-                    <div className="space-y-1 flex-1 min-w-0">
-                      {' '}
-                      {/* min-w-0 prevents overflow issues with flex */}
-                      <h4
-                        className="text-lg font-semibold text-text truncate"
-                        title={key.Name}
-                      >
-                        {key.Name}
-                      </h4>
-                      <div className="space-y-2 text-sm text-text-secondary">
-                        <p className="flex items-center gap-2 flex-wrap">
-                          {' '}
-                          {/* flex-wrap for smaller screens */}
-                          <span className="font-medium">Created:</span>
-                          <span>{formatDate(key.created_at)}</span>
-                        </p>
-                        <p className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium">Expires:</span>
-                          {/* Check for non-expiring keys if backend uses a specific value like null or zero date */}
-                          <span>
-                            {formatDate(key.ExpiresAt) === formatDate(new Date(0).toISOString()) ||
-                            formatDate(key.ExpiresAt) === 'N/A'
-                              ? 'Never'
-                              : formatDate(key.ExpiresAt)}
-                          </span>
-                        </p>
-                        {key.last_used_at && (
-                          <p className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">Last Used:</span>
-                            <span>{formatDate(key.last_used_at)}</span>
-                          </p>
-                        )}
-                        <p className="flex items-center gap-2 flex-wrap font-mono text-xs">
-                          <span className="font-medium">Prefix:</span>
-                          <span>{key.prefix}...</span>
-                        </p>
-                      </div>
-                    </div>
-                    {/* Revoke Button */}
-                    <button
-                      onClick={() => {
-                        // Optional: Add confirmation dialog
-                        if (
-                          window.confirm(
-                            `Are you sure you want to revoke the key "${key.Name}"? This action cannot be undone.`
-                          )
-                        ) {
-                          revokeMutation.mutate(key.id);
-                        }
-                      }}
-                      // Disable button if this specific key is being revoked
-                      disabled={revokeMutation.isPending && revokeMutation.variables === key.id}
-                      className="px-4 py-2 bg-error/10 hover:bg-error/20
-                                 border border-error/30 hover:border-error/50
-                                 rounded-xl text-error font-medium transition-all
-                                 duration-300 disabled:opacity-50 disabled:cursor-not-allowed
-                                 flex-shrink-0"
-                      aria-label={`Revoke API key ${key.Name}`}
-                    >
-                      {revokeMutation.isPending && revokeMutation.variables === key.id
-                        ? 'Revoking...'
-                        : 'Revoke'}
-                    </button>
+        {!isLoading && !fetchError && keys && keys.length > 0 && (
+          <div>
+            {keys.map((key) => (
+              <div
+                key={key.id}
+                className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-border last:border-0"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate" title={key.Name}>
+                      {key.Name}
+                    </span>
+                    <code className="text-xs font-mono text-text-secondary bg-surface-2 border border-border rounded px-1.5 py-0.5">
+                      {key.prefix}…
+                    </code>
+                  </div>
+                  <div className="text-xs text-text-secondary mt-1">
+                    Created {formatDate(key.created_at)} · Expires {formatDate(key.ExpiresAt)}
+                    {key.last_used_at && ` · Last used ${formatDate(key.last_used_at)}`}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
-    </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-error/40 text-error hover:border-error hover:bg-error/10 shrink-0"
+                  disabled={revokeMutation.isPending && revokeMutation.variables === key.id}
+                  onClick={() => {
+                    if (window.confirm(`Revoke "${key.Name}"? Requests using it will stop working immediately.`)) {
+                      revokeMutation.mutate(key.id);
+                    }
+                  }}
+                >
+                  {revokeMutation.isPending && revokeMutation.variables === key.id
+                    ? 'Revoking…'
+                    : 'Revoke'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 };
 

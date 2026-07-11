@@ -1,8 +1,7 @@
+// src/pages/settings/Profile.tsx — personal details and password.
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '@/lib/config';
@@ -20,6 +19,11 @@ interface PasswordData {
   newPassword: string;
   confirmPassword: string;
 }
+
+const inputClass =
+  'w-full rounded-md bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 focus:outline-none focus:border-primary/60';
+
+const labelClass = 'block mb-1.5 text-[13px] font-medium text-text';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -41,20 +45,15 @@ const Profile = () => {
   const [status, setStatus] = useState<'idle' | 'submitting'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const getAuthToken = () => {
-    return localStorage.getItem('token');
-  };
-
   const makeAuthRequest = async (url: string, options: RequestInit = {}) => {
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       toast.error('Please log in to continue');
       navigate('/login');
       throw new Error('No auth token');
     }
 
-    const API_URL = API_BASE_URL;
-    return fetch(`${API_URL}${url}`, {
+    return fetch(`${API_BASE_URL}${url}`, {
       ...options,
       headers: {
         ...options.headers,
@@ -79,12 +78,13 @@ const Profile = () => {
           phoneNumber: data.phoneNumber || '',
         });
         setAvatarUrl(data.avatarUrl || '');
-      } catch (error) {
+      } catch {
         toast.error('Failed to load profile data');
       }
     };
 
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -97,22 +97,16 @@ const Profile = () => {
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Add file size check
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
       toast.error('File size must be less than 5MB');
       return;
     }
 
-    // Add file type check
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast.error('Only JPEG, PNG and WEBP files are allowed');
@@ -122,7 +116,6 @@ const Profile = () => {
     try {
       setStatus('submitting');
 
-      // Convert file to base64
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -132,21 +125,15 @@ const Profile = () => {
 
       const response = await makeAuthRequest('/api/v1/users/me/avatar', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          avatar: base64,
-          fileName: file.name,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: base64, fileName: file.name }),
       });
 
       let data;
       const responseText = await response.text();
       try {
         data = responseText ? JSON.parse(responseText) : null;
-      } catch (e) {
-        console.error('Failed to parse response:', responseText);
+      } catch {
         throw new Error('Invalid server response');
       }
 
@@ -154,13 +141,11 @@ const Profile = () => {
         throw new Error(data?.error || 'Failed to upload avatar');
       }
 
-      toast.success('Avatar uploaded successfully');
-      // Update the avatar URL state
+      toast.success('Avatar updated');
       if (data?.avatarUrl) {
         setAvatarUrl(data.avatarUrl);
       }
     } catch (error) {
-      console.error('Avatar upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to upload avatar');
     } finally {
       setStatus('idle');
@@ -174,15 +159,13 @@ const Profile = () => {
     try {
       const response = await makeAuthRequest('/api/v1/users/me', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profileData),
       });
 
       if (!response.ok) throw new Error('Failed to update profile');
 
-      toast.success('Profile updated successfully');
+      toast.success('Profile saved');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update profile');
     } finally {
@@ -201,31 +184,27 @@ const Profile = () => {
       setStatus('submitting');
       const response = await makeAuthRequest('/api/v1/users/me/password', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         }),
       });
 
-      const responseData = await response.text();
-      console.log('Password change response:', responseData);
-
       if (!response.ok) {
-        const error = JSON.parse(responseData);
-        throw new Error(error.error || 'Failed to change password');
+        const responseData = await response.text();
+        let message = 'Failed to change password';
+        try {
+          message = JSON.parse(responseData).error || message;
+        } catch {
+          /* non-JSON error body */
+        }
+        throw new Error(message);
       }
 
-      toast.success('Password changed successfully');
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
+      toast.success('Password changed');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      console.error('Password change error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to change password');
     } finally {
       setStatus('idle');
@@ -233,174 +212,168 @@ const Profile = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-8"
-    >
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Profile Settings</h1>
-        <p className="text-text-secondary text-lg">Manage your account information and preferences</p>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full overflow-hidden">
-          {/* Avatar Section */}
-          <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-          <div className="flex items-center space-x-6">
-            <div
-              onClick={handleAvatarClick}
-              className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-primary/30 flex items-center justify-center cursor-pointer hover:border-primary/50 hover:shadow-glow transition-all duration-300 overflow-hidden group"
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              ) : (
-                <Camera className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
-              )}
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-text">Profile Picture</h3>
-              <p className="text-text-secondary">Click to upload a new avatar (max 5MB)</p>
-              <div className="flex gap-2 text-xs text-text-secondary">
-                <span className="bg-primary/10 px-2 py-1 rounded-lg">JPEG</span>
-                <span className="bg-primary/10 px-2 py-1 rounded-lg">PNG</span>
-                <span className="bg-primary/10 px-2 py-1 rounded-lg">WEBP</span>
-              </div>
-            </div>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={handleAvatarChange}
-          />
-        </Card>
-
-          {/* Profile Form */}
-          <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-          <h3 className="text-2xl font-bold text-text mb-8">Personal Information</h3>
-          <form onSubmit={handleProfileSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block mb-1.5 text-sm font-medium text-text">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={profileData.firstName}
-                  onChange={handleProfileChange}
-                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                  placeholder="Enter your first name"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block mb-1.5 text-sm font-medium text-text">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={profileData.lastName}
-                  onChange={handleProfileChange}
-                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                  placeholder="Enter your last name"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block mb-1.5 text-sm font-medium text-text">Bio</label>
-              <textarea
-                name="bio"
-                value={profileData.bio}
-                onChange={handleProfileChange}
-                rows={4}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 resize-none"
-                placeholder="Tell us about yourself..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block mb-1.5 text-sm font-medium text-text">Phone Number</label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={profileData.phoneNumber}
-                onChange={handleProfileChange}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                placeholder="Enter your phone number"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={status === 'submitting'}
-              variant="gradient"
-              size="lg"
-              className="w-full"
-            >
-              {status === 'submitting' ? 'Updating...' : 'Update Profile'}
-            </Button>
-          </form>
-          </Card>
+    <div className="space-y-6">
+      {/* Profile */}
+      <section className="rounded-md border border-border bg-surface">
+        <div className="px-5 pt-4 pb-3 border-b border-border">
+          <h2 className="text-sm font-semibold">Profile</h2>
+          <p className="text-[13px] text-text-secondary mt-0.5">
+            Your name and details as they appear across CryptoWebb.
+          </p>
         </div>
 
-        {/* Password Change Form - Full Width */}
-        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border shadow-sm" hover={false}>
-          <h3 className="text-2xl font-bold text-text mb-8">Change Password</h3>
-          <form onSubmit={handlePasswordSubmit} className="space-y-8">
-            <div className="space-y-2">
-              <label className="block mb-1.5 text-sm font-medium text-text">Current Password</label>
+        <form onSubmit={handleProfileSubmit} className="p-5 space-y-4">
+          {/* Avatar row */}
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-14 h-14 rounded-md bg-surface-2 border border-border flex items-center justify-center overflow-hidden hover:border-text-secondary/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              aria-label="Change profile picture"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <Camera className="w-5 h-5 text-text-secondary" aria-hidden="true" />
+              )}
+            </button>
+            <div className="text-[13px] text-text-secondary">
+              <div className="text-sm font-medium text-text">Profile picture</div>
+              Click to upload — JPEG, PNG or WEBP, max 5MB.
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarChange}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="firstName" className={labelClass}>First name</label>
               <input
-                type="password"
-                name="currentPassword"
-                value={passwordData.currentPassword}
-                onChange={handlePasswordChange}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                placeholder="Enter your current password"
-                required
+                id="firstName"
+                type="text"
+                name="firstName"
+                value={profileData.firstName}
+                onChange={handleProfileChange}
+                className={inputClass}
+                placeholder="First name"
               />
             </div>
-
-            <div className="space-y-2">
-              <label className="block mb-1.5 text-sm font-medium text-text">New Password</label>
+            <div>
+              <label htmlFor="lastName" className={labelClass}>Last name</label>
               <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                value={profileData.lastName}
+                onChange={handleProfileChange}
+                className={inputClass}
+                placeholder="Last name"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className={labelClass}>Phone number</label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              name="phoneNumber"
+              value={profileData.phoneNumber}
+              onChange={handleProfileChange}
+              className={inputClass}
+              placeholder="Optional"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="bio" className={labelClass}>Bio</label>
+            <textarea
+              id="bio"
+              name="bio"
+              value={profileData.bio}
+              onChange={handleProfileChange}
+              rows={3}
+              className={`${inputClass} resize-none`}
+              placeholder="Optional"
+            />
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <Button type="submit" variant="primary" size="sm" disabled={status === 'submitting'}>
+              {status === 'submitting' ? 'Saving…' : 'Save changes'}
+            </Button>
+          </div>
+        </form>
+      </section>
+
+      {/* Password */}
+      <section className="rounded-md border border-border bg-surface">
+        <div className="px-5 pt-4 pb-3 border-b border-border">
+          <h2 className="text-sm font-semibold">Password</h2>
+          <p className="text-[13px] text-text-secondary mt-0.5">
+            Use at least 8 characters. You'll stay signed in on this device.
+          </p>
+        </div>
+
+        <form onSubmit={handlePasswordSubmit} className="p-5 space-y-4">
+          <div>
+            <label htmlFor="currentPassword" className={labelClass}>Current password</label>
+            <input
+              id="currentPassword"
+              type="password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+              className={inputClass}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="newPassword" className={labelClass}>New password</label>
+              <input
+                id="newPassword"
                 type="password"
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                placeholder="Enter your new password (min 8 characters)"
+                className={inputClass}
+                autoComplete="new-password"
                 required
                 minLength={8}
               />
             </div>
-
-            <div className="space-y-2">
-              <label className="block mb-1.5 text-sm font-medium text-text">Confirm New Password</label>
+            <div>
+              <label htmlFor="confirmPassword" className={labelClass}>Confirm new password</label>
               <input
+                id="confirmPassword"
                 type="password"
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
-                className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                placeholder="Confirm your new password"
+                className={inputClass}
+                autoComplete="new-password"
                 required
                 minLength={8}
               />
             </div>
+          </div>
 
-            <Button
-              type="submit"
-              disabled={status === 'submitting'}
-              variant="outline"
-              size="lg"
-              className="w-full"
-            >
-              {status === 'submitting' ? 'Changing Password...' : 'Change Password'}
+          <div className="flex justify-end pt-1">
+            <Button type="submit" variant="outline" size="sm" disabled={status === 'submitting'}>
+              {status === 'submitting' ? 'Changing…' : 'Change password'}
             </Button>
-          </form>
-      </Card>
-    </motion.div>
+          </div>
+        </form>
+      </section>
+    </div>
   );
 };
 

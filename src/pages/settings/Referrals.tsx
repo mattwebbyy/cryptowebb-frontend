@@ -1,15 +1,13 @@
-// src/pages/settings/Referrals.tsx
+// src/pages/settings/Referrals.tsx — create and share referral codes.
 import React, { useState, useEffect, useCallback } from 'react';
 import type { AxiosError } from 'axios';
+import { Copy } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../lib/axios';
 import { toast } from 'sonner';
-import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { SEO } from '../../components/SEO';
-import { FiPlusCircle, FiList, FiCopy } from 'react-icons/fi';
 
-// Configuration - easy to update if needed
 const REFERRAL_BASE_URL = 'https://cryptowebb.com/ref/';
 
 interface ReferralCode {
@@ -76,15 +74,19 @@ const extractReferralList = (payload: ReferralApiResponse): RawReferralCode[] =>
   return [];
 };
 
+const inputClass =
+  'w-full rounded-md bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 focus:outline-none focus:border-primary/60';
+
+const labelClass = 'block mb-1.5 text-[13px] font-medium text-text';
+
 const ReferralsPage: React.FC = () => {
   const { user } = useAuth();
   const [referralCodes, setReferralCodes] = useState<ReferralCode[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Initialize platform to "general" as it's the only option
   const [newCode, setNewCode] = useState<NewReferralCode>({
-    platform: 'general', // Default to 'general'
+    platform: 'general',
     code: '',
     description: '',
   });
@@ -94,35 +96,32 @@ const ReferralsPage: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await apiClient.get<ReferralApiResponse>('/api/v1/users/referral-codes');
-
       const codesArray = extractReferralList(response);
-      
-      // Normalize the data by handling field capitalization differences
-      if (codesArray.length > 0) {
-        const normalizedCodes = codesArray.map((code) => ({
+
+      setReferralCodes(
+        codesArray.map((code) => ({
           id: code.ID || code.id || '',
           platform: code.Platform || code.platform || '',
           code: code.Code || code.code || '',
           description: code.Description || code.description || '',
-          active: typeof code.Active !== 'undefined' ? code.Active : 
-                 (typeof code.active !== 'undefined' ? code.active : true),
+          active:
+            typeof code.Active !== 'undefined'
+              ? code.Active
+              : typeof code.active !== 'undefined'
+                ? code.active
+                : true,
           created_at: code.CreatedAt || code.created_at || '',
-          updated_at: code.UpdatedAt || code.updated_at || ''
-        }));
-        
-        setReferralCodes(normalizedCodes);
-      } else {
-        setReferralCodes([]);
-      }
+          updated_at: code.UpdatedAt || code.updated_at || '',
+        }))
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch referral codes.';
-      console.error('Error fetching referral codes:', error);
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
   }, [user]);
-  
+
   useEffect(() => {
     fetchReferralCodes();
   }, [fetchReferralCodes]);
@@ -136,90 +135,68 @@ const ReferralsPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Platform is now defaulted and non-empty, so the main check is for code
     if (!user || !newCode.code) {
-      toast.warning('Referral Code is required.');
-      return;
-    }
-    // Ensure platform is set (should be by default)
-    if (!newCode.platform) {
-      toast.warning('Platform is required.'); // Should not happen with default
+      toast.warning('Referral code is required.');
       return;
     }
 
     setIsSubmitting(true);
     try {
       await apiClient.post('/api/v1/users/referral-codes', newCode);
-      toast.success('Referral code added successfully!');
+      toast.success('Referral code added');
       setNewCode({ platform: 'general', code: '', description: '' });
       fetchReferralCodes();
     } catch (error) {
       const axiosError = error as AxiosError<{ error?: string }>;
-      const specificMessage = axiosError.response?.data?.error;
-      const fallbackMessage = axiosError.message || 'Failed to add referral code. Please try again.';
-      toast.error(specificMessage || fallbackMessage);
-      console.error('Error adding referral code:', error);
+      toast.error(
+        axiosError.response?.data?.error || axiosError.message || 'Failed to add referral code.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Updated to copy full referral link
   const copyToClipboard = (code: string) => {
-    const referralLink = `${REFERRAL_BASE_URL}${code}`;
-    
-    navigator.clipboard.writeText(referralLink)
-      .then(() => toast.success('Referral link copied to clipboard!'))
+    navigator.clipboard
+      .writeText(`${REFERRAL_BASE_URL}${code}`)
+      .then(() => toast.success('Referral link copied'))
       .catch(() => toast.error('Failed to copy referral link.'));
   };
 
-  // Helper function to format a referral link for display
-  const formatReferralLink = (code: string) => {
-    // Remove protocol (https://) for display
-    const displayBaseUrl = REFERRAL_BASE_URL.replace(/^https?:\/\//, '');
-    return `${displayBaseUrl}${code}`;
-  };
+  const displayLink = (code: string) =>
+    `${REFERRAL_BASE_URL.replace(/^https?:\/\//, '')}${code}`;
 
   return (
     <>
-      <SEO
-        title="My Referral Codes"
-        description="Manage your referral codes on CryptoWebb."
-      />
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Referral Management</h1>
-        <p className="text-text-secondary text-lg">Create and manage your referral codes to earn rewards</p>
-      </div>
+      <SEO title="Referrals" description="Manage your referral codes on CryptoWebb." />
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full overflow-hidden">
-        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-            <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
-              <FiPlusCircle className="mr-3 text-primary" />
-              Add New Referral Code
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-2">
-                <label htmlFor="platform" className="block mb-1.5 text-sm font-medium text-text">
-                  Platform
-                </label>
+      <div className="space-y-6">
+        {/* Create */}
+        <section className="rounded-md border border-border bg-surface">
+          <div className="px-5 pt-4 pb-3 border-b border-border">
+            <h2 className="text-sm font-semibold">Add referral code</h2>
+            <p className="text-[13px] text-text-secondary mt-0.5">
+              Share your link — anyone who signs up through it is credited to you.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="platform" className={labelClass}>Platform</label>
                 <select
                   name="platform"
                   id="platform"
                   value={newCode.platform}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                  className={inputClass}
                 >
                   <option value="general">General</option>
-                  {/* Future platforms can be added here */}
                 </select>
               </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="code" className="block mb-1.5 text-sm font-medium text-text">
-                  Referral Code
-                </label>
+              <div>
+                <label htmlFor="code" className={labelClass}>Referral code</label>
                 <input
                   type="text"
                   name="code"
@@ -227,101 +204,87 @@ const ReferralsPage: React.FC = () => {
                   value={newCode.code}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
-                  placeholder="Enter your unique referral code"
+                  className={inputClass}
+                  placeholder="e.g. matt10"
                 />
               </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="description" className="block mb-1.5 text-sm font-medium text-text">
-                  Description (Optional)
-                </label>
-                <textarea
-                  name="description"
-                  id="description"
-                  value={newCode.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary/50 transition-colors hover:border-primary/30 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 resize-none"
-                  placeholder="e.g., 10% off trading fees, bonus rewards, etc."
-                />
-              </div>
-              
-              <Button type="submit" variant="gradient" size="lg" isLoading={isSubmitting} disabled={isSubmitting} className="w-full">
-                {isSubmitting ? 'Adding...' : 'Add Referral Code'}
-              </Button>
-            </form>
-            </Card>
+            </div>
 
-        <Card className="p-6 bg-surface/95 backdrop-blur-sm border border-border hover:bg-surface transition-all duration-300 shadow-sm hover:shadow-md">
-            <h2 className="text-2xl font-bold text-text mb-8 flex items-center">
-              <FiList className="mr-3 text-primary" />
-              Your Referral Codes
-            </h2>
-            
-            {isLoading && (
-              <div className="text-center py-8">
-                <div className="inline-flex items-center gap-3 text-text-secondary">
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  Loading your codes...
-                </div>
-              </div>
-            )}
-            
-            {!isLoading && referralCodes.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FiList className="h-8 w-8 text-primary" />
-                </div>
-                <p className="text-text-secondary text-lg">No referral codes yet</p>
-                <p className="text-text-secondary/60 text-sm mt-1">Create your first referral code to start earning rewards</p>
-              </div>
-            )}
-            
-            {!isLoading && referralCodes.length > 0 && (
-              <div className="space-y-4">
-                {referralCodes.map((refCode) => (
-                  <div key={refCode.id} className="glass-morphism p-6 rounded-2xl border border-border/30 hover:border-primary/30 transition-all duration-300">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                      <div className="space-y-3 flex-1">
-                        <div className="flex items-center gap-3">
-                          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                            {refCode.platform}
-                          </span>
-                          {refCode.active && (
-                            <span className="bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium">
-                              Active
-                            </span>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-text font-medium">Referral Link:</p>
-                          <div className="font-mono bg-surface/80 p-3 rounded-xl text-primary text-sm overflow-x-auto border border-border/30">
-                            {formatReferralLink(refCode.code)}
-                          </div>
-                        </div>
-                        {refCode.description && (
-                          <p className="text-text-secondary text-sm">
-                            <span className="font-medium">Description:</span> {refCode.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex-shrink-0">
-                        <Button
-                          variant="outline"
-                          onClick={() => copyToClipboard(refCode.code)}
-                          className="flex items-center gap-2"
-                        >
-                          <FiCopy className="h-4 w-4" />
-                          Copy Link
-                        </Button>
-                      </div>
-                    </div>
+            <div>
+              <label htmlFor="description" className={labelClass}>Description</label>
+              <input
+                type="text"
+                name="description"
+                id="description"
+                value={newCode.description}
+                onChange={handleInputChange}
+                className={inputClass}
+                placeholder="Optional — e.g. 10% off trading fees"
+              />
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding…' : 'Add code'}
+              </Button>
+            </div>
+          </form>
+        </section>
+
+        {/* Codes */}
+        <section className="rounded-md border border-border bg-surface">
+          <div className="px-5 pt-4 pb-3 border-b border-border">
+            <h2 className="text-sm font-semibold">Your codes</h2>
+          </div>
+
+          {isLoading && (
+            <div className="px-5 py-8 text-center text-[13px] text-text-secondary">
+              Loading codes…
+            </div>
+          )}
+
+          {!isLoading && referralCodes.length === 0 && (
+            <div className="px-5 py-8 text-center text-[13px] text-text-secondary">
+              No referral codes yet — add your first one above.
+            </div>
+          )}
+
+          {!isLoading &&
+            referralCodes.map((refCode) => (
+              <div
+                key={refCode.id}
+                className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-border last:border-0"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono truncate">{displayLink(refCode.code)}</code>
+                    {refCode.active && (
+                      <span className="rounded px-1.5 py-0.5 text-[11px] font-medium bg-gain/10 text-gain shrink-0">
+                        Active
+                      </span>
+                    )}
+                    <span className="rounded px-1.5 py-0.5 text-[11px] bg-surface-2 border border-border text-text-secondary capitalize shrink-0">
+                      {refCode.platform}
+                    </span>
                   </div>
-                ))}
+                  {refCode.description && (
+                    <p className="text-xs text-text-secondary mt-1 truncate">
+                      {refCode.description}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(refCode.code)}
+                  className="shrink-0"
+                >
+                  <Copy className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  Copy link
+                </Button>
               </div>
-            )}
-        </Card>
+            ))}
+        </section>
       </div>
     </>
   );
