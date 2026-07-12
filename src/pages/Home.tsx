@@ -1,5 +1,7 @@
 // src/pages/Home.tsx — marketing landing. Flat, data-first, no gradient
-// theater: the product visual and concrete surfaces do the selling.
+// theater: the live product does the selling. The hero panel is a real
+// launch ticker fed by the indexer (REST seed + WS prepends); every number
+// in the stats strip is real, with static fallbacks if the API is away.
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -10,16 +12,12 @@ import {
   Crosshair,
   Bell,
   Zap,
+  Radio,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { EChart } from '@/components/charts/EChart';
-
-const stats = [
-  { value: '15k+', label: 'Tokens priced live' },
-  { value: '10s', label: 'Launch detection' },
-  { value: '24/7', label: 'Chain indexing' },
-  { value: 'REST + WS', label: 'Developer API' },
-];
+import { useNewTokens, useIndexerStatus } from '@/features/indexer';
+import { useIndexerStream } from '@/hooks/useIndexerStream';
+import { formatAge, formatCompact } from '@/lib/format';
 
 const surfaces = [
   {
@@ -72,33 +70,140 @@ const surfaces = [
   },
 ];
 
-// Deterministic demo series so the hero chart renders identically every visit.
-const heroSeries = Array.from({ length: 64 }, (_, i) => {
-  const trend = 42000 + i * 95;
-  const wave = Math.sin(i / 5.2) * 900 + Math.sin(i / 2.1) * 350;
-  return Math.round(trend + wave);
-});
+const TICKER_ROWS = 8;
+
+interface TickerRow {
+  address: string;
+  symbol: string;
+  name: string;
+  dex: string;
+  ageMinutes: number;
+  live: boolean;
+}
+
+/**
+ * Real launch ticker: seeded over REST, prepended over WS. Never shows an
+ * error — an unreachable indexer collapses to a calm "listening" state.
+ * No USD figures here: fresh pairs price in later, and the landing page
+ * shouldn't open with em dashes.
+ */
+const LiveLaunchTicker = () => {
+  const { data } = useNewTokens(
+    { limit: TICKER_ROWS, hours: 24, sort: 'age' },
+    { refetchInterval: 60000 }
+  );
+  const { newTokens: liveAlerts, isConnected } = useIndexerStream({ bufferSize: 16 });
+
+  const rows = useMemo<TickerRow[]>(() => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const seen = new Set<string>();
+    const out: TickerRow[] = [];
+    for (const a of liveAlerts) {
+      if (seen.has(a.token_address)) continue;
+      seen.add(a.token_address);
+      out.push({
+        address: a.token_address,
+        symbol: a.symbol,
+        name: a.name,
+        dex: a.dex,
+        ageMinutes: Math.max(0, (nowSec - a.timestamp) / 60),
+        live: true,
+      });
+    }
+    for (const t of data ?? []) {
+      if (seen.has(t.token_address)) continue;
+      seen.add(t.token_address);
+      out.push({
+        address: t.token_address,
+        symbol: t.symbol,
+        name: t.name,
+        dex: t.dex,
+        ageMinutes: t.age_minutes,
+        live: false,
+      });
+    }
+    return out.slice(0, TICKER_ROWS);
+  }, [data, liveAlerts]);
+
+  return (
+    <div className="rounded-md border border-border bg-surface overflow-hidden">
+      <div className="flex items-center gap-2 px-4 h-9 border-b border-border">
+        <span className="text-xs text-text-secondary font-mono">New pairs · Ethereum</span>
+        <span
+          className={`ml-auto inline-flex items-center gap-1.5 text-xs ${
+            isConnected ? 'text-gain' : 'text-text-secondary'
+          }`}
+        >
+          <Radio className="w-3 h-3" aria-hidden="true" />
+          {isConnected ? 'Live' : 'Connecting…'}
+        </span>
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="h-56 md:h-72 flex flex-col items-center justify-center gap-2 text-text-secondary">
+          <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" aria-hidden="true" />
+          <span className="text-sm">Listening for new pairs…</span>
+        </div>
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {rows.map((row) => (
+            <li key={row.address} className={row.live ? 'animate-row-flash' : undefined}>
+              <Link
+                to={`/token/${row.address}`}
+                className="flex items-center gap-3 px-4 py-2 hover:bg-surface-2/60 transition-colors"
+              >
+                <span className="w-14 shrink-0 text-xs font-mono tabular-nums text-text-secondary">
+                  {formatAge(row.ageMinutes)}
+                </span>
+                <span className="min-w-0 flex-1 truncate">
+                  <span className="text-[13px] font-semibold">{row.symbol || '·'}</span>
+                  {row.name && (
+                    <span className="ml-2 text-xs text-text-secondary">{row.name}</span>
+                  )}
+                </span>
+                <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 text-primary whitespace-nowrap">
+                  {row.dex.replace('_', ' ')}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="border-t border-border">
+        <Link
+          to="/launches"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs text-text-secondary hover:text-primary transition-colors"
+        >
+          Open the full launch feed
+          <ArrowRight className="w-3 h-3" aria-hidden="true" />
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
-  const heroOption = useMemo(
-    () => ({
-      grid: { left: 8, right: 8, top: 8, bottom: 8 },
-      xAxis: { type: 'category', show: false, data: heroSeries.map((_, i) => i) },
-      yAxis: { type: 'value', show: false, scale: true },
-      tooltip: { trigger: 'axis', formatter: '${c0}' },
-      series: [
-        {
-          type: 'line',
-          data: heroSeries,
-          showSymbol: false,
-          smooth: true,
-          lineStyle: { width: 1.5 },
-          areaStyle: { opacity: 0.08 },
-        },
-      ],
-    }),
-    []
-  );
+  const { data: status } = useIndexerStatus({ refetchInterval: 30000 });
+
+  // Real infrastructure numbers with static fallbacks — never zeros.
+  const stats = [
+    {
+      value: status ? `${formatCompact(status.transfers_count, 0)}` : '500M+',
+      label: 'Transfers indexed',
+    },
+    {
+      value: status ? `${formatCompact(status.swaps_count, 0)}` : '85M+',
+      label: 'DEX swaps decoded',
+    },
+    { value: '10s', label: 'Launch detection' },
+    { value: 'REST + WS', label: 'Developer API' },
+  ];
+
+  const syncPct =
+    status && status.latest_chain_block > 0
+      ? Math.min(100, (status.latest_indexed_block / status.latest_chain_block) * 100)
+      : null;
 
   return (
     <div className="relative">
@@ -106,10 +211,15 @@ const Home = () => {
       <section className="max-w-6xl mx-auto px-6 pt-16 md:pt-24 pb-14">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-secondary">
+            <Link
+              to="/status"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-secondary hover:border-primary/40 hover:text-text transition-colors"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-gain animate-pulse" aria-hidden="true" />
-              Indexing Ethereum mainnet, live
-            </span>
+              {status
+                ? `Live · ${formatCompact(status.blocks_behind, 0)} blocks behind chain head`
+                : 'Indexing Ethereum mainnet, live'}
+            </Link>
             <h1 className="mt-5 text-3xl md:text-[2.75rem] font-semibold tracking-tight leading-[1.15]">
               Onchain intelligence,
               <br />
@@ -126,9 +236,9 @@ const Home = () => {
                   <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
                 </Button>
               </Link>
-              <Link to="/pricing">
+              <Link to="/trial">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  View pricing
+                  Start free trial
                 </Button>
               </Link>
             </div>
@@ -137,28 +247,8 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Product visual */}
-          <div className="rounded-md border border-border bg-surface overflow-hidden">
-            <div className="flex items-center gap-2 px-4 h-9 border-b border-border">
-              <span className="text-xs text-text-secondary font-mono">ETH / USD · 1h</span>
-              <span className="ml-auto text-xs font-mono tabular-nums text-gain">+4.62%</span>
-            </div>
-            <div className="h-56 md:h-72 p-2">
-              <EChart option={heroOption} />
-            </div>
-            <div className="grid grid-cols-3 divide-x divide-border border-t border-border text-center">
-              {[
-                ['Whale alert', '$2.4M → Binance'],
-                ['New launch', 'liquidity $180K'],
-                ['Net flow', '-12,400 ETH'],
-              ].map(([k, v]) => (
-                <div key={k} className="px-2 py-2.5">
-                  <div className="text-[10px] uppercase tracking-wider text-text-secondary">{k}</div>
-                  <div className="text-xs font-mono tabular-nums mt-0.5 truncate">{v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Product visual: the actual launch feed, not a mockup */}
+          <LiveLaunchTicker />
         </div>
       </section>
 
@@ -213,6 +303,33 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {/* Trust band: honest sync progress */}
+      {syncPct != null && (
+        <section className="max-w-6xl mx-auto px-6 pb-16">
+          <Link
+            to="/status"
+            className="group flex flex-col sm:flex-row sm:items-center gap-3 rounded-md border border-border bg-surface px-5 py-4 hover:border-text-secondary/40 transition-colors"
+          >
+            <span className="text-[13px] text-text-secondary shrink-0">
+              Chain sync{' '}
+              <span className="font-mono tabular-nums text-text">{syncPct.toFixed(2)}%</span>
+            </span>
+            <span
+              className="h-1.5 flex-1 rounded-full bg-surface-2 overflow-hidden"
+              aria-hidden="true"
+            >
+              <span
+                className="block h-full rounded-full bg-gain"
+                style={{ width: `${syncPct}%` }}
+              />
+            </span>
+            <span className="text-[13px] text-text-secondary shrink-0 group-hover:text-primary transition-colors">
+              Full status →
+            </span>
+          </Link>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 pb-20">

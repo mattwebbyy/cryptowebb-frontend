@@ -53,6 +53,8 @@ const SmartMoneyPage = lazy(() => import('./pages/smart-money/SmartMoneyPage'));
 const TokenPage = lazy(() => import('./pages/token/TokenPage'));
 const WalletPage = lazy(() => import('./pages/wallet/WalletPage'));
 const StatusPage = lazy(() => import('./pages/status/StatusPage'));
+const LabelsPage = lazy(() => import('./pages/labels/LabelsPage'));
+const MacroPage = lazy(() => import('./pages/macro/MacroPage'));
 
 // --- Shared / Embedded Dashboards (public, no chrome) ---
 const PublicDashboard = lazy(() => import('./pages/shared/PublicDashboard'));
@@ -100,6 +102,8 @@ export function Routes() {
           <Route path="/launches" element={<LaunchFeedPage />} />
           <Route path="/token/:address" element={<TokenPage />} />
           <Route path="/status" element={<StatusPage />} />
+          <Route path="/labels" element={<LabelsPage />} />
+          <Route path="/macro" element={<MacroPage />} />
           <Route path="/docs" element={<ApiDocumentation />} />
           <Route path="/live-crypto" element={<LiveCryptoPage />} />
 

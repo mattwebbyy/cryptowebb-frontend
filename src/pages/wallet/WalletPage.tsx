@@ -11,6 +11,7 @@ import {
   useAddressProfile,
   usePortfolio,
   useAddressTransfers,
+  PriceStalenessBadge,
 } from '@/features/indexer';
 import type { PortfolioToken, TokenTransfer } from '@/features/indexer';
 import {
@@ -20,7 +21,7 @@ import {
   formatCompact,
   formatPriceMaybe,
   formatUSD,
-  formatUSDMaybe,
+  formatUSDSane,
   shortenAddress,
 } from '@/lib/format';
 
@@ -93,7 +94,7 @@ const WalletPage: React.FC = () => {
         accessorKey: 'value_usd',
         cell: ({ row }) => (
           <span className="font-mono tabular-nums font-semibold">
-            {formatUSDMaybe(row.original.value_usd)}
+            {formatUSDSane(row.original.value_usd)}
           </span>
         ),
       },
@@ -185,14 +186,16 @@ const WalletPage: React.FC = () => {
             <Wallet className="w-7 h-7" />
             {label ? label.name : shortenAddress(address, 6)}
             {label && (
-              <span
-                className={`rounded px-2 py-0.5 text-xs font-medium ${
+              <Link
+                to="/labels"
+                className={`rounded px-2 py-0.5 text-xs font-medium hover:opacity-80 transition-opacity ${
                   CATEGORY_COLORS[label.category] ?? 'bg-surface-2 text-text-secondary'
                 }`}
+                title="Browse the labels directory"
               >
                 {label.category}
                 {label.subcategory ? ` · ${label.subcategory}` : ''}
-              </span>
+              </Link>
             )}
             {profile?.is_contract && (
               <span className="rounded px-2 py-0.5 text-xs font-medium bg-surface-2 text-text-secondary">
@@ -272,12 +275,15 @@ const WalletPage: React.FC = () => {
 
       {/* Portfolio total */}
       {tab === 'holdings' && portfolio && (
-        <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-primary/10 rounded-lg">
           <span className="text-text-secondary text-sm">
             Portfolio value ({portfolio.token_count} tokens + ETH)
           </span>
-          <span className="text-xl font-bold font-mono tabular-nums">
-            {formatUSD(portfolio.total_value_usd)}
+          <span className="inline-flex items-center gap-2">
+            <PriceStalenessBadge asOf={portfolio.prices_as_of} />
+            <span className="text-xl font-bold font-mono tabular-nums">
+              {formatUSD(portfolio.total_value_usd)}
+            </span>
           </span>
         </div>
       )}

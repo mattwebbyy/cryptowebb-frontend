@@ -8,6 +8,8 @@ import {
   Waves,
   ArrowLeftRight,
   Crosshair,
+  TrendingUp,
+  Tags,
   Briefcase,
   Bell,
   LayoutDashboard,
@@ -85,6 +87,8 @@ const NAV_SECTIONS: NavSection[] = [
       { to: '/whales', label: 'Whales', icon: Waves, gated: true },
       { to: '/flows', label: 'Exchange flows', icon: ArrowLeftRight, gated: true },
       { to: '/smart-money', label: 'Smart money', icon: Crosshair, gated: true },
+      { to: '/macro', label: 'Macro metrics', icon: TrendingUp },
+      { to: '/labels', label: 'Labels', icon: Tags },
     ],
   },
   {

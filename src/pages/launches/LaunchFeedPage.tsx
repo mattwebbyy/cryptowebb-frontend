@@ -100,12 +100,17 @@ const LaunchFeedPage: React.FC = () => {
   // the alert payload can't answer (liquidity floor).
   const liveMode = sort === 'age' && minLiquidity === 0;
 
+  // One token can launch several pairs (and appear once per pair in the
+  // feed), so rows key on token+pair.
+  const rowKeyOf = (t: { token_address: string; pair_address: string }) =>
+    `${t.token_address}:${t.pair_address}`;
+
   const rows = useMemo(() => {
     const base = data ?? [];
     if (!liveMode || liveAlerts.length === 0) return base;
-    const seen = new Set(base.map((t) => t.token_address));
+    const seen = new Set(base.map(rowKeyOf));
     const prepended = liveAlerts
-      .filter((a) => !seen.has(a.token_address))
+      .filter((a) => !seen.has(rowKeyOf(a)))
       .map(alertToRow);
     return [...prepended, ...base];
   }, [data, liveAlerts, liveMode]);
@@ -115,7 +120,7 @@ const LaunchFeedPage: React.FC = () => {
     // Flash rows that arrived over WS after the last REST refresh.
     const cutoff = Math.floor(dataUpdatedAt / 1000);
     return new Set(
-      liveAlerts.filter((a) => a.timestamp >= cutoff).map((a) => a.token_address)
+      liveAlerts.filter((a) => a.timestamp >= cutoff).map(rowKeyOf)
     );
   }, [liveAlerts, liveMode, dataUpdatedAt]);
 
@@ -344,7 +349,7 @@ const LaunchFeedPage: React.FC = () => {
                   }
                 : null
             }
-            rowKey={(t) => t.token_address}
+            rowKey={rowKeyOf}
             virtualized
             height={640}
             highlightedKeys={highlightedKeys}

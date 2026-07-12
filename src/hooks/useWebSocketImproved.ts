@@ -28,23 +28,14 @@ const DEFAULT_RECONNECT_ATTEMPTS = 5;
 const DEFAULT_HEARTBEAT_INTERVAL = 30000; // 30 seconds
 const DEFAULT_HEARTBEAT_TIMEOUT = 5000; // 5 seconds
 
+const defaultShouldReconnect = (event: CloseEvent) =>
+  event.code !== 1000 && event.code !== 1001;
+
 export const useWebSocketImproved = <T = unknown>(
   url: string | null,
   onMessage: (data: T) => void,
   options: WebSocketOptions = {}
 ) => {
-  const {
-    onOpen,
-    onClose,
-    onError,
-    shouldReconnect = (event) => event.code !== 1000 && event.code !== 1001,
-    reconnectInterval = DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts = DEFAULT_RECONNECT_ATTEMPTS,
-    heartbeatInterval = DEFAULT_HEARTBEAT_INTERVAL,
-    heartbeatTimeout = DEFAULT_HEARTBEAT_TIMEOUT,
-    protocols,
-  } = options;
-
   // State management
   const [state, setState] = useState<WebSocketState>({
     isConnected: false,
@@ -63,11 +54,16 @@ export const useWebSocketImproved = <T = unknown>(
   const urlRef = useRef(url);
   const onMessageRef = useRef(onMessage);
 
-  // Keep refs up to date
+  // Callers pass inline callbacks and options objects, so everything except
+  // `url` is routed through a ref. If connect() closed over these directly,
+  // its identity would change every render and the connection effect would
+  // tear the socket down and redial in a loop.
+  const optsRef = useRef(options);
   useEffect(() => {
     urlRef.current = url;
     onMessageRef.current = onMessage;
-  }, [url, onMessage]);
+    optsRef.current = options;
+  });
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -76,12 +72,12 @@ export const useWebSocketImproved = <T = unknown>(
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    
+
     if (heartbeatTimeoutRef.current) {
       clearTimeout(heartbeatTimeoutRef.current);
       heartbeatTimeoutRef.current = null;
     }
-    
+
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
@@ -91,58 +87,60 @@ export const useWebSocketImproved = <T = unknown>(
     if (wsRef.current) {
       const ws = wsRef.current;
       wsRef.current = null;
-      
+
       // Remove event listeners to prevent memory leaks
       ws.onopen = null;
       ws.onmessage = null;
       ws.onerror = null;
       ws.onclose = null;
-      
+
       if (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN) {
         ws.close(1000, 'Component unmounting');
       }
     }
   }, []);
 
-  // Heartbeat mechanism
-  const startHeartbeat = useCallback(() => {
-    if (!heartbeatInterval || heartbeatInterval <= 0) return;
-    
-    heartbeatIntervalRef.current = setInterval(() => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
-        
-        // Set timeout for pong response
-        heartbeatTimeoutRef.current = setTimeout(() => {
-          if (isMountedRef.current) {
-            console.warn('WebSocket: Heartbeat timeout, closing connection');
-            wsRef.current?.close(1006, 'Heartbeat timeout');
-          }
-        }, heartbeatTimeout);
-      }
-    }, heartbeatInterval);
-  }, [heartbeatInterval, heartbeatTimeout]);
-
   const stopHeartbeat = useCallback(() => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
     }
-    
+
     if (heartbeatTimeoutRef.current) {
       clearTimeout(heartbeatTimeoutRef.current);
       heartbeatTimeoutRef.current = null;
     }
   }, []);
 
-  // Connection function
+  // Heartbeat mechanism
+  const startHeartbeat = useCallback(() => {
+    const interval = optsRef.current.heartbeatInterval ?? DEFAULT_HEARTBEAT_INTERVAL;
+    const timeout = optsRef.current.heartbeatTimeout ?? DEFAULT_HEARTBEAT_TIMEOUT;
+    if (!interval || interval <= 0) return;
+
+    heartbeatIntervalRef.current = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+
+        // Set timeout for pong response
+        heartbeatTimeoutRef.current = setTimeout(() => {
+          if (isMountedRef.current) {
+            console.warn('WebSocket: Heartbeat timeout, closing connection');
+            wsRef.current?.close(1006, 'Heartbeat timeout');
+          }
+        }, timeout);
+      }
+    }, interval);
+  }, []);
+
+  // Connection function — referentially stable; reads live values from refs.
   const connect = useCallback(() => {
     if (!urlRef.current || wsRef.current || !isMountedRef.current) {
       return;
     }
 
     const connectionId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     setState(prev => ({
       ...prev,
       isConnecting: true,
@@ -152,10 +150,11 @@ export const useWebSocketImproved = <T = unknown>(
     console.log(`WebSocket: Connecting to ${urlRef.current} (${connectionId})`);
 
     try {
-      const ws = protocols 
+      const { protocols } = optsRef.current;
+      const ws = protocols
         ? new WebSocket(urlRef.current, protocols)
         : new WebSocket(urlRef.current);
-      
+
       wsRef.current = ws;
 
       ws.onopen = (event) => {
@@ -165,7 +164,7 @@ export const useWebSocketImproved = <T = unknown>(
         }
 
         console.log(`WebSocket: Connected to ${urlRef.current} (${connectionId})`);
-        
+
         setState(prev => ({
           ...prev,
           isConnected: true,
@@ -175,7 +174,7 @@ export const useWebSocketImproved = <T = unknown>(
         }));
 
         startHeartbeat();
-        onOpen?.(event);
+        optsRef.current.onOpen?.(event);
       };
 
       ws.onmessage = (event) => {
@@ -183,7 +182,7 @@ export const useWebSocketImproved = <T = unknown>(
 
         try {
           const data = JSON.parse(event.data);
-          
+
           // Handle heartbeat pong
           if (data.type === 'pong' && heartbeatTimeoutRef.current) {
             clearTimeout(heartbeatTimeoutRef.current);
@@ -196,13 +195,13 @@ export const useWebSocketImproved = <T = unknown>(
         } catch (error) {
           console.error('WebSocket: Error parsing message', error, event.data);
           const parseError = new Error(`Failed to parse WebSocket message: ${error}`);
-          
+
           setState(prev => ({
             ...prev,
             lastError: parseError,
           }));
 
-          onError?.(new Event('messageerror'));
+          optsRef.current.onError?.(new Event('messageerror'));
         }
       };
 
@@ -210,7 +209,7 @@ export const useWebSocketImproved = <T = unknown>(
         if (!isMountedRef.current) return;
 
         console.error(`WebSocket: Error on ${urlRef.current} (${connectionId})`, event);
-        
+
         const error = new Error('WebSocket connection error');
         setState(prev => ({
           ...prev,
@@ -219,16 +218,22 @@ export const useWebSocketImproved = <T = unknown>(
         }));
 
         stopHeartbeat();
-        onError?.(event);
+        optsRef.current.onError?.(event);
       };
 
       ws.onclose = (event) => {
         if (!isMountedRef.current) return;
 
         console.log(`WebSocket: Disconnected from ${urlRef.current} (${connectionId}) - Code: ${event.code}, Reason: ${event.reason}`);
-        
+
         stopHeartbeat();
         wsRef.current = null;
+
+        const {
+          shouldReconnect = defaultShouldReconnect,
+          reconnectInterval = DEFAULT_RECONNECT_INTERVAL,
+          reconnectAttempts = DEFAULT_RECONNECT_ATTEMPTS,
+        } = optsRef.current;
 
         setState(prev => {
           const newState = {
@@ -240,9 +245,9 @@ export const useWebSocketImproved = <T = unknown>(
           // Handle reconnection
           if (shouldReconnect(event) && prev.reconnectCount < reconnectAttempts) {
             const nextReconnectCount = prev.reconnectCount + 1;
-            
+
             console.log(`WebSocket: Scheduling reconnect attempt ${nextReconnectCount}/${reconnectAttempts} in ${reconnectInterval}ms`);
-            
+
             reconnectTimeoutRef.current = setTimeout(() => {
               if (isMountedRef.current && urlRef.current) {
                 connect();
@@ -255,7 +260,7 @@ export const useWebSocketImproved = <T = unknown>(
             };
           } else if (prev.reconnectCount >= reconnectAttempts) {
             console.log(`WebSocket: Max reconnect attempts reached for ${urlRef.current}`);
-            
+
             if (event.code !== 1000 && event.code !== 1001) {
               toast.error('Connection lost. Max reconnect attempts reached.', {
                 duration: 7000,
@@ -266,41 +271,32 @@ export const useWebSocketImproved = <T = unknown>(
           return newState;
         });
 
-        onClose?.(event);
+        optsRef.current.onClose?.(event);
       };
 
     } catch (error) {
       console.error('WebSocket: Failed to create connection', error);
-      
+
       setState(prev => ({
         ...prev,
         isConnecting: false,
         lastError: error as Error,
       }));
     }
-  }, [
-    shouldReconnect,
-    reconnectInterval,
-    reconnectAttempts,
-    protocols,
-    startHeartbeat,
-    stopHeartbeat,
-    onOpen,
-    onClose,
-    onError,
-  ]);
+  }, [startHeartbeat, stopHeartbeat]);
 
   // Manual disconnect function
   const disconnect = useCallback((_code = 1000, _reason = 'Manual disconnect') => {
+    const reconnectAttempts = optsRef.current.reconnectAttempts ?? DEFAULT_RECONNECT_ATTEMPTS;
     setState(prev => ({
       ...prev,
       reconnectCount: reconnectAttempts + 1, // Prevent reconnection
     }));
 
     cleanup();
-    
+
     console.log(`WebSocket: Manual disconnect from ${urlRef.current}`);
-  }, [cleanup, reconnectAttempts]);
+  }, [cleanup]);
 
   // Send message function
   const sendMessage = useCallback((data: Record<string, unknown> | string) => {
@@ -316,8 +312,15 @@ export const useWebSocketImproved = <T = unknown>(
     }
   }, []);
 
-  // Main effect for connection management
+  // Main effect for connection management. connect/cleanup are stable, so
+  // this runs only when `url` changes (and on mount). The mounted flag must
+  // be re-armed here, before connect(): refs survive StrictMode's
+  // unmount/remount cycle, and a stale `false` would make connect() bail.
   useEffect(() => {
+    isMountedRef.current = true;
+    // urlRef is also written by the render-time effect above, but that one
+    // runs after this on the first mount — set it explicitly before dialing.
+    urlRef.current = url;
     if (url) {
       connect();
     } else {
